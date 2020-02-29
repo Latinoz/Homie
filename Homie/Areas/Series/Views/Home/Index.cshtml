@@ -1,0 +1,19 @@
+﻿@model Movies[]
+@{ Layout = null; }
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Areas</title>
+    <link rel="stylesheet" asp-href-include="lib/bootstrap/dist/css/*.min.css" />
+</head>
+<body class="m-1 p-1">
+    <table class="table table-bordered table-striped table-sm">
+        <tr><th>Name</th><th>Season</th><th>Episode</th></tr>
+        @foreach (Movies p in Model) {
+        <tr><td>@p.Name</td><td>@p.Season</td><td>@p.Episode</td></tr>
+        }
+    </table>
+    <a asp-action="Index" asp-controller="Home">Link</a>    
+</body>
+</html>
