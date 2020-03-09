@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 
-namespace Homie.Areas.Series.Models {
+namespace Homie.Areas.Series.Models
+{
 
     public interface IMovieRepository {
 

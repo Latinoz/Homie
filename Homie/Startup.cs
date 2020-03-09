@@ -36,7 +36,9 @@ namespace Homie
             services.AddDbContext<ApplicationDbContext>(options =>
             options.UseMySql(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddTransient<IMovieRepository, EFMoviesRepository>();            
+            services.AddTransient<IMovieRepository, EFMoviesRepository>();
+
+            services.AddControllersWithViews();
 
             services.AddRazorPages();
         }
@@ -53,11 +55,12 @@ namespace Homie
                 endpoints.MapControllerRoute("areas","{area:exists}/{controller=Home}/{action=Index}");
                 endpoints.MapControllerRoute("default","{controller=Home}/{action=Index}");
             });
-            
+
             app.UseDeveloperExceptionPage();
             app.UseStatusCodePages();
-            app.UseStaticFiles();            
-        
+            app.UseStaticFiles();
+
+            SeedData.EnsurePopulated(app);
         }
     }
 }
