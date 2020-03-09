@@ -13,6 +13,6 @@ namespace Homie.Areas.Series.Models
             context = ctx;
         }
 
-        public IQueryable<Movies> Products => context.Movies;
+        public IQueryable<Movies> Pictures => context.Movies;
     }
 }

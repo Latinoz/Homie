@@ -5,6 +5,6 @@ namespace Homie.Areas.Series.Models
 
     public interface IMovieRepository {
 
-        IQueryable<Movies> Products { get; }
+        IQueryable<Movies> Pictures { get; }
     }
 }

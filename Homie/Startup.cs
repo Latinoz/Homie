@@ -29,10 +29,7 @@ namespace Homie
     // This method gets called by the runtime. Use this method to add services to the container.
     // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
     public void ConfigureServices(IServiceCollection services)
-        {
-            //services.AddDbContext<ApplicationDbContext>(options =>
-            //options.UseMySql("Server=localhost;User Id=root;Password=123456;Database=homiedb"));
-
+        {            
             services.AddDbContext<ApplicationDbContext>(options =>
             options.UseMySql(Configuration.GetConnectionString("DefaultConnection")));
 
@@ -45,7 +42,10 @@ namespace Homie
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostEnvironment env)
-        {           
+        {
+            app.UseDeveloperExceptionPage();
+            app.UseStatusCodePages();
+            app.UseStaticFiles();
 
             app.UseRouting();
 
@@ -54,13 +54,9 @@ namespace Homie
                 endpoints.MapRazorPages();
                 endpoints.MapControllerRoute("areas","{area:exists}/{controller=Home}/{action=Index}");
                 endpoints.MapControllerRoute("default","{controller=Home}/{action=Index}");
-            });
+            });            
 
-            app.UseDeveloperExceptionPage();
-            app.UseStatusCodePages();
-            app.UseStaticFiles();
-
-            SeedData.EnsurePopulated(app);
+            
         }
     }
 }
