@@ -19,6 +19,8 @@ namespace Homie.Areas.Series.Controllers
         }
         
         public ViewResult Index() => View(db.Movies.ToList());
-        
+
+        public ViewResult ArchMovies() => View(db.ArchMovies.ToList());
+
     }
 }
