@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="~/css/StyleSheet.css">
+    <!--<link rel="stylesheet" href="~/font-awesome/css/fontawesome.min.css">-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!--<script src="~/js/JavaScript.js"></script>-->
+</head>
+<body>
+    <!-- The sidebar -->
+    <div class="sidebar">
+        <a href="#home"><i class="fa fa-fw fa-home"></i> Домой</a>
+        <a asp-area="Series" asp-controller="Home" asp-action="Index">
+            /Series/Home/
+        </a>
+        <a href="#services"><i class="fa fa-fw fa-wrench"></i> Services</a>
+        <a href="#clients"><i class="fa fa-fw fa-user"></i> Clients</a>
+        <a href="#contact"><i class="fa fa-fw fa-envelope"></i> Contact</a>
+    </div>
+    <div class="main">
+        @RenderBody()
+    </div>
+</body>
+</html>
