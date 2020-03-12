@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Homies.Models;
+using Homie.Areas.Series.Models;
 
 namespace Homie.Areas.Series.Controllers
 {
@@ -16,6 +17,8 @@ namespace Homie.Areas.Series.Controllers
         {
             db = context;
         }
+        
         public ViewResult Index() => View(db.Movies.ToList());
+        
     }
 }

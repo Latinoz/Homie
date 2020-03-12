@@ -32,9 +32,7 @@ namespace Homie
         {            
             services.AddDbContext<ApplicationDbContext>(options =>
             options.UseMySql(Configuration.GetConnectionString("DefaultConnection")));
-
-            services.AddTransient<IMovieRepository, EFMoviesRepository>();
-
+            
             services.AddControllersWithViews();
 
             services.AddRazorPages();
@@ -43,7 +41,11 @@ namespace Homie
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostEnvironment env)
         {
-            app.UseDeveloperExceptionPage();
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
             app.UseStatusCodePages();
             app.UseStaticFiles();
 

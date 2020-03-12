@@ -1,5 +1,5 @@
 ﻿@model IEnumerable<Homie.Areas.Series.Models.Movies>
-@{ Layout = null; }
+@{ Layout = "_Layout"; }
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,9 +9,9 @@
 </head>
 <body class="m-1 p-1">
     <table class="table table-bordered table-striped table-sm">
-        <tr><th>Name</th><th>Season</th><th>Episode</th></tr>
+        <tr><th>Name</th><th>Season</th><th>Episode</th><th>StopPlayMinute</th><th>StopPlaySecond</th></tr>
         @foreach (var p in Model) {
-        <tr><td>@p.Name</td><td>@p.Season</td><td>@p.Episode</td></tr>
+        <tr><td>@p.Name</td><td>@p.Season</td><td>@p.Episode</td><td>@p.StopPlayMinute</td><td>@p.StopPlaySecond</td></tr>
         }
     </table>
     <a asp-action="Index" asp-controller="Home">Link</a>    

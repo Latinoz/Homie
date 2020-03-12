@@ -3,5 +3,20 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+@{ Layout = null; }
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Areas</title>
+    <link rel="stylesheet" asp-href-include="lib/bootstrap/dist/css/*.min.css" />
+</head>
+<body class="m-1 p-1">
+
+    <a asp-area="Series" asp-controller="Home" asp-action="Index">
+        /Series/Home/
+    </a>
+</body>
+</html>
+
 
