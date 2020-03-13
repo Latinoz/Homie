@@ -7,21 +7,41 @@
     <link rel="stylesheet" href="~/css/StyleSheet.css">
     <!--<link rel="stylesheet" href="~/font-awesome/css/fontawesome.min.css">-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
     <!--<script src="~/js/JavaScript.js"></script>-->
 </head>
 <body>
-    <!-- The sidebar -->
-    <div class="sidebar">
-        <a href="#home"><i class="fa fa-fw fa-home"></i> Домой</a>
-        <a asp-area="Series" asp-controller="Home" asp-action="Index"><i class="fa fa-fw fa-film"></i>
-            Сериалы
+    <div class="w3-sidebar w3-bar-block w3-collapse w3-card w3-animate-left" style="width:200px;" id="mySidebar">
+        <button class="w3-bar-item w3-button w3-large w3-hide-large" onclick="w3_close()">&times;</button>
+        <a href="#" class="w3-bar-item w3-button"><i class="fa fa-fw fa-home"></i> Домой</a>
+        <a asp-area="Series" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button">
+            <i class="fa fa-fw fa-film"></i> Сериалы
         </a>
-        <a href="#services"><i class="fa fa-fw fa-wrench"></i> Services</a>
-        <a href="#clients"><i class="fa fa-fw fa-user"></i> Clients</a>
-        <a href="#contact"><i class="fa fa-fw fa-envelope"></i> Contact</a>
+        <a href="#" class="w3-bar-item w3-button"><i class="fa fa-fw fa-wrench"></i> Services</a>
+        <a href="#" class="w3-bar-item w3-button"><i class="fa fa-fw fa-user"></i> Clients</a>
     </div>
-    <div class="main">
-        @RenderBody()
-    </div>
+
+    <div class="w3-main" style="margin-left:200px">
+        <div class="w3-teal">
+            <button class="w3-button w3-teal w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
+            <div class="w3-container">
+                <h1>Homie</h1>
+            </div>
+        </div>
+        <p></p>
+
+        <div class="w3-container">
+            @RenderBody()
+        </div>
+
+        <script>
+            function w3_open() {
+                document.getElementById("mySidebar").style.display = "block";
+            }
+
+            function w3_close() {
+                document.getElementById("mySidebar").style.display = "none";
+            }
+        </script>
 </body>
 </html>
