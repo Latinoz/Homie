@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Homies.Models;
 using Homie.Areas.Series.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Homie.Areas.Series.Controllers
 {
@@ -17,10 +18,53 @@ namespace Homie.Areas.Series.Controllers
         {
             db = context;
         }
-        
-        public ViewResult Index() => View(db.Movies.ToList());
 
-        public ViewResult ArchMovies() => View(db.ArchMovies.ToList());
+        public async Task<IActionResult> Index()
+        {
+            return View(await db.Movies.ToListAsync());
+        }
+
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create(Movies movie)
+        {
+            db.Movies.Add(movie);
+            await db.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
+
+        //public async Task<IActionResult> Details(int? id)
+        //{
+        //    if (id != null)
+        //    {
+        //        Movies user = await db.Movies.FirstOrDefaultAsync(p => p.Id == id);
+        //        if (user != null)
+        //            return View(user);
+        //    }
+        //    return NotFound();
+        //}
+
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id != null)
+            {
+                Movies movie = await db.Movies.FirstOrDefaultAsync(p => p.Id == id);
+                if (movie != null)
+                    return View(movie);
+            }
+            return NotFound();
+        }
+        [HttpPost]
+        public async Task<IActionResult> Edit(Movies movie)
+        {
+            db.Movies.Update(movie);
+            await db.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
 
     }
 }
