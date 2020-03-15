@@ -24,6 +24,11 @@ namespace Homie.Areas.Series.Controllers
             return View(await db.Movies.ToListAsync());
         }
 
+        public async Task<IActionResult> ArchMovies()
+        {
+            return View(await db.ArchMovies.ToListAsync());
+        }
+
         public IActionResult Create()
         {
             return View();

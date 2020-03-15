@@ -1,11 +1,7 @@
 ﻿@model IEnumerable<Homie.Areas.Series.Models.Movies>
 @{ Layout = "~/Views/Shared/_Layout.cshtml"; }
 
-<html>
-<head>    
-    
-</head>
-<body class="m-1 p-1">
+
    
     <a asp-action="Create" asp-controller="Home" asp-area="Series" 
        class="btn btn-outline-primary" 
@@ -24,17 +20,13 @@
                 <td>@p.StopPlaySecond</td>
 
                 <td>
-                    <a asp-action="Details" asp-controller="Home" asp-route-id="@p.Id">Просмотр</a> |
+                    <a asp-action="Details" asp-controller="Home" asp-route-id="@p.Id">Смотреть</a> |
                     <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id">Изменить</a> |
                     <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id">Удалить</a>
                 </td>
             </tr>
 
-
-
-
         }
     </table>
 
-</body>
-</html>
+

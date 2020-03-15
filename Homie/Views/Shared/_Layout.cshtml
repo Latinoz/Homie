@@ -1,35 +1,46 @@
 ﻿<!DOCTYPE html>
-
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
     <title>@ViewBag.Title</title>
-    <!--<link rel="stylesheet" href="~/css/StyleSheet.css">-->
-    <!--<link rel="stylesheet" href="~/font-awesome/css/fontawesome.min.css">-->
+    <style>
+        a {
+            text-decoration: none; /* Отменяем подчеркивание у ссылки */
+        }
+    </style>
+    <link rel="stylesheet" type="text/css" href="~/css/StyleSheet.css">
     <link rel="stylesheet" asp-href-include="lib/bootstrap/dist/css/*.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/fontawesome.min.css" />
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
-    <!--<script src="~/js/JavaScript.js"></script>-->
-    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <script src="~/js/a076d05399.js"></script>
 </head>
+
 <body>
+    <!-- Sidebar -->
     <div class="w3-sidebar w3-bar-block w3-collapse w3-card w3-animate-left w3-indigo" style="width:200px;" id="mySidebar">
         <button class="w3-bar-item w3-button w3-large w3-hide-large w3-hover-white" onclick="w3_close()">&times;</button>
-        <a href="#" class="w3-bar-item w3-button w3-hover-white"><i class="fa fa-fw fa-home"></i>&nbsp; Домой</a>
+
+        <a asp-area="" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+            <i class="fa fa-fw fa-home"></i>&nbsp; Домой
+        </a>
+
         <div class="w3-dropdown-hover w3-hover-white">
             <a asp-area="Series" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
-                <i class="fa fa-film fa-fw"></i>&nbsp; Сериалы</a>
+                <i class="fa fa-film fa-fw"></i>&nbsp; Сериалы
+            </a>
             <div class="w3-dropdown-content w3-bar-block w3-card w3-hover-white">
                 <a asp-area="Series" asp-controller="Home" asp-action="ArchMovies" class="w3-bar-item w3-button w3-hover-white">
-                    <i class="fa fa-fast-backward fa-fw" aria-hidden="true"></i>&nbsp; Архив сериалов</a>
-                                
+                    <i class="fa fa-fast-backward fa-fw" aria-hidden="true"></i>&nbsp; Архив сериалов
+                </a>
             </div>
-        </div>       
+        </div>
         <a href="#" class="w3-bar-item w3-button w3-hover-white"><i class="fas fa-joint"></i>&nbsp; Сигары</a>
         <a href="#" class="w3-bar-item w3-button w3-hover-white"><i class='fas fa-sign-in-alt'></i>&nbsp; Выход</a>
     </div>
 
+    <!-- Page Content -->
     <div class="w3-main" style="margin-left:200px">
+
         <div class="w3-indigo">
             <button class="w3-button w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
             <div class="w3-container w3-indigo">
@@ -43,13 +54,17 @@
         </div>
 
         <script>
-            function w3_open() {
-                document.getElementById("mySidebar").style.display = "block";
-            }
+        function w3_open() {
+        document.getElementById("mySidebar").style.display = "block";
 
-            function w3_close() {
-                document.getElementById("mySidebar").style.display = "none";
-            }
-        </script>
+        }
+
+        function w3_close() {
+        document.getElementById("mySidebar").style.display = "none";
+        }
+        </script>   
+    </div>
+
+    
 </body>
 </html>
