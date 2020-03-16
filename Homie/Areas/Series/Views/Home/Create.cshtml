@@ -3,28 +3,31 @@
 @{
     ViewBag.Title = "Добавление сериала";
 }
-<form asp-action="create" asp-controller="home">
-    <div class="form-group">
-        <label asp-for="Name" class="control-label">Имя</label>
-        <input type="text" asp-for="Name" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label asp-for="Season" class="control-label">Сезон</label>
-        <input type="number" asp-for="Season" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label asp-for="Episode" class="control-label">Серия</label>
-        <input type="number" asp-for="Episode" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label asp-for="StopPlayMinute" class="control-label">Минута остановки</label>
-        <input type="number" asp-for="StopPlayMinute" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label asp-for="StopPlaySecond" class="control-label">Секунда остановки</label>
-        <input type="number" asp-for="StopPlaySecond" class="form-control" />
-    </div>
-    <div class="form-group">
-        <input type="submit" value="Отправить" class="btn btn-primary" />
-    </div>
-</form>
+    <form asp-action="create" asp-controller="home">
+        <div class="form-group">
+            <label asp-for="Name" class="control-label">Имя</label>
+            <input type="text" asp-for="Name" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Season" class="control-label">Сезон</label>
+            <input type="number" asp-for="Season" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Episode" class="control-label">Серия</label>
+            <input type="number" asp-for="Episode" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label asp-for="StopPlayMinute" class="control-label">Минута остановки</label>
+            <input type="number" asp-for="StopPlayMinute" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label asp-for="StopPlaySecond" class="control-label">Секунда остановки</label>
+            <input type="number" asp-for="StopPlaySecond" class="form-control" />
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Отправить" class="btn btn-primary" />            
+            <a asp-action="Index" asp-controller="Home" asp-area="Series"
+               class="btn btn-primary"
+               role="button">Назад</a>
+        </div>
+    </form>

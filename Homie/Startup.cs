@@ -55,7 +55,7 @@ namespace Homie
             {
                 endpoints.MapRazorPages();
                 endpoints.MapControllerRoute("areas","{area:exists}/{controller=Home}/{action=Index}");
-                endpoints.MapControllerRoute("default","{controller=Home}/{action=Index}");
+                endpoints.MapControllerRoute("default","{controller=Home}/{action=Index}/{id?}");
             });            
 
             

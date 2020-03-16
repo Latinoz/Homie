@@ -71,5 +71,33 @@ namespace Homie.Areas.Series.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpGet]
+        [ActionName("Delete")]
+        public async Task<IActionResult> ConfirmDelete(int? id)
+        {
+            if (id != null)
+            {
+                Movies user = await db.Movies.FirstOrDefaultAsync(p => p.Id == id);
+                if (user != null)
+                    return View(user);
+            }
+            return NotFound();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id != null)
+            {
+                Movies user = await db.Movies.FirstOrDefaultAsync(p => p.Id == id);
+                if (user != null)
+                {
+                    db.Movies.Remove(user);
+                    await db.SaveChangesAsync();
+                    return RedirectToAction("Index");
+                }
+            }
+            return NotFound();
+        }
     }
 }
