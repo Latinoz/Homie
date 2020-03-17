@@ -13,8 +13,7 @@ namespace Homies.Models {
             : base(options) { }
 
         public DbSet<Movies> Movies { get; set; }
-
-        public DbSet<ArchMovies> ArchMovies { get; set; }
+        
     }
     
 }

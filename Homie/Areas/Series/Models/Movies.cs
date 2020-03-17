@@ -13,6 +13,7 @@ namespace Homie.Areas.Series.Models
         public int Episode { get; set; }
         public int StopPlayMinute { get; set; }
         public int StopPlaySecond { get; set; }
+        public bool Archive { get; set; }
 
     }
 }

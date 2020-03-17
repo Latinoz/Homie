@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Homie.Areas.Series.Models.ArchMovies>
+﻿@model IEnumerable<Homie.Areas.Series.Models.Movies>
 @{ Layout = "~/Views/Shared/_Layout.cshtml"; }
 <!DOCTYPE html>
 <html>
@@ -18,7 +18,7 @@
                 <td>@p.StopPlaySecond</td>
 
                 <td>
-                    <a asp-action="Back" asp-controller="Home" asp-route-id="@p.Id">Вернуть</a> |
+                    <a asp-action="BackToList" asp-controller="Home" asp-route-id="@p.Id">Вернуть</a> |
                     <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id">Изменить</a> |
                     <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id">Удалить</a>
                 </td>

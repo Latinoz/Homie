@@ -21,12 +21,12 @@ namespace Homie.Areas.Series.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await db.Movies.ToListAsync());
+            return View(await db.Movies.Where(a => a.Archive == false).ToListAsync());
         }
 
         public async Task<IActionResult> ArchMovies()
         {
-            return View(await db.ArchMovies.ToListAsync());
+            return View(await db.Movies.Where(a => a.Archive == true).ToListAsync());
         }
 
         public IActionResult Create()
@@ -42,16 +42,31 @@ namespace Homie.Areas.Series.Controllers
             return RedirectToAction("Index");
         }
 
-        //public async Task<IActionResult> Details(int? id)
-        //{
-        //    if (id != null)
-        //    {
-        //        Movies user = await db.Movies.FirstOrDefaultAsync(p => p.Id == id);
-        //        if (user != null)
-        //            return View(user);
-        //    }
-        //    return NotFound();
-        //}
+        public async Task<IActionResult> GoToArchive(int? Id)
+        {
+            if (Id != null)
+            {
+                Movies movie = await db.Movies.FirstOrDefaultAsync(p => p.Id == Id);
+                movie.Archive = true;                
+
+                await db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }            
+            return NotFound();
+        }
+
+        public async Task<IActionResult> BackToList(int? Id)
+        {
+            if (Id != null)
+            {
+                Movies movie = await db.Movies.FirstOrDefaultAsync(p => p.Id == Id);
+                movie.Archive = false;
+
+                await db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+            return NotFound();
+        }
 
         public async Task<IActionResult> Edit(int? id)
         {
@@ -63,6 +78,7 @@ namespace Homie.Areas.Series.Controllers
             }
             return NotFound();
         }
+
         [HttpPost]
         public async Task<IActionResult> Edit(Movies movie)
         {
@@ -85,11 +101,11 @@ namespace Homie.Areas.Series.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? Id)
         {
-            if (id != null)
+            if (Id != null)
             {
-                Movies user = await db.Movies.FirstOrDefaultAsync(p => p.Id == id);
+                Movies user = await db.Movies.FirstOrDefaultAsync(p => p.Id == Id);
                 if (user != null)
                 {
                     db.Movies.Remove(user);
