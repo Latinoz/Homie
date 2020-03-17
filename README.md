@@ -1,2 +1,2 @@
 # Homie
-Homie App MVC v.0.1
+Homie App MVC
