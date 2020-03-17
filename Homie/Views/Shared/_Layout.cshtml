@@ -3,11 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     <title>@ViewBag.Title</title>
-    <style>
-        a {
-            text-decoration: none; /* Отменяем подчеркивание у ссылки */
-        }
-    </style>
+   
     <link rel="stylesheet" type="text/css" href="~/css/StyleSheet.css">
     <link rel="stylesheet" asp-href-include="lib/bootstrap/dist/css/*.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/fontawesome.min.css" />
@@ -25,12 +21,16 @@
         </a>
 
         <div class="w3-dropdown-hover w3-hover-white">
-            <a asp-area="Series" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+            <a href="#" class="w3-bar-item w3-button w3-hover-white">
                 <i class="fa fa-film fa-fw"></i>&nbsp; Сериалы
             </a>
             <div class="w3-dropdown-content w3-bar-block w3-card w3-hover-white">
+                <a asp-area="Series" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                    <i class="fa fa-video fa-fw" aria-hidden="true"></i>&nbsp; Список
+                </a>           
+            
                 <a asp-area="Series" asp-controller="Home" asp-action="ArchMovies" class="w3-bar-item w3-button w3-hover-white">
-                    <i class="fa fa-fast-backward fa-fw" aria-hidden="true"></i>&nbsp; Архив сериалов
+                    <i class="fa fa-fast-backward fa-fw" aria-hidden="true"></i>&nbsp; Архив
                 </a>
             </div>
         </div>

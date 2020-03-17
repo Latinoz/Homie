@@ -93,9 +93,9 @@ namespace Homie.Areas.Series.Controllers
         {
             if (id != null)
             {
-                Movies user = await db.Movies.FirstOrDefaultAsync(p => p.Id == id);
-                if (user != null)
-                    return View(user);
+                Movies movie = await db.Movies.FirstOrDefaultAsync(p => p.Id == id);
+                if (movie != null)
+                    return View(movie);
             }
             return NotFound();
         }
@@ -105,12 +105,17 @@ namespace Homie.Areas.Series.Controllers
         {
             if (Id != null)
             {
-                Movies user = await db.Movies.FirstOrDefaultAsync(p => p.Id == Id);
-                if (user != null)
+                Movies movie = await db.Movies.FirstOrDefaultAsync(p => p.Id == Id);
+                if (movie != null)
                 {
-                    db.Movies.Remove(user);
+                    db.Movies.Remove(movie);
                     await db.SaveChangesAsync();
-                    return RedirectToAction("Index");
+
+                    if(movie.Archive == false)
+                    {
+                        return RedirectToAction("Index");
+                    }
+                    return RedirectToAction("ArchMovies", "Home", new { area = "Series" });
                 }
             }
             return NotFound();

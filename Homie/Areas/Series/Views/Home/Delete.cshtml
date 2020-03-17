@@ -3,17 +3,15 @@
     ViewData["Title"] = "Delete";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
     <div>
         <dl class="dl-horizontal">
-            <dt>Имя</dt>
+            <dt>Название:</dt>
+            <p></p>
             <dd>
                 @Html.DisplayFor(model => model.Name)
-            </dd>
-
-          
+            </dd>          
         </dl>
-
+        <p></p>
         <div>
             <form asp-controller="Home" asp-action="Delete" asp-route-id="@Model.Id" method="post">
                 <div class="form-group">
