@@ -1,36 +1,38 @@
 ﻿@model IEnumerable<Homie.Areas.Series.Models.Movies>
 @{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+@{
+    ViewBag.Title = "Список сериалов";
+    ViewBag.HeaderTitle = "- [ Список ]";
+}
 
+<a asp-action="Create" asp-controller="Home" asp-area="Series"
+   class="btn btn-primary"
+   role="button">Добавить</a>
+<p></p>
 
-   
-    <a asp-action="Create" asp-controller="Home" asp-area="Series" 
-       class="btn btn-primary" 
-       role="button">Добавить</a>
-    <p></p>
+<table class="table table-bordered table-striped table-sm">
+    <tr><th>Название</th><th>Сезон</th><th>Серия</th><th>Час.</th><th>Мин.</th><th>Сек.</th><th></th></tr>
+    @foreach (var p in Model)
+    {
+        <tr>
+            <td>@p.Name</td>
+            <td>@p.Season</td>
+            <td>@p.Episode</td>
+            <td>@p.StopPlayHour</td>
+            <td>@p.StopPlayMinute</td>
+            <td>@p.StopPlaySecond</td>
 
-    <table class="table table-bordered table-striped table-sm">
-        <tr><th>Название</th><th>Сезон</th><th>Серия</th><th>Час.</th><th>Мин.</th><th>Сек.</th><th></th></tr>
-        @foreach (var p in Model)
-        {
-            <tr>
-                <td>@p.Name</td>
-                <td>@p.Season</td>
-                <td>@p.Episode</td>
-                <td>@p.StopPlayHour</td>
-                <td>@p.StopPlayMinute</td>
-                <td>@p.StopPlaySecond</td>
+            <td>
+                <a asp-action="GoToArchive" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-secondary"
+                   role="button">В Архив</a>
+                <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
+                   role="button">Изменить</a>
+                <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
+                   role="button">Удалить</a>
+            </td>
+        </tr>
 
-                <td>
-                    <a asp-action="GoToArchive" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-secondary"
-                    role="button">В Архив</a>
-                    <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
-                    role="button">Изменить</a>
-                    <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
-                    role="button">Удалить</a>
-                </td>
-            </tr>
-
-        }
-    </table>
+    }
+</table>
 
 
