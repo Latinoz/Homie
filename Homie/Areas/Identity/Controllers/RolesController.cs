@@ -4,12 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Homie.Areas.Identity.Models;
 using Homie.Areas.Identity.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Homie.Areas.Identity.Controllers
 {
     [Area("Identity")]
+    [Authorize(Roles = "admin")]
     public class RolesController : Controller
     {
         RoleManager<IdentityRole> _roleManager;

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Homie.Areas.Identity.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Homie.Areas.Identity.Controllers
 {
@@ -38,6 +39,7 @@ namespace Homie.Areas.Identity.Controllers
                     // установка куки
                     await _signInManager.SignInAsync(user, false);
                     return RedirectToAction("Index", "Home");
+                    
                 }
                 else
                 {
@@ -50,13 +52,13 @@ namespace Homie.Areas.Identity.Controllers
             return View(model);
         }
 
-        [HttpGet]
+        [HttpGet]        
         public IActionResult Login(string returnUrl = null)
         {
             return View(new LoginViewModel { ReturnUrl = returnUrl });
         }
 
-        [HttpPost]
+        [HttpPost]        
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
@@ -74,6 +76,7 @@ namespace Homie.Areas.Identity.Controllers
                     else
                     {
                         return RedirectToAction("Index", "Home");
+                        
                     }
                 }
                 else
@@ -91,6 +94,12 @@ namespace Homie.Areas.Identity.Controllers
             // удаляем аутентификационные куки
             await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
+            
+        }
+        
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

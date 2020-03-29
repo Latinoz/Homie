@@ -4,10 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 using Homie.Areas.Series.Models;
 using Microsoft.EntityFrameworkCore;
 using Homies.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Homie.Areas.Series.Controllers
 {
     [Area("Series")]
+    [Authorize(Roles = "admin,user")]
+    
     public class HomeController : Controller
     {
         ApplicationDbContext db;

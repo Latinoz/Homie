@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace Homie.Areas.Identity.Controllers
 {
     [Area("Identity")]
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = "admin,user")]
     public class HomeController : Controller
     {
         public IActionResult Index()
