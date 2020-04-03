@@ -11,7 +11,6 @@ namespace Homie.Areas.Series.Models
         public string Name { get; set; }
         public int Season { get; set; }
         public int Episode { get; set; }
-
         public int StopPlayHour { get; set; }
         public int StopPlayMinute { get; set; }
         public int StopPlaySecond { get; set; }
