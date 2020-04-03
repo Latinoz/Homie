@@ -1,0 +1,19 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet"
+          asp-href-include="/lib/bootstrap/dist/**/*.min.css"
+          asp-href-exclude="**/*-reboot*,**/*-grid*" />
+    <title>Test</title>
+</head>
+<body>
+    <h1>_Layout from /Areas/Series/Views/Shared</h1>
+    <div class="row m-1 p-1">        
+        <div class="col-9">
+            @RenderBody()
+        </div>
+    </div>
+</body>
+</html>

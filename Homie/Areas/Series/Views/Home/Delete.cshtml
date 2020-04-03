@@ -1,26 +1,27 @@
 ﻿@model Homie.Areas.Series.Models.Movies
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
 @{
-    ViewData["Title"] = "Delete";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Удалить";
+    
 }
-    <div>
-        <dl class="dl-horizontal">
-            <dt>Название:</dt>
-            <p></p>
-            <dd>
-                @Html.DisplayFor(model => model.Name)
-            </dd>          
-        </dl>
+<div>
+    <dl class="dl-horizontal">
+        <dt>Название:</dt>
         <p></p>
-        <div>
-            <form asp-controller="Home" asp-action="Delete" asp-route-id="@Model.Id" method="post">
-                <div class="form-group">
-                    <input type="submit" class="btn btn-danger" value="Удалить" />
-                    <a asp-action="Index" asp-controller="Home" asp-area="Series"
-                       class="btn btn-primary"
-                       role="button">Назад</a>
-                </div>
-            </form>
-        </div>
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+    </dl>
+    <p></p>
+    <div>
+        <form asp-controller="Home" asp-action="Delete" asp-route-id="@Model.Id" method="post">
+            <div class="form-group">
+                <input type="submit" class="btn btn-danger" value="Удалить" />
+                <a asp-action="Index" asp-controller="Home" asp-area="Series"
+                   class="btn btn-primary"
+                   role="button">Назад</a>
+            </div>
+        </form>
     </div>
+</div>
 

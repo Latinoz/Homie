@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
-namespace Homie.Controllers
+namespace Homie.Areas.Identity.Controllers
 {
-    
+    [Area("Identity")]
     [Authorize(Roles = "admin,user")]
     public class HomeController : Controller
     {

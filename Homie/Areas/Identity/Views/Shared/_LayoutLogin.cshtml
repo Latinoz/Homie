@@ -2,8 +2,8 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>@ViewBag.Title</title>   
-   
+    <title>@ViewBag.Title</title>
+
     <link rel="stylesheet" asp-href-include="lib/bootstrap/dist/css/*.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/fontawesome.min.css" />
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
@@ -14,27 +14,7 @@
     <!-- Sidebar -->
     <div class="w3-sidebar w3-bar-block w3-collapse w3-card w3-animate-left w3-indigo" style="width:200px;" id="mySidebar">
         <button class="w3-bar-item w3-button w3-large w3-hide-large w3-hover-white" onclick="w3_close()">&times;</button>
-
-        <a asp-area="" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
-            <i class="fa fa-fw fa-lg fa-home"></i>&nbsp; Домой
-        </a>       
-
-        <button class="w3-button w3-block w3-left-align w3-hover-white" onclick="myAccFunc()">
-            <i class="fa fa-film fa-fw fa-lg"></i>&nbsp; Сериалы <i class="fa fa-caret-down"></i>
-        </button>
-        <div id="demoAcc" class="w3-hide w3-light-gray w3-card">
-            <a asp-area="Series" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
-                <i class="fa fa-video fa-fw" aria-hidden="true"></i>&nbsp; Список
-            </a>
-
-            <a asp-area="Series" asp-controller="Home" asp-action="ArchMovies" class="w3-bar-item w3-button w3-hover-white">
-                <i class="fa fa-fast-backward fa-fw" aria-hidden="true"></i>&nbsp; Архив
-            </a>
-        </div>
-        
-        <a href="#" class="w3-bar-item w3-button w3-hover-white"><i class="fas fa-joint fa-lg"></i>&nbsp; Сигары</a>
-
-        <a method="post" asp-area="Identity" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white"><i class="fas fa-sign-in-alt fa-lg"></i>&nbsp; Выход</a>
+       
     </div>
 
     <!-- Page Content -->
@@ -52,7 +32,7 @@
             @RenderBody()
         </div>
 
-        <script>    
+        <script>
 
             function myAccFunc() {
                 var x = document.getElementById("demoAcc");
@@ -77,7 +57,7 @@
         </script>
     </div>
 
-   
+
 
 </body>
 </html>

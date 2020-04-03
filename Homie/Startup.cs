@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Homies.Models;
 using Homie.Areas.Series.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -14,8 +13,10 @@ using Microsoft.Extensions.Hosting;
 using Pomelo.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Pomelo.EntityFrameworkCore.MySql.Storage.Internal;
-
-
+using Microsoft.AspNetCore.Identity;
+using Homies.Data.Models;
+using Homie.Areas.Identity.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Homie
 {
@@ -32,7 +33,30 @@ namespace Homie
         {            
             services.AddDbContext<ApplicationDbContext>(options =>
             options.UseMySql(Configuration.GetConnectionString("DefaultConnection")));
-            
+           
+
+            //** Удалить снятие ограничений, при Release **
+            services.AddIdentity<User, IdentityRole>(opts =>
+            {
+                opts.Password.RequiredLength = 5;   // минимальная длина
+                opts.Password.RequireNonAlphanumeric = false;   // требуются ли не алфавитно-цифровые символы
+                opts.Password.RequireLowercase = false; // требуются ли символы в нижнем регистре
+                opts.Password.RequireUppercase = false; // требуются ли символы в верхнем регистре
+                opts.Password.RequireDigit = false; // требуются ли цифры
+            })
+               .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            services.ConfigureApplicationCookie(options =>
+            {
+                // Cookie settings
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+
+                options.LoginPath = "/Identity/Account/Login";
+                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+                options.SlidingExpiration = true;
+            });
+
             services.AddControllersWithViews();
 
             services.AddRazorPages();
@@ -50,6 +74,9 @@ namespace Homie
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseAuthentication();    // подключение аутентификации
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
