@@ -1,20 +1,36 @@
-﻿@model Homie.Areas.Cigars.Models.Cigars
+﻿@model Homie.Areas.Cigars.Models.CigarsModel
 @{ Layout = "~/Views/Shared/_Layout.cshtml"; }
 @{
-    ViewBag.Title = "Добавить";
+    ViewBag.Title = "Добавить сигару";
     
 }
 
-<form asp-action="create" asp-controller="home">
-    <div class="form-group">
-        <label asp-for="Name" class="control-label">Имя</label>
-        <input type="text" asp-for="Name" class="form-control" />
-    </div>
-    
-    <div class="form-group">
-        <input type="submit" value="Добавить" class="btn btn-primary" />
-        <a asp-action="Index" asp-controller="Home" asp-area="Series"
-           class="btn btn-primary"
-           role="button">Назад</a>
-    </div>
-</form>
+    <form asp-action="create" asp-controller="home">
+        <div class="form-group">
+            <label asp-for="Name" class="control-label">Имя</label>
+            <input type="text" asp-for="Name" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Country" class="control-label">Страна</label>
+            <input type="text" asp-for="Country" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Shape" class="control-label">Формат</label>
+            <input type="text" asp-for="Shape" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Rating" class="control-label">Рейтинг</label>
+            <input type="number" asp-for="Rating" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Price" class="control-label">Цена</label>
+            <input type="number" asp-for="Price" class="form-control" />
+        </div>       
+
+        <div class="form-group">
+            <input type="submit" value="Добавить" class="btn btn-primary" />
+            <a asp-action="Index" asp-controller="Home" asp-area="Cigars"
+               class="btn btn-primary"
+               role="button">Назад</a>
+        </div>
+    </form>

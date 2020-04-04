@@ -3,21 +3,23 @@ using System;
 using Homies.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Homie.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200404065739_AddForCigarsId")]
+    partial class AddForCigarsId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "3.1.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("Homie.Areas.Cigars.Models.CigarsModel", b =>
+            modelBuilder.Entity("Homie.Areas.Cigars.Models.Cigars", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -61,7 +63,7 @@ namespace Homie.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CigarsEF");
+                    b.ToTable("Cigars");
                 });
 
             modelBuilder.Entity("Homie.Areas.Identity.Models.User", b =>
@@ -131,7 +133,7 @@ namespace Homie.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("Homie.Areas.Series.Models.MoviesModel", b =>
+            modelBuilder.Entity("Homie.Areas.Series.Models.Movies", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -160,7 +162,7 @@ namespace Homie.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MoviesEF");
+                    b.ToTable("Movies");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

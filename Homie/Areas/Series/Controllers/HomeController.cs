@@ -22,12 +22,12 @@ namespace Homie.Areas.Series.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await db.Movies.Where(a => a.Archive == false).ToListAsync());
+            return View(await db.MoviesEF.Where(a => a.Archive == false).ToListAsync());
         }
 
         public async Task<IActionResult> ArchMovies()
         {
-            return View(await db.Movies.Where(a => a.Archive == true).ToListAsync());
+            return View(await db.MoviesEF.Where(a => a.Archive == true).ToListAsync());
         }
 
         public IActionResult Create()
@@ -36,9 +36,9 @@ namespace Homie.Areas.Series.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Movies movie)
+        public async Task<IActionResult> Create(MoviesModel movie)
         {
-            db.Movies.Add(movie);
+            db.MoviesEF.Add(movie);
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
@@ -47,7 +47,7 @@ namespace Homie.Areas.Series.Controllers
         {
             if (Id != null)
             {
-                Movies movie = await db.Movies.FirstOrDefaultAsync(p => p.Id == Id);
+                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
                 movie.Archive = true;                
 
                 await db.SaveChangesAsync();
@@ -60,7 +60,7 @@ namespace Homie.Areas.Series.Controllers
         {
             if (Id != null)
             {
-                Movies movie = await db.Movies.FirstOrDefaultAsync(p => p.Id == Id);
+                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
                 movie.Archive = false;
 
                 await db.SaveChangesAsync();
@@ -73,7 +73,7 @@ namespace Homie.Areas.Series.Controllers
         {
             if (id != null)
             {
-                Movies movie = await db.Movies.FirstOrDefaultAsync(p => p.Id == id);
+                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == id);
                 if (movie != null)
                     return View(movie);
             }
@@ -81,9 +81,9 @@ namespace Homie.Areas.Series.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(Movies movie)
+        public async Task<IActionResult> Edit(MoviesModel movie)
         {
-            db.Movies.Update(movie);
+            db.MoviesEF.Update(movie);
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
@@ -94,7 +94,7 @@ namespace Homie.Areas.Series.Controllers
         {
             if (id != null)
             {
-                Movies movie = await db.Movies.FirstOrDefaultAsync(p => p.Id == id);
+                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == id);
                 if (movie != null)
                     return View(movie);
             }
@@ -106,10 +106,10 @@ namespace Homie.Areas.Series.Controllers
         {
             if (Id != null)
             {
-                Movies movie = await db.Movies.FirstOrDefaultAsync(p => p.Id == Id);
+                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
                 if (movie != null)
                 {
-                    db.Movies.Remove(movie);
+                    db.MoviesEF.Remove(movie);
                     await db.SaveChangesAsync();
 
                     if(movie.Archive == false)

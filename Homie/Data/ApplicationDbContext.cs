@@ -15,8 +15,8 @@ namespace Homies.Data.Models {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options) { }
 
-        public DbSet<Movies> Movies { get; set; }
-        public DbSet<Cigars> Cigars { get; set; }
+        public DbSet<MoviesModel> MoviesEF { get; set; }
+        public DbSet<CigarsModel> CigarsEF { get; set; }
         
     }
     

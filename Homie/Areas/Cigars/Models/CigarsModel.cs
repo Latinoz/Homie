@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace Homie.Areas.Cigars.Models
 {
-    public class Cigars
+    public class CigarsModel
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public string Length { get; set; }
         public string Ring { get; set; }
@@ -16,5 +16,10 @@ namespace Homie.Areas.Cigars.Models
         public string Wrapper { get; set; }
         public string Color { get; set; }
         public string Strength { get; set; }
+        public string Shape { get; set; }
+        public int Rating { get; set; }
+        public int Price { get; set; }
+        public string Brand { get; set; }
+
     }
 }

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Homie.Areas.Series.Models
 {
-    public class Movies
+    public class MoviesModel
     {
         public int Id { get; set; }
         public string Name { get; set; }

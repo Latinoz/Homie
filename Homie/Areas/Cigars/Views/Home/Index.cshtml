@@ -1,32 +1,33 @@
-﻿@model IEnumerable<Homie.Areas.Cigars.Models.Cigars>
+﻿@model IEnumerable<Homie.Areas.Cigars.Models.CigarsModel>
 @{ Layout = "~/Views/Shared/_Layout.cshtml"; }
 @{
-    ViewBag.Title = "Список сериалов";
+    ViewBag.Title = "Список сигар";
     ViewBag.HeaderTitle = "- [ Список ]";
 }
 
-<a asp-action="Create" asp-controller="Home" asp-area="Series"
+<a asp-action="Create" asp-controller="Home" asp-area="Cigars"
    class="btn btn-primary"
    role="button">Добавить</a>
 <p></p>
 
 <table class="table table-bordered table-striped table-sm">
-    <tr><th>Название</th><th>С111</th><th>222</th><th>333</th><th>Мин.</th><th>Сек.</th><th></th></tr>
+    <tr><th>Название</th><th>Страна</th><th>Цена</th><th>Рейтинг</th><th>Формат</th><th></th></tr>
     @foreach (var p in Model)
     {
-        <tr>
-            <td>@p.Name</td>
-           
-
-            <td>
-                <a asp-action="GoToArchive" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-secondary"
-                   role="button">В Архив</a>
-                <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
-                   role="button">Изменить</a>
-                <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
-                   role="button">Удалить</a>
-            </td>
-        </tr>
+<tr>
+    <td>@p.Name</td>
+    <td>@p.Country</td>
+    <td>@p.Price</td>
+    <td>@p.Rating</td>
+    <td>@p.Shape</td>
+    <td>
+       
+        <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
+           role="button">Изменить</a>
+        <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
+           role="button">Удалить</a>
+    </td>
+</tr>
 
     }
 </table>
