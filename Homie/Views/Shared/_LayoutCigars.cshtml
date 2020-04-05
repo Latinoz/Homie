@@ -2,8 +2,8 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>@ViewBag.Title</title>   
-   
+    <title>@ViewBag.Title</title>
+
     <link rel="stylesheet" asp-href-include="lib/bootstrap/dist/css/*.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/fontawesome.min.css" />
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
@@ -17,6 +17,10 @@
 
         <a asp-area="" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
             <i class="fa fa-fw fa-lg fa-home"></i>&nbsp; Домой
+        </a>        
+
+        <a asp-area="Cigars" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+            <i class="fas fa-joint fa-lg"></i>&nbsp; Сигары
         </a>       
 
         <a method="post" asp-area="Identity" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white"><i class="fas fa-sign-in-alt fa-lg"></i>&nbsp; Выход</a>
@@ -37,29 +41,29 @@
             @RenderBody()
         </div>
 
-        <script>    
+        <script>
 
             function myAccSeriesFunc() {
                 var x = document.getElementById("seriesAcc");
                 if (x.className.indexOf("w3-show") == -1) {
-                x.className += " w3-show";
-                x.previousElementSibling.className += " w3-white";
+                    x.className += " w3-show";
+                    x.previousElementSibling.className += " w3-white";
                 } else {
-                x.className = x.className.replace(" w3-show", "");
-                x.previousElementSibling.className =
-                    x.previousElementSibling.className.replace(" w3-white", "");
-                }                
+                    x.className = x.className.replace(" w3-show", "");
+                    x.previousElementSibling.className =
+                        x.previousElementSibling.className.replace(" w3-white", "");
+                }
             }
 
             function myAccAdminFunc() {
                 var y = document.getElementById("adminAcc");
                 if (y.className.indexOf("w3-show") == -1) {
-                y.className += " w3-show";
-                y.previousElementSibling.className += " w3-white";
+                    y.className += " w3-show";
+                    y.previousElementSibling.className += " w3-white";
                 } else {
-                y.className = y.className.replace(" w3-show", "");
-                y.previousElementSibling.className =
-                    y.previousElementSibling.className.replace(" w3-white", "");
+                    y.className = y.className.replace(" w3-show", "");
+                    y.previousElementSibling.className =
+                        y.previousElementSibling.className.replace(" w3-white", "");
                 }
             }
 
@@ -74,7 +78,7 @@
         </script>
     </div>
 
-   
+
 
 </body>
 </html>
