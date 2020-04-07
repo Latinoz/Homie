@@ -17,7 +17,24 @@
 
         <a asp-area="" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
             <i class="fa fa-fw fa-lg fa-home"></i>&nbsp; Домой
-        </a>       
+        </a>
+
+        <button class="w3-button w3-block w3-left-align w3-hover-white" onclick="myAccSeriesFunc()">
+            <i class="fa fa-film fa-fw fa-lg"></i>&nbsp; Сериалы <i class="fa fa-caret-down"></i>
+        </button>
+        <div id="seriesAcc" class="w3-hide w3-light-gray w3-card">
+            <a asp-area="Series" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fa fa-video fa-fw" aria-hidden="true"></i>&nbsp; Список
+            </a>
+
+            <a asp-area="Series" asp-controller="Home" asp-action="ArchMovies" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fa fa-fast-backward fa-fw" aria-hidden="true"></i>&nbsp; Архив
+            </a>
+        </div>
+
+        <a asp-area="Cigars" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+            <i class="fas fa-joint fa-lg"></i>&nbsp; Сигары
+        </a>        
 
         <a method="post" asp-area="Identity" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white"><i class="fas fa-sign-in-alt fa-lg"></i>&nbsp; Выход</a>
     </div>
