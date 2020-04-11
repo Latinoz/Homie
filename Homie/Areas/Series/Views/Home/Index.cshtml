@@ -11,28 +11,27 @@
 <p></p>
 
 <table class="table table-bordered table-striped table-sm">
-    <tr><th>Название</th><th>Сезон</th><th>Серия</th><th>Час.</th><th>Мин.</th><th>Сек.</th><th></th></tr>
+    <tr><th>Название</th><th>Сезон</th><th>Серия</th><th>Категория</th><th>Время</th><th></th></tr>
     @foreach (var p in Model)
-    {
-        <tr>
-            <td><a href=@p.Href target="_blank">@p.Name</a></td>
-            <td>@p.Season</td>
-            <td>@p.Episode</td>
-            <td>@p.StopPlayHour</td>
-            <td>@p.StopPlayMinute</td>
-            <td>@p.StopPlaySecond</td>
+        {
+<tr>
+        <td><a href=@p.Link target="_blank">@p.Name</a></td>
+        <td>@p.Season</td>
+        <td>@p.Episode</td>
+        <td>@p.Category</td>
+        <td>@p.HoldPlay</td>
 
-            <td>
-                <a asp-action="GoToArchive" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-secondary"
-                   role="button">В Архив</a>
-                <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
-                   role="button">Изменить</a>
-                <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
-                   role="button">Удалить</a>
-            </td>
-        </tr>
+        <td>
+        <a asp-action="GoToArchive" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-secondary"
+           role="button">В Архив</a>
+        <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
+           role="button">Изменить</a>
+        <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
+           role="button">Удалить</a>
+        </td>
+</tr>
 
-    }
+        }
 </table>
 
 

@@ -10,8 +10,8 @@
             <input type="text" asp-for="Name" class="form-control" />
         </div>
         <div class="form-group">
-            <label asp-for="Href" class="control-label">Ссылка</label>
-            <input type="text" asp-for="Href" class="form-control" />
+            <label asp-for="Link" class="control-label">Ссылка</label>
+            <input type="text" asp-for="Link" class="form-control" />
         </div>
         <div class="form-group">
             <label asp-for="Season" class="control-label">Сезон</label>
@@ -22,17 +22,14 @@
             <input type="number" asp-for="Episode" class="form-control" />
         </div>
         <div class="form-group">
-            <label asp-for="StopPlayHour" class="control-label">Час. остановки</label>
-            <input type="number" asp-for="StopPlayHour" class="form-control" />
+            <label asp-for="Category" class="control-label">Категория</label>
+            <input type="text" asp-for="Category" class="form-control" />
         </div>
         <div class="form-group">
-            <label asp-for="StopPlayMinute" class="control-label">Мин. остановки</label>
-            <input type="number" asp-for="StopPlayMinute" class="form-control" />
+            <label asp-for="HoldPlay" class="control-label">Час. остановки</label>
+            <input type="text" asp-for="HoldPlay" class="form-control" />
         </div>
-        <div class="form-group">
-            <label asp-for="StopPlaySecond" class="control-label">Сек. остановки</label>
-            <input type="number" asp-for="StopPlaySecond" class="form-control" />
-        </div>
+
         <div class="form-group">
             <input type="submit" value="Добавить" class="btn btn-primary" />
             <a asp-action="Index" asp-controller="Home" asp-area="Series"
