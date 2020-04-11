@@ -10,6 +10,8 @@ namespace Homie.Areas.Series.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public string Href { get; set; }
+        public string Category { get; set; }
         public int Season { get; set; }
         public int Episode { get; set; }
         public int StopPlayHour { get; set; }

@@ -15,7 +15,7 @@
     @foreach (var p in Model)
     {
         <tr>
-            <td>@p.Name</td>
+            <td><a href=@p.Href target="_blank">@p.Name</a></td>
             <td>@p.Season</td>
             <td>@p.Episode</td>
             <td>@p.StopPlayHour</td>
