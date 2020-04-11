@@ -7,6 +7,7 @@ using Homies.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Homie.Areas.Cigars.Controllers
 {
@@ -23,7 +24,9 @@ namespace Homie.Areas.Cigars.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await db.CigarsEF.ToListAsync());
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            return View(await db.CigarsEF.Where(a => a.UserUid == userId).ToListAsync());
         }
 
         public IActionResult Create()
@@ -34,6 +37,10 @@ namespace Homie.Areas.Cigars.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CigarsModel cigar)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            cigar.UserUid = userId;
+
             db.CigarsEF.Add(cigar);
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
@@ -53,6 +60,10 @@ namespace Homie.Areas.Cigars.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(CigarsModel cigar)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            cigar.UserUid = userId;
+
             db.CigarsEF.Update(cigar);
             await db.SaveChangesAsync();
             return RedirectToAction("Index");

@@ -5,6 +5,9 @@ using Homie.Areas.Series.Models;
 using Microsoft.EntityFrameworkCore;
 using Homies.Data.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Homie.Areas.Identity.Models;
+using System.Security.Claims;
 
 namespace Homie.Areas.Series.Controllers
 {
@@ -16,18 +19,22 @@ namespace Homie.Areas.Series.Controllers
         ApplicationDbContext db;
 
         public HomeController(ApplicationDbContext context)
-        {
+        {            
             db = context;
         }
 
         public async Task<IActionResult> Index()
         {
-            return View(await db.MoviesEF.Where(a => a.Archive == false).ToListAsync());
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            return View(await db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == false).ToListAsync());
         }
 
         public async Task<IActionResult> ArchMovies()
         {
-            return View(await db.MoviesEF.Where(a => a.Archive == true).ToListAsync());
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            return View(await db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == true).ToListAsync());
         }
 
         public IActionResult Create()
@@ -38,6 +45,10 @@ namespace Homie.Areas.Series.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(MoviesModel movie)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            movie.UserUid = userId;
+
             db.MoviesEF.Add(movie);
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
@@ -83,6 +94,10 @@ namespace Homie.Areas.Series.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(MoviesModel movie)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            movie.UserUid = userId;
+
             db.MoviesEF.Update(movie);
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
