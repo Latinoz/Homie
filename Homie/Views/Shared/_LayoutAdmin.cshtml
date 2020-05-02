@@ -24,7 +24,7 @@
         </button>
         <div id="seriesAcc" class="w3-hide w3-light-gray w3-card">
             <a asp-area="Series" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
-                <i class="fa fa-video fa-fw" aria-hidden="true"></i>&nbsp; Список
+                <i class="fa fa-video fa-fw" aria-hidden="true"></i>&nbsp; Просмотр
             </a>
 
             <a asp-area="Series" asp-controller="Home" asp-action="ArchMovies" class="w3-bar-item w3-button w3-hover-white">
@@ -58,7 +58,7 @@
         <div class="w3-indigo">
             <button class="w3-button w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
             <div class="w3-container w3-indigo">
-                <h1>Homie @ViewBag.HeaderTitle</h1>
+                <h1>@ViewBag.HeaderTitle</h1>
             </div>
         </div>
         <p></p>

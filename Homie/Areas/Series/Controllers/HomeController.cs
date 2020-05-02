@@ -100,7 +100,12 @@ namespace Homie.Areas.Series.Controllers
 
             db.MoviesEF.Update(movie);
             await db.SaveChangesAsync();
-            return RedirectToAction("Index");
+
+            if (movie.Archive == false)
+            {
+                return RedirectToAction("Index");
+            }
+            return RedirectToAction("ArchMovies", "Home", new { area = "Series" });
         }
 
         [HttpGet]

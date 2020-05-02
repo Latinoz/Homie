@@ -2,7 +2,7 @@
 
 @{
     ViewBag.Title = "Список сериалов";
-    ViewBag.HeaderTitle = "- [ Список ]";
+    ViewBag.HeaderTitle = "[ Просмотр ]";
 }
 
 <a asp-action="Create" asp-controller="Home" asp-area="Series"
@@ -11,7 +11,7 @@
 <p></p>
 
 <table class="table table-bordered table-striped table-sm">
-    <tr><th>Название</th><th>Сезон</th><th>Серия</th><th>Категория</th><th>Время</th><th></th></tr>
+    <tr><th>Название</th><th>Сезон</th><th>Серия</th><th>Жанр</th><th>Стоп Время</th><th></th></tr>
     @foreach (var p in Model)
         {
 <tr>
