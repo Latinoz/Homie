@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Homie.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20200407044827_ModiMoviesDelTest")]
-    partial class ModiMoviesDelTest
+    [Migration("20200509074832_AlreadyFormatId_Ignore")]
+    partial class AlreadyFormatId_Ignore
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -37,6 +37,9 @@ namespace Homie.Migrations
                     b.Property<string>("Filler")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
+                    b.Property<int>("FormatId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Length")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
@@ -58,12 +61,31 @@ namespace Homie.Migrations
                     b.Property<string>("Strength")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
+                    b.Property<string>("UserUid")
+                        .HasColumnType("varchar(255)");
+
                     b.Property<string>("Wrapper")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("FormatId");
+
                     b.ToTable("CigarsEF");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Cigars.Models.Format", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("ShapeName")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FormatsEF");
                 });
 
             modelBuilder.Entity("Homie.Areas.Identity.Models.User", b =>
@@ -142,22 +164,22 @@ namespace Homie.Migrations
                     b.Property<bool>("Archive")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<string>("Category")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
                     b.Property<int>("Episode")
                         .HasColumnType("int");
+
+                    b.Property<string>("HoldPlay")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.Property<string>("Link")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<string>("Name")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<int>("Season")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StopPlayHour")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StopPlayMinute")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StopPlaySecond")
                         .HasColumnType("int");
 
                     b.Property<string>("UserUid")
@@ -294,6 +316,15 @@ namespace Homie.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Cigars.Models.CigarsModel", b =>
+                {
+                    b.HasOne("Homie.Areas.Cigars.Models.Format", "Format")
+                        .WithMany("CigarsModels")
+                        .HasForeignKey("FormatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

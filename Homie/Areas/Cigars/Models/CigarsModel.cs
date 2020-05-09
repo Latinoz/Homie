@@ -24,6 +24,20 @@ namespace Homie.Areas.Cigars.Models
 
         [Column(TypeName = "varchar(255)")]
         public string UserUid { get; set; }
+        public int FormatId { get; set; }        
+        public Format Format { get; set; }
 
+    }
+
+    public class Format
+    {
+        public int Id { get; set; }
+        public string ShapeName { get; set; }
+
+        public List<CigarsModel> CigarsModels { get; set; }
+        public Format()
+        {
+            CigarsModels = new List<CigarsModel>();
+        }
     }
 }

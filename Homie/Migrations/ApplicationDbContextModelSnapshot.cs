@@ -35,6 +35,9 @@ namespace Homie.Migrations
                     b.Property<string>("Filler")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
+                    b.Property<int>("FormatId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Length")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
@@ -64,7 +67,23 @@ namespace Homie.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("FormatId");
+
                     b.ToTable("CigarsEF");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Cigars.Models.Format", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("ShapeName")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FormatsEF");
                 });
 
             modelBuilder.Entity("Homie.Areas.Identity.Models.User", b =>
@@ -295,6 +314,15 @@ namespace Homie.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Cigars.Models.CigarsModel", b =>
+                {
+                    b.HasOne("Homie.Areas.Cigars.Models.Format", "Format")
+                        .WithMany("CigarsModels")
+                        .HasForeignKey("FormatId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

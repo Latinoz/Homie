@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Homie.Models;
 
 namespace Homie.Areas.Cigars.Controllers
 {
@@ -22,11 +23,84 @@ namespace Homie.Areas.Cigars.Controllers
             db = context;
         }
 
-        public async Task<IActionResult> Index()
+        //public async Task<IActionResult> Index()
+        //{
+        //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        //    return View(await db.CigarsEF.Where(a => a.UserUid == userId).ToListAsync());
+        //}
+
+        //public async Task<IActionResult> Index(int page = 1)
+        //{
+        //    int pageSize = 30;   // количество элементов на странице
+
+        //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        //    IQueryable<CigarsModel> source = db.CigarsEF.Where(a => a.UserUid == userId);
+        //    var count = await source.CountAsync();
+        //    var items = await source.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+        //    PageViewModel pageViewModel = new PageViewModel(count, page, pageSize);
+        //    IndexViewModel viewModel = new IndexViewModel
+        //    {
+        //        PageViewModel = pageViewModel,
+        //        Cigars = items
+        //    };
+        //    return View(viewModel);
+        //}
+
+        public async Task<IActionResult> Index(int? format, string name, int page = 1,
+            SortState sortOrder = SortState.NameAsc)
         {
+            int pageSize = 30;
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            return View(await db.CigarsEF.Where(a => a.UserUid == userId).ToListAsync());
+            //фильтрация
+            IQueryable<CigarsModel> cigars = db.CigarsEF.Where(a => a.UserUid == userId);
+                //.Include(x => x.Format);
+
+            //var temp = cigars.ToList();
+
+            if (format != null && format != 0)
+            {
+                cigars = cigars.Where(p => p.FormatId == format);
+            }
+            if (!String.IsNullOrEmpty(name))
+            {
+                cigars = cigars.Where(p => p.Name.Contains(name));
+            }
+
+            // сортировка
+            switch (sortOrder)
+            {
+                case SortState.NameDesc:
+                    cigars = cigars.OrderByDescending(s => s.Name);
+                    break;                
+                case SortState.FormatAsc:
+                    cigars = cigars.OrderBy(s => s.Format.ShapeName);
+                    break;
+                case SortState.FormatDesc:
+                    cigars = cigars.OrderByDescending(s => s.Format.ShapeName);
+                    break;
+                default:
+                    cigars = cigars.OrderBy(s => s.Name);
+                    break;
+            }
+
+            // пагинация
+            var count = await cigars.CountAsync();
+            var items = await cigars.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            // формируем модель представления
+            IndexViewModel viewModel = new IndexViewModel
+            {
+                PageViewModel = new PageViewModel(count, page, pageSize),
+                SortViewModel = new SortViewModel(sortOrder),
+                FilterViewModel = new FilterViewModel(db.FormatsEF.ToList(), format, name),
+                Cigars = items
+            };
+            return View(viewModel);
         }
 
         public IActionResult Create()

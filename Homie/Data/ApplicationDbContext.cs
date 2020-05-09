@@ -17,7 +17,8 @@ namespace Homies.Data.Models {
 
         public DbSet<MoviesModel> MoviesEF { get; set; }
         public DbSet<CigarsModel> CigarsEF { get; set; }
-        
+        public DbSet<Format> FormatsEF { get; set; }
+
     }
     
 }
