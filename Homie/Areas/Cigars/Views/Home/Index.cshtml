@@ -12,10 +12,8 @@
     .table-striped > tbody > tr:nth-child(odd) > td,
     .table-striped > tbody > tr:nth-child(odd) > th {
         background-color: sandybrown;
-    }
-        
+    }    
 </style>
-
 
 <a asp-action="Create" asp-controller="Home" asp-area="Cigars"
    class="btn btn-primary"
@@ -27,25 +25,36 @@
         <label>Название: </label>
         <input name="name" value="@Model.FilterViewModel.SelectedName" class="form-control" />
 
-        <label>Формат: </label>
-        <select name="format" asp-items="Model.FilterViewModel.Formats" class="form-control"></select>
+        <label>Формат: </label>        
+        <select name="format" asp-items="Model.FilterViewModel.Formats" class="form-control"></select>        
 
         <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
     </div>
 </form>
 <p></p>
 
-<table class="table table-bordered table-striped table-sm">    
-    <tr><th>
-    <a asp-action="Index"
-       asp-route-sortOrder="@(Model.SortViewModel.NameSort)"
-       asp-route-name="@(Model.FilterViewModel.SelectedName)"
-       asp-route-format="@(Model.FilterViewModel.SelectedFormat)">Название</a>
-    </th><th>Страна</th><th>Цена</th><th>Рейтинг</th><th>
-    <a asp-action="Index" asp-route-sortOrder="@(Model.SortViewModel.FormatSort)"
-       asp-route-name="@(Model.FilterViewModel.SelectedName)"
-       asp-route-format="@(Model.FilterViewModel.SelectedFormat)">Формат</a>
-    </th><th></th></tr>
+<div>
+    <label>Количество сигар: @Model.PageViewModel.CountPages</label>
+</div>
+
+<table class="table table-bordered table-striped table-sm">
+    <tr>
+        <th>
+            <a asp-action="Index"
+               asp-route-sortOrder="@(Model.SortViewModel.NameSort)"
+               asp-route-name="@(Model.FilterViewModel.SelectedName)"
+               asp-route-format="@(Model.FilterViewModel.SelectedFormat)">Название</a>
+        </th>
+        <th>Страна</th>
+        <th>Цена</th>
+        <th>Рейтинг</th>
+        <th>
+            <a asp-action="Index" asp-route-sortOrder="@(Model.SortViewModel.FormatSort)"
+               asp-route-name="@(Model.FilterViewModel.SelectedName)"
+               asp-route-format="@(Model.FilterViewModel.SelectedFormat)">Формат</a>
+        </th>
+        <th></th>
+    </tr>
     @foreach (var p in Model.Cigars)
     {
         <tr>

@@ -21,33 +21,7 @@ namespace Homie.Areas.Cigars.Controllers
         public HomeController(ApplicationDbContext context)
         {
             db = context;
-        }
-
-        //public async Task<IActionResult> Index()
-        //{
-        //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        //    return View(await db.CigarsEF.Where(a => a.UserUid == userId).ToListAsync());
-        //}
-
-        //public async Task<IActionResult> Index(int page = 1)
-        //{
-        //    int pageSize = 30;   // количество элементов на странице
-
-        //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        //    IQueryable<CigarsModel> source = db.CigarsEF.Where(a => a.UserUid == userId);
-        //    var count = await source.CountAsync();
-        //    var items = await source.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-
-        //    PageViewModel pageViewModel = new PageViewModel(count, page, pageSize);
-        //    IndexViewModel viewModel = new IndexViewModel
-        //    {
-        //        PageViewModel = pageViewModel,
-        //        Cigars = items
-        //    };
-        //    return View(viewModel);
-        //}
+        }        
 
         public async Task<IActionResult> Index(int? format, string name, int page = 1,
             SortState sortOrder = SortState.NameAsc)
@@ -57,9 +31,7 @@ namespace Homie.Areas.Cigars.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             //фильтрация
-            IQueryable<CigarsModel> cigars = db.CigarsEF.Where(a => a.UserUid == userId);               
-
-            //var temp = cigars.ToList();
+            IQueryable<CigarsModel> cigars = db.CigarsEF.Where(a => a.UserUid == userId);
 
             if (format != null && format != 0)
             {
