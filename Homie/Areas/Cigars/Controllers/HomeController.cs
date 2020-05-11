@@ -57,8 +57,7 @@ namespace Homie.Areas.Cigars.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             //фильтрация
-            IQueryable<CigarsModel> cigars = db.CigarsEF.Where(a => a.UserUid == userId);
-                //.Include(x => x.Format);
+            IQueryable<CigarsModel> cigars = db.CigarsEF.Where(a => a.UserUid == userId);               
 
             //var temp = cigars.ToList();
 
@@ -105,6 +104,12 @@ namespace Homie.Areas.Cigars.Controllers
 
         public IActionResult Create()
         {
+            List<Format> shapeslist = new List<Format>();
+
+            shapeslist = db.FormatsEF.ToList();
+
+            ViewBag.ListofShapes = shapeslist;           
+
             return View();
         }
 
@@ -115,6 +120,14 @@ namespace Homie.Areas.Cigars.Controllers
 
             cigar.UserUid = userId;
 
+            Format format = new Format();            
+
+            int idFromShape = cigar.FormatId;
+
+            format = db.FormatsEF.FirstOrDefault(p => p.Id == idFromShape);
+
+            cigar.Shape = format.ShapeName;
+
             db.CigarsEF.Add(cigar);
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
@@ -122,6 +135,12 @@ namespace Homie.Areas.Cigars.Controllers
 
         public async Task<IActionResult> Edit(int? id)
         {
+            List<Format> shapeslist = new List<Format>();
+
+            shapeslist = db.FormatsEF.ToList();
+
+            ViewBag.ListofShapes = shapeslist;
+
             if (id != null)
             {
                 CigarsModel cigar = await db.CigarsEF.FirstOrDefaultAsync(p => p.Id == id);
@@ -137,6 +156,14 @@ namespace Homie.Areas.Cigars.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             cigar.UserUid = userId;
+
+            Format format = new Format();
+
+            int idFromShape = cigar.FormatId;
+
+            format = db.FormatsEF.FirstOrDefault(p => p.Id == idFromShape);
+
+            cigar.Shape = format.ShapeName;
 
             db.CigarsEF.Update(cigar);
             await db.SaveChangesAsync();

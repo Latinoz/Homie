@@ -14,10 +14,14 @@
             <label asp-for="Country" class="control-label">Страна</label>
             <input type="text" asp-for="Country" class="form-control" />
         </div>
+
         <div class="form-group">
             <label asp-for="Shape" class="control-label">Формат</label>
-            <input type="text" asp-for="Shape" class="form-control" />
+            <select asp-for="FormatId"
+                    class="form-control"
+                    asp-items="@(new SelectList(@ViewBag.ListofShapes,"Id","ShapeName",Model.FormatId))"></select>
         </div>
+
         <div class="form-group">
             <label asp-for="Rating" class="control-label">Рейтинг</label>
             <input type="number" asp-for="Rating" class="form-control" />
