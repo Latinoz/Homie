@@ -23,17 +23,11 @@ namespace Homie.Areas.Series.Controllers
         {            
             db = context;
         }
-
-        //public async Task<IActionResult> Index()
-        //{
-        //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        //    return View(await db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == false).ToListAsync());
-        //}
+        
 
         public async Task<IActionResult> Index(int page = 1)
         {
-            int pageSize = 30;   // количество элементов на странице
+            int pageSize = 40;   // количество элементов на странице
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -49,17 +43,11 @@ namespace Homie.Areas.Series.Controllers
             };
             return View(viewModel);
         }
-
-        //public async Task<IActionResult> ArchMovies()
-        //{
-        //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        //    return View(await db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == true).ToListAsync());
-        //}
+       
 
         public async Task<IActionResult> ArchMovies(int page = 1)
         {
-            int pageSize = 30;   // количество элементов на странице
+            int pageSize = 50;   // количество элементов на странице
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
