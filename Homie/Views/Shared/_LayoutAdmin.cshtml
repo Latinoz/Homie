@@ -2,12 +2,11 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>@ViewBag.Title</title>   
-   
+    <title>@ViewBag.Title</title>
+
     <link rel="stylesheet" asp-href-include="lib/bootstrap/dist/css/*.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/fontawesome.min.css" />
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="~/js/a076d05399.js"></script>
 </head>
 
@@ -15,9 +14,6 @@
     <!-- Sidebar -->
     <div class="w3-sidebar w3-bar-block w3-collapse w3-card w3-animate-left w3-indigo" style="width:200px;" id="mySidebar">
         <button class="w3-bar-item w3-button w3-large w3-hide-large w3-hover-white" onclick="w3_close()">&times;</button>
-
-        <center><h1>HOMIE</h1></center>
-        <hr>
 
         <a asp-area="" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
             <i class="fa fa-fw fa-lg fa-home"></i>&nbsp; Домой
@@ -38,7 +34,20 @@
 
         <a asp-area="Cigars" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
             <i class="fas fa-joint fa-lg"></i>&nbsp; Сигары
-        </a>        
+        </a>
+
+        <button class="w3-button w3-block w3-left-align w3-hover-white" onclick="myAccAdminFunc()">
+            <i class="fa fa-users-cog fa-fw fa-lg"></i>&nbsp; Админ <i class="fa fa-caret-down"></i>
+        </button>
+        <div id="adminAcc" class="w3-hide w3-light-gray w3-card">
+            <a asp-area="Identity" asp-controller="Users" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fa fa-users fa-fw" aria-hidden="true"></i>&nbsp; Пользователи
+            </a>
+
+            <a asp-area="Identity" asp-controller="Roles" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fa fa-user-shield fa-fw" aria-hidden="true"></i>&nbsp; Роли
+            </a>
+        </div>
 
         <a method="post" asp-area="Identity" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white"><i class="fas fa-sign-in-alt fa-lg"></i>&nbsp; Выход</a>
     </div>
@@ -58,33 +67,35 @@
             @RenderBody()
         </div>
 
-        <script>            
+        <script>
+
             function myAccSeriesFunc() {
                 var x = document.getElementById("seriesAcc");
                 if (x.className.indexOf("w3-show") == -1) {
-                x.className += "w3-show";
-                x.previousElementSibling.className += "w3-white";
+                    x.className += " w3-show";
+                    x.previousElementSibling.className += " w3-white";
                 } else {
-                x.className = x.className.replace(" w3-show", "");
-                x.previousElementSibling.className =
-                    x.previousElementSibling.className.replace(" w3-white", "");
-                }                
+                    x.className = x.className.replace(" w3-show", "");
+                    x.previousElementSibling.className =
+                        x.previousElementSibling.className.replace(" w3-white", "");
+                }
             }
 
             function myAccAdminFunc() {
                 var y = document.getElementById("adminAcc");
                 if (y.className.indexOf("w3-show") == -1) {
-                y.className += " w3-show";
-                y.previousElementSibling.className += " w3-white";
+                    y.className += " w3-show";
+                    y.previousElementSibling.className += " w3-white";
                 } else {
-                y.className = y.className.replace(" w3-show", "");
-                y.previousElementSibling.className =
-                    y.previousElementSibling.className.replace(" w3-white", "");
+                    y.className = y.className.replace(" w3-show", "");
+                    y.previousElementSibling.className =
+                        y.previousElementSibling.className.replace(" w3-white", "");
                 }
             }
 
             function w3_open() {
                 document.getElementById("mySidebar").style.display = "block";
+
             }
 
             function w3_close() {
@@ -93,7 +104,7 @@
         </script>
     </div>
 
-   
+
 
 </body>
 </html>

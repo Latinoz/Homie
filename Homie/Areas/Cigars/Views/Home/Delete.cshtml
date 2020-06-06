@@ -1,7 +1,7 @@
-﻿@model Homie.Areas.Series.Models.MoviesModel
-
+﻿@model Homie.Areas.Cigars.Models.CigarsModel
+@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
 @{
-    ViewBag.Title = "Удалить";
+    ViewBag.Title = "Удалить сигару";
     
 }
 <div>
@@ -17,7 +17,7 @@
         <form asp-controller="Home" asp-action="Delete" asp-route-id="@Model.Id" method="post">
             <div class="form-group">
                 <input type="submit" class="btn btn-danger" value="Удалить" />
-                <a asp-action="Index" asp-controller="Home" asp-area="Series"
+                <a asp-action="Index" asp-controller="Home" asp-area="Cigars"
                    class="btn btn-primary"
                    role="button">Назад</a>
             </div>

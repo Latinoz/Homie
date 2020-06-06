@@ -1,38 +1,91 @@
-﻿@model IEnumerable<Homie.Areas.Series.Models.Movies>
-@{ Layout = "~/Views/Shared/_Layout.cshtml"; }
+﻿@using Homie.Models
+@model IndexViewModel
+
 @{
     ViewBag.Title = "Список сериалов";
-    ViewBag.HeaderTitle = "- [ Список ]";
+    ViewBag.HeaderTitle = "Сериалы - [Просмотр]";
 }
+
+<style>
+    @@font-face {
+        font-family: 'FontAwesome';
+        src: url('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/fonts/fontawesome-webfont.woff2') format('woff2'), 
+            url('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/fonts/fontawesome-webfont.woff') format('woff'), 
+            url('https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/fonts/fontawesome-webfont.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal
+    }
+
+    .glyphicon {
+        display: inline-block;
+        font: normal normal normal 14px/1 FontAwesome;
+        font-size: inherit;
+        text-rendering: auto;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale
+    }
+
+    .glyphicon-chevron-right:before {
+        content: "\f054";
+    }
+
+    .glyphicon-chevron-left:before {
+        content: "\f053";
+    }
+
+    .scroll-x {
+        overflow-x: auto;
+    }
+</style>
 
 <a asp-action="Create" asp-controller="Home" asp-area="Series"
    class="btn btn-primary"
    role="button">Добавить</a>
 <p></p>
 
-<table class="table table-bordered table-striped table-sm">
-    <tr><th>Название</th><th>Сезон</th><th>Серия</th><th>Час.</th><th>Мин.</th><th>Сек.</th><th></th></tr>
-    @foreach (var p in Model)
+<div class="scroll-x">
+    <table class="table table-bordered table-striped table-sm">
+        <tr><th>Название</th><th>Сезон</th><th>Серия</th><th>Жанр</th><th>Стоп Время</th><th></th></tr>
+        @foreach (var p in Model.Series)
+        {
+            <tr>
+                <td><a href=@p.Link target="_blank">@p.Name</a></td>
+                <td>@p.Season</td>
+                <td>@p.Episode</td>
+                <td>@p.Category</td>
+                <td>@p.HoldPlay</td>
+
+                <td>
+                    <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
+                       role="button">Изменить</a>
+                    <a asp-action="GoToArchive" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-secondary"
+                       role="button">В Архив</a>
+                    <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
+                       role="button">Удалить</a>
+                </td>
+            </tr>
+
+        }
+    </table>
+</div>
+
+    @if (Model.PageViewModel.HasPreviousPage)
     {
-        <tr>
-            <td>@p.Name</td>
-            <td>@p.Season</td>
-            <td>@p.Episode</td>
-            <td>@p.StopPlayHour</td>
-            <td>@p.StopPlayMinute</td>
-            <td>@p.StopPlaySecond</td>
-
-            <td>
-                <a asp-action="GoToArchive" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-secondary"
-                   role="button">В Архив</a>
-                <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
-                   role="button">Изменить</a>
-                <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
-                   role="button">Удалить</a>
-            </td>
-        </tr>
-
+        <a asp-action="Index"
+           asp-route-page="@(Model.PageViewModel.PageNumber - 1)"
+           class="btn btn-outline-dark">
+            <i class="glyphicon glyphicon-chevron-left"></i>
+            Назад
+        </a>
     }
-</table>
-
+    @if (Model.PageViewModel.HasNextPage)
+    {
+        <a asp-action="Index"
+           asp-route-page="@(Model.PageViewModel.PageNumber + 1)"
+           class="btn btn-outline-dark">
+            Вперед
+            <i class="glyphicon glyphicon-chevron-right"></i>
+        </a>
+    }
+    <p></p>
 

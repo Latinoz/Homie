@@ -1,5 +1,6 @@
 ﻿using Homie;
 using Homie.Areas.Series.Models;
+using Homie.Areas.Cigars.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -14,8 +15,10 @@ namespace Homies.Data.Models {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options) { }
 
-        public DbSet<Movies> Movies { get; set; }
-        
+        public DbSet<MoviesModel> MoviesEF { get; set; }
+        public DbSet<CigarsModel> CigarsEF { get; set; }
+        public DbSet<Format> FormatsEF { get; set; }
+
     }
     
 }

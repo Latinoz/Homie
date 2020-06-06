@@ -5,6 +5,10 @@ using Homie.Areas.Series.Models;
 using Microsoft.EntityFrameworkCore;
 using Homies.Data.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Homie.Areas.Identity.Models;
+using System.Security.Claims;
+using Homie.Models;
 
 namespace Homie.Areas.Series.Controllers
 {
@@ -16,18 +20,48 @@ namespace Homie.Areas.Series.Controllers
         ApplicationDbContext db;
 
         public HomeController(ApplicationDbContext context)
-        {
+        {            
             db = context;
         }
+        
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
-            return View(await db.Movies.Where(a => a.Archive == false).ToListAsync());
+            int pageSize = 40;   // количество элементов на странице
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            IQueryable<MoviesModel> source = db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == false);
+            var count = await source.CountAsync();
+            var items = await source.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            PageViewModel pageViewModel = new PageViewModel(count, page, pageSize);
+            IndexViewModel viewModel = new IndexViewModel
+            {
+                PageViewModel = pageViewModel,
+                Series = items
+            };
+            return View(viewModel);
         }
+       
 
-        public async Task<IActionResult> ArchMovies()
+        public async Task<IActionResult> ArchMovies(int page = 1)
         {
-            return View(await db.Movies.Where(a => a.Archive == true).ToListAsync());
+            int pageSize = 50;   // количество элементов на странице
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            IQueryable<MoviesModel> source = db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == true);
+            var count = await source.CountAsync();
+            var items = await source.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            PageViewModel pageViewModel = new PageViewModel(count, page, pageSize);
+            IndexViewModel viewModel = new IndexViewModel
+            {
+                PageViewModel = pageViewModel,
+                Series = items
+            };
+            return View(viewModel);
         }
 
         public IActionResult Create()
@@ -36,9 +70,13 @@ namespace Homie.Areas.Series.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Movies movie)
+        public async Task<IActionResult> Create(MoviesModel movie)
         {
-            db.Movies.Add(movie);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            movie.UserUid = userId;
+
+            db.MoviesEF.Add(movie);
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
@@ -47,7 +85,7 @@ namespace Homie.Areas.Series.Controllers
         {
             if (Id != null)
             {
-                Movies movie = await db.Movies.FirstOrDefaultAsync(p => p.Id == Id);
+                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
                 movie.Archive = true;                
 
                 await db.SaveChangesAsync();
@@ -60,7 +98,7 @@ namespace Homie.Areas.Series.Controllers
         {
             if (Id != null)
             {
-                Movies movie = await db.Movies.FirstOrDefaultAsync(p => p.Id == Id);
+                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
                 movie.Archive = false;
 
                 await db.SaveChangesAsync();
@@ -73,7 +111,7 @@ namespace Homie.Areas.Series.Controllers
         {
             if (id != null)
             {
-                Movies movie = await db.Movies.FirstOrDefaultAsync(p => p.Id == id);
+                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == id);
                 if (movie != null)
                     return View(movie);
             }
@@ -81,11 +119,20 @@ namespace Homie.Areas.Series.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(Movies movie)
+        public async Task<IActionResult> Edit(MoviesModel movie)
         {
-            db.Movies.Update(movie);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            movie.UserUid = userId;
+
+            db.MoviesEF.Update(movie);
             await db.SaveChangesAsync();
-            return RedirectToAction("Index");
+
+            if (movie.Archive == false)
+            {
+                return RedirectToAction("Index");
+            }
+            return RedirectToAction("ArchMovies", "Home", new { area = "Series" });
         }
 
         [HttpGet]
@@ -94,7 +141,7 @@ namespace Homie.Areas.Series.Controllers
         {
             if (id != null)
             {
-                Movies movie = await db.Movies.FirstOrDefaultAsync(p => p.Id == id);
+                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == id);
                 if (movie != null)
                     return View(movie);
             }
@@ -106,10 +153,10 @@ namespace Homie.Areas.Series.Controllers
         {
             if (Id != null)
             {
-                Movies movie = await db.Movies.FirstOrDefaultAsync(p => p.Id == Id);
+                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
                 if (movie != null)
                 {
-                    db.Movies.Remove(movie);
+                    db.MoviesEF.Remove(movie);
                     await db.SaveChangesAsync();
 
                     if(movie.Archive == false)

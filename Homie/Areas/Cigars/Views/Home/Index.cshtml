@@ -1,0 +1,90 @@
+﻿@using Homie.Models
+@model IndexViewModel
+
+@addTagHelper *, Homie
+
+@{
+    ViewBag.Title = "Список выкуренных сигар";
+    ViewBag.HeaderTitle = "Сигары - [История]";
+}
+
+<style>
+    .table-striped > tbody > tr:nth-child(odd) > td,
+    .table-striped > tbody > tr:nth-child(odd) > th {
+        background-color: sandybrown;
+    }
+
+
+    .scroll-x {
+        overflow-x: auto;
+    }
+</style>
+
+<a asp-action="Create" asp-controller="Home" asp-area="Cigars"
+   class="btn btn-primary"
+   role="button">Добавить</a>
+<p></p>
+
+<form method="get">
+    <div class="form-inline">
+        <label>Название: </label>
+        <input name="name" value="@Model.FilterViewModel.SelectedName" class="form-control" />
+
+        <label>Формат: </label>        
+        <select name="format" asp-items="Model.FilterViewModel.Formats" class="form-control"></select>        
+
+        <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
+    </div>
+</form>
+<p></p>
+
+<div>
+    <label>Количество сигар: @Model.PageViewModel.CountPages</label>
+</div>
+
+<div class="scroll-x">
+    <table class="table table-bordered table-striped table-sm">
+        <tr>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@(Model.SortViewModel.NameSort)"
+                   asp-route-name="@(Model.FilterViewModel.SelectedName)"
+                   asp-route-format="@(Model.FilterViewModel.SelectedFormat)">Название</a>
+            </th>
+            <th>Страна</th>
+            <th>Цена</th>
+            <th>Рейтинг</th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@(Model.SortViewModel.FormatSort)"
+                   asp-route-name="@(Model.FilterViewModel.SelectedName)"
+                   asp-route-format="@(Model.FilterViewModel.SelectedFormat)">Формат</a>
+            </th>
+            <th></th>
+        </tr>
+        @foreach (var p in Model.Cigars)
+        {
+            <tr>
+                <td>@p.Name</td>
+                <td>@p.Country</td>
+                <td>@p.Price</td>
+                <td>@p.Rating</td>
+                <td>@p.Shape</td>
+                <td>
+
+                    <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
+                       role="button">Изменить</a>
+                    <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
+                       role="button">Удалить</a>
+                </td>
+            </tr>
+
+        }
+    </table>
+</div>
+    <p></p>
+    <page-link page-model="Model.PageViewModel" page-action="Index"
+               page-url-name="@(Model.FilterViewModel.SelectedName)"
+               page-url-format="@(Model.FilterViewModel.SelectedFormat)"
+               page-url-sortorder="@(Model.SortViewModel.Current)"></page-link>
+
+
