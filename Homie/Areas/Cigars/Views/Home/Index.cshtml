@@ -59,6 +59,7 @@
                    asp-route-name="@(Model.FilterViewModel.SelectedName)"
                    asp-route-format="@(Model.FilterViewModel.SelectedFormat)">Формат</a>
             </th>
+            <th>Крепость</th>
             <th></th>
         </tr>
         @foreach (var p in Model.Cigars)
@@ -69,6 +70,7 @@
                 <td>@p.Price</td>
                 <td>@p.Rating</td>
                 <td>@p.Shape</td>
+                <td>@p.Strength</td>
                 <td>
 
                     <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
