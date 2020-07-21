@@ -1,0 +1,16 @@
+﻿@{
+    if (this.User.IsInRole("admin") || !this.User.Identity.IsAuthenticated)
+    {
+        Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+    }
+
+    else if (this.User.IsInRole("series") || !this.User.Identity.IsAuthenticated)
+    {
+        Layout = "~/Views/Shared/_LayoutSeries.cshtml";
+    }
+
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+}

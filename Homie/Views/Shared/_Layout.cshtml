@@ -38,9 +38,22 @@
 
         <a asp-area="Cigars" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
             <i class="fas fa-joint fa-lg"></i>&nbsp; Сигары
-        </a>        
+        </a>
 
-        <a method="post" asp-area="Identity" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white"><i class="fas fa-sign-in-alt fa-lg"></i>&nbsp; Выход</a>
+        <button class="w3-button w3-block w3-left-align w3-hover-white" onclick="myAccBattletechFunc()">
+            <i class="fa fa-robot fa-fw fa-lg"></i>&nbsp; БТ <i class="fa fa-caret-down"></i>
+        </button>
+        <div id="BattletechAcc" class="w3-hide w3-light-gray w3-card">
+            <a asp-area="Battletech" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fa fa-meteor fa-fw" aria-hidden="true"></i>&nbsp; МехПарк
+            </a>
+
+            <a asp-area="Battletech" asp-controller="Home" asp-action="Pilots" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fa fa-user-astronaut fa-fw" aria-hidden="true"></i>&nbsp; Пилоты
+            </a>
+        </div>
+
+        <a method="post" asp-area="Identity" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white"><i class="fas fa-sign-in-alt fa-lg"></i>&nbsp;&nbsp; Выход</a>
     </div>
 
     <!-- Page Content -->
@@ -69,6 +82,18 @@
                 x.previousElementSibling.className =
                     x.previousElementSibling.className.replace(" w3-white", "");
                 }                
+            }
+
+            function myAccBattletechFunc() {
+                var x = document.getElementById("BattletechAcc");
+                if (x.className.indexOf("w3-show") == -1) {
+                    x.className += " w3-show";
+                    x.previousElementSibling.className += " w3-white";
+                } else {
+                    x.className = x.className.replace(" w3-show", "");
+                    x.previousElementSibling.className =
+                        x.previousElementSibling.className.replace(" w3-white", "");
+                }
             }
 
             function myAccAdminFunc() {
