@@ -12,7 +12,7 @@ using Homie.Models;
 namespace Homie.Areas.Battletech.Controllers
 {
     [Area("Battletech")]
-    [Authorize(Roles = "admin,user")]
+    [Authorize(Roles = "admin,user,battletech")]
     public class HomeController : Controller
     {
         ApplicationDbContext db;
