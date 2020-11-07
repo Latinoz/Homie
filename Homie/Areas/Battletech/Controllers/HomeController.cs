@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Homies.Data.Models;
+using Homie.Areas.Battletech.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +25,15 @@ namespace Homie.Areas.Battletech.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    
+            IQueryable<BTMechsModel> mechs = db.BTMechsEF.Where(a => a.UserUid == userId);
+
+            IndexViewModel viewModel = new IndexViewModel
+            {
+                Mechs = mechs
+            };
+            return View(viewModel);
         }
     }
 }
