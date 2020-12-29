@@ -3,7 +3,7 @@
 
 @{
     ViewBag.Title = "Список мехов";
-    ViewBag.HeaderTitle = "BT - [Ангар]";
+    ViewBag.HeaderTitle = "BT - [Компания]";
 }
 
 <style>
@@ -28,25 +28,25 @@
         <tr><th>Name</th><th>Tonnage</th><th>Pilot</th><th>Sent</th><th>Return</th><th>Exp.</th><th>BV</th><th>State</th><th></th></tr>
         @foreach (var p in Model.Mechs)
         {
-    <tr>
-        <td><a href=@p.Name target="_blank">@p.Name</a></td>
-        <td>@p.Tonnage</td>
-        <td>@p.PilotUid</td>
-        <td>@p.Sent</td>
-        <td>@p.Return</td>
-        <td>@p.Experience</td>
-        <td>@p.Bv</td>
-               
+            <tr>
+                <td><a href=@p.Name target="_blank">@p.Name</a></td>
+                <td>@p.Tonnage</td>
+                <td>@p.PilotUid</td>
+                <td>@p.Sent</td>
+                <td>@p.Return</td>
+                <td>@p.Experience</td>
+                <td>@p.Bv</td>
 
 
-        <td>
-            <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
-               role="button">Изменить</a>
 
-            <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
-               role="button">Удалить</a>
-        </td>
-    </tr>
+                <td>
+                    <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
+                       role="button">Изменить</a>
+
+                    <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
+                       role="button">Удалить</a>
+                </td>
+            </tr>
 
         }
     </table>

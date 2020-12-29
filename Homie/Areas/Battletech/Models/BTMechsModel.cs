@@ -10,7 +10,21 @@ namespace Homie.Areas.Battletech.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public int Tonnage { get; set; }
+        public int Tonnage { get; set; }        
+        public int Experience { get; set; }
+        public int Bv { get; set; }        
+        public int Sent { get; set; }
+        public int Return { get; set; }
+        public int State { get; set; }
+
+        //public enum State
+        //{
+        //    Normal = 1,
+        //    Damaged = 2,
+        //    Destroyed = 3
+        //}
+
+        public int TypeMech { get; set; }
 
         //public enum Type
         //{
@@ -19,19 +33,6 @@ namespace Homie.Areas.Battletech.Models
         //    Medium  = 3,
         //    Light   = 4
         //}
-        public List<BTMechType> Types { get; set; }
-        public int Experience { get; set; }
-        public int Bv { get; set; }        
-        public int Sent { get; set; }
-        public int Return { get; set; }
-
-        //public enum State
-        //{
-        //    Normal = 1,
-        //    Damaged = 2,
-        //    Destroyed = 3
-        //}
-        public List<BTMechState> States { get; set; }
 
         [Column(TypeName = "varchar(255)")]
         public string UserUid { get; set; }
@@ -39,21 +40,8 @@ namespace Homie.Areas.Battletech.Models
         [Column(TypeName = "varchar(255)")]
         public string PilotUid { get; set; }
 
-    }
+        public int Game { get; set; }
 
-    public class BTMechType
-    {
-        public int Id { get; set; }
-        public string Content { get; set; }
-        //public int BTMechsModelId { get; set; }
-        //public BTMechsModel BTMechsModel { get; set; }
     }
-
-    public class BTMechState
-    {
-        public int Id { get; set; }
-        public string Content { get; set; }
-        //public int BTMechsModelId { get; set; }
-        //public BTMechsModel BTMechsModel { get; set; }
-    }
+    
 }
