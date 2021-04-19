@@ -29,9 +29,8 @@
         <input type="text" asp-for="Bv" class="form-control text-input-width" />
     </div>
     <div class="form-group">
-        <label asp-for="TypeMech" class="control-label">Тип Меха</label>        
+        <label asp-for="TypeMech" class="control-label">Тип Меха</label>
         <select asp-for="TypeMech" asp-items="Html.GetEnumSelectList<BTMechsModel.TypeMechEnum>()" class="form-control text-input-width">
-            <option selected="selected" value="">Выберите..</option>
         </select>
     </div>
 

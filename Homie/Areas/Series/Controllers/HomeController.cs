@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Homie.Areas.Series.Models;
 using Microsoft.EntityFrameworkCore;
-using Homies.Data.Models;
+using Homie.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Homie.Areas.Identity.Models;

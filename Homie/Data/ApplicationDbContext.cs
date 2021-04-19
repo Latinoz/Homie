@@ -7,8 +7,9 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
 using Homie.Areas.Identity.Models;
+using Homie.Models;
 
-namespace Homies.Data.Models {
+namespace Homie.Data.Models {
 
     public class ApplicationDbContext : IdentityDbContext<User>
     {

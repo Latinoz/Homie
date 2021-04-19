@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Homie.Areas.Cigars.Models;
 using System.Linq;
 using System.Threading.Tasks;
-using Homies.Data.Models;
+using Homie.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

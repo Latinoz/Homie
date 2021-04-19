@@ -14,7 +14,7 @@ using Pomelo.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Pomelo.EntityFrameworkCore.MySql.Storage.Internal;
 using Microsoft.AspNetCore.Identity;
-using Homies.Data.Models;
+using Homie.Data.Models;
 using Homie.Areas.Identity.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
