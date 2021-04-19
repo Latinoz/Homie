@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace Homie.Areas.Battletech.Models
 {
@@ -24,15 +25,16 @@ namespace Homie.Areas.Battletech.Models
         //    Destroyed = 3
         //}
 
-        public int TypeMech { get; set; }
+        [EnumDataType(typeof(TypeMechEnum))]
+        public TypeMechEnum TypeMech { get; set; }
 
-        //public enum Type
-        //{
-        //    Assault = 1,
-        //    Heavy   = 2,
-        //    Medium  = 3,
-        //    Light   = 4
-        //}
+        public enum TypeMechEnum
+        {
+            Assault = 1,
+            Heavy   = 2,
+            Medium  = 3,
+            Light   = 4
+        }
 
         [Column(TypeName = "varchar(255)")]
         public string UserUid { get; set; }
