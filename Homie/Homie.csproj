@@ -22,6 +22,7 @@
     <Folder Include="Areas\Battletech\Views\Shared\" />
     <Folder Include="Areas\Identity\Data\" />
     <Folder Include="Migrations\" />
+    <Folder Include="wwwroot\Files\" />
   </ItemGroup>
 
 </Project>
