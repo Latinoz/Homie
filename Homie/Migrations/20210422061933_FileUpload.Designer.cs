@@ -3,14 +3,16 @@ using System;
 using Homie.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Homie.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210422061933_FileUpload")]
+    partial class FileUpload
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -334,7 +336,7 @@ namespace Homie.Migrations
                     b.ToTable("Files");
                 });
 
-            modelBuilder.Entity("Homie.Models.Image", b =>
+            modelBuilder.Entity("Homie.Models.Person", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -348,7 +350,7 @@ namespace Homie.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Picture");
+                    b.ToTable("People");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

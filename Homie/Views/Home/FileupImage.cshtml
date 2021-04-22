@@ -1,0 +1,29 @@
+﻿@model IEnumerable<Homie.Models.Image>
+
+@{
+    ViewBag.Title = "Добавление изображения";
+}
+<form asp-action="Create" asp-controller="Home" method="post" enctype="multipart/form-data">
+    <p>
+        <label>Имя</label>
+        <input name="Name" class="form-control" />
+    </p>
+    <p>
+        <label>Аватар</label>
+        <input name="Avatar" type="file" class="form-control" />
+    </p>
+    <p>
+        <input type="submit" value="Добавить" />
+    </p>
+</form>
+<h3>Все пользователи</h3>
+@foreach (var p in Model)
+{
+    <div>
+        <h4>@p.Name</h4>
+        @if (p.Avatar != null)
+        {
+            <img style='width:80px; height:60px;' src="data:image/jpeg;base64,@(Convert.ToBase64String(p.Avatar))" />
+        }
+    </div>
+}

@@ -22,7 +22,13 @@ namespace Homie.Data.Models {
         public DbSet<Format> FormatsEF { get; set; }
         public DbSet<BTMechsModel> BTMechsEF { get; set; }        
         public DbSet<BTVehiclesModel> BTVehiclesEF { get; set; }       
-        public DbSet<BTArmourInfantryModel> BTBattleArmourInfantryEF { get; set; }        
+        public DbSet<BTArmourInfantryModel> BTBattleArmourInfantryEF { get; set; }
+
+        //..//
+
+        public DbSet<FileModel> Files { get; set; }
+
+        public DbSet<Image> Picture { get; set; }
 
     }
     
