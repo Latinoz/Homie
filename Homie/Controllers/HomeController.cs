@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Homie.Models;
+using Homie.Areas.Battletech.Models;
+using System;
 
 namespace Homie.Controllers
 {
@@ -23,12 +25,13 @@ namespace Homie.Controllers
             _appEnvironment = appEnvironment;
         }
 
-
+        [HttpGet]
         public IActionResult Index()
         {
             return View();
         }
 
+        [HttpGet]
         public IActionResult Fileup()
         {
             return View(db.Files.ToList());
@@ -54,6 +57,7 @@ namespace Homie.Controllers
             return RedirectToAction("Fileup");
         }
 
+        [HttpGet]
         public IActionResult FileupImage()
         {
             return View(db.Picture.ToList());
@@ -62,14 +66,14 @@ namespace Homie.Controllers
         [HttpPost]
         public IActionResult Create(ImageViewModel pvm)
         {
-            Image image = new Image { Name = pvm.Name };
-            if (pvm.Avatar != null)
+            Image image = new Image { NameImg = pvm.NameImgVM };
+            if (pvm.AvatarFile != null)
             {
                 byte[] imageData = null;
                 // считываем переданный файл в массив байтов
-                using (var binaryReader = new BinaryReader(pvm.Avatar.OpenReadStream()))
+                using (var binaryReader = new BinaryReader(pvm.AvatarFile.OpenReadStream()))
                 {
-                    imageData = binaryReader.ReadBytes((int)pvm.Avatar.Length);
+                    imageData = binaryReader.ReadBytes((int)pvm.AvatarFile.Length);
                 }
                 // установка массива байтов
                 image.Avatar = imageData;
@@ -79,5 +83,6 @@ namespace Homie.Controllers
 
             return RedirectToAction("FileupImage");
         }
+        
     }
 }

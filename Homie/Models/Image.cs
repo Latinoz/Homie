@@ -8,7 +8,8 @@ namespace Homie.Models
     public class Image
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string NameImg { get; set; }
         public byte[] Avatar { get; set; }
+        public Guid _uid { get; set; }
     }
 }

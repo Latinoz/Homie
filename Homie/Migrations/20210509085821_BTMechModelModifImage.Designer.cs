@@ -3,14 +3,16 @@ using System;
 using Homie.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Homie.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210509085821_BTMechModelModifImage")]
+    partial class BTMechModelModifImage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,13 +72,7 @@ namespace Homie.Migrations
                     b.Property<int>("Experience")
                         .HasColumnType("int");
 
-                    b.Property<int>("GameType")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ImgBT")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<int?>("ImgVMidId")
+                    b.Property<int>("Game")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -97,15 +93,18 @@ namespace Homie.Migrations
                     b.Property<int>("Tonnage")
                         .HasColumnType("int");
 
-                    b.Property<string>("TypeMech")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.Property<int>("TypeMech")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserUid")
                         .HasColumnType("varchar(255)");
 
+                    b.Property<int?>("imageId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ImgVMidId");
+                    b.HasIndex("imageId");
 
                     b.ToTable("BTMechsEF");
                 });
@@ -351,11 +350,8 @@ namespace Homie.Migrations
                     b.Property<byte[]>("Avatar")
                         .HasColumnType("longblob");
 
-                    b.Property<string>("NameImg")
+                    b.Property<string>("Name")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
-
-                    b.Property<Guid>("_uid")
-                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
@@ -492,9 +488,9 @@ namespace Homie.Migrations
 
             modelBuilder.Entity("Homie.Areas.Battletech.Models.BTMechsModel", b =>
                 {
-                    b.HasOne("Homie.Models.Image", "ImgVMid")
+                    b.HasOne("Homie.Models.Image", "image")
                         .WithMany()
-                        .HasForeignKey("ImgVMidId");
+                        .HasForeignKey("imageId");
                 });
 
             modelBuilder.Entity("Homie.Areas.Cigars.Models.CigarsModel", b =>

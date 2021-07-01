@@ -4,6 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Homie.Models;
+using System.IO;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Homie.Areas.Battletech.Models
 {
@@ -25,16 +30,27 @@ namespace Homie.Areas.Battletech.Models
         //    Destroyed = 3
         //}
 
-        [EnumDataType(typeof(TypeMechEnum))]
-        public TypeMechEnum TypeMech { get; set; }
+        //[EnumDataType(typeof(TypeMechEnum))]
+        //public TypeMechEnum TypeMech { get; set; }
 
-        public enum TypeMechEnum
+        //public enum TypeMechEnum
+        //{
+        //    Assault = 1,
+        //    Heavy   = 2,
+        //    Medium  = 3,
+        //    Light   = 4
+        //}
+
+        public string TypeMech { get; set; }
+
+        [NotMapped]
+        public List<SelectListItem> TypeMechList { get; } = new List<SelectListItem>
         {
-            Assault = 1,
-            Heavy   = 2,
-            Medium  = 3,
-            Light   = 4
-        }
+            new SelectListItem { Value = "ASS", Text = "Assault" },
+            new SelectListItem { Value = "HEA", Text = "Heavy" },
+            new SelectListItem { Value = "MED", Text = "Medium"  },
+            new SelectListItem { Value = "LIG", Text = "Light"  },
+        };
 
         [Column(TypeName = "varchar(255)")]
         public string UserUid { get; set; }
@@ -42,8 +58,13 @@ namespace Homie.Areas.Battletech.Models
         [Column(TypeName = "varchar(255)")]
         public string PilotUid { get; set; }
 
-        public int Game { get; set; }
+        public int GameType { get; set; }
 
+        [Column(TypeName = "varchar(255)")]
+        public string ImgBT { get; set; }
+
+        public Image ImgVMid { get; set; }
+        
     }
     
 }

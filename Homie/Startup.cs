@@ -57,8 +57,10 @@ namespace Homie
                 options.SlidingExpiration = true;
             });
 
-            services.AddControllersWithViews();
+            services.AddDistributedMemoryCache();
+            services.AddSession();
 
+            services.AddControllersWithViews();
             services.AddRazorPages();
         }
 
@@ -84,6 +86,8 @@ namespace Homie
 
             app.UseAuthentication();    // подключение аутентификации
             app.UseAuthorization();
+
+            //app.UseSession();
 
             app.UseEndpoints(endpoints =>
             {

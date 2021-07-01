@@ -3,14 +3,16 @@ using System;
 using Homie.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Homie.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210520071939_BTModelsAdd_uid_ImgVMid")]
+    partial class BTModelsAdd_uid_ImgVMid
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -73,8 +75,8 @@ namespace Homie.Migrations
                     b.Property<int>("GameType")
                         .HasColumnType("int");
 
-                    b.Property<string>("ImgBT")
-                        .HasColumnType("varchar(255)");
+                    b.Property<byte[]>("ImgBT")
+                        .HasColumnType("longblob");
 
                     b.Property<int?>("ImgVMidId")
                         .HasColumnType("int");
@@ -97,8 +99,8 @@ namespace Homie.Migrations
                     b.Property<int>("Tonnage")
                         .HasColumnType("int");
 
-                    b.Property<string>("TypeMech")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                    b.Property<int>("TypeMech")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserUid")
                         .HasColumnType("varchar(255)");
