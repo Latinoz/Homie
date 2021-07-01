@@ -49,25 +49,25 @@
 </form>
 
 <form asp-action="CreateImgMech" asp-controller="Home" asp-area="Battletech" method="post" enctype="multipart/form-data">
+    <fieldset style="width:328px">
 
-    <div class="form-group">
-        <input name="tempName" type="hidden" id="tempName" />
-        <input name="tempTonnage" type="hidden" id="tempTonnage" />
-        <input name="tempBV" type="hidden" id="tempBV" />
-        <input name="tempTypeMech" type="hidden" id="tempTypeMech" />
-    </div>
+        <div class="form-group">
+            <input name="tempName" type="hidden" id="tempName" />
+            <input name="tempTonnage" type="hidden" id="tempTonnage" />
+            <input name="tempBV" type="hidden" id="tempBV" />
+            <input name="tempTypeMech" type="hidden" id="tempTypeMech" />
+        </div>
 
-    <div class="form-group">
-        <label>Изображение меха</label>
-        <input name="AvatarFile" type="file" class="form-control text-input-width" />
-    </div>
-    <div class="form-group">
-        <input type="submit" value="Добавить картинку" class="btn btn-success" />
-    </div>
+        <div class="form-group">
+            <label>Изображение меха</label>
+            <input name="AvatarFile" type="file" class="form-control" />
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Добавить картинку" class="btn btn-success" />
+        </div>
+    </fieldset>
 </form>
 
-@*тест*@
-<div id="test"></div>
 
 <script>
     $(document).ready(function () {
@@ -90,20 +90,15 @@
 
     });
 
-    $(document).ready(function () {
-        //const select = ('select[name=selectTypeMechName]');
+    $(document).ready(function () {        
         const select = ('select[name=TypeMech]');
         var input = $('#tempTypeMech');        
         
         $(select).change(function () {
-            let val = $(this).val();
-
-            //тест
-            $('#test').html('Результат: ' + val);
+            let val = $(this).val();           
 
             $(input).val(val);            
-        })
-        
+        })        
     })
 
 </script>
