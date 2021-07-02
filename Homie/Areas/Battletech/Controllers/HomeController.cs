@@ -33,9 +33,12 @@ namespace Homie.Areas.Battletech.Controllers
                     
             IQueryable<BTMechsModel> mechs = db.BTMechsEF.Where(a => a.UserUid == userId);
 
+            var image = db.Picture.ToList();
+
             IndexViewModel viewModel = new IndexViewModel
             {
-                Mechs = mechs
+                Mechs = mechs,
+                Images = image
             };
             return View(viewModel);
         }

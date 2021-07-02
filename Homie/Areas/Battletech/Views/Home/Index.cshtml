@@ -12,7 +12,6 @@
         background-color: sandybrown;
     }
 
-
     .scroll-x {
         overflow-x: auto;
     }
@@ -26,7 +25,8 @@
 <div class="scroll-x">
     <table class="table table-bordered table-striped table-sm">
         <tr><th>Название</th>
-        <th>Вес (тонн)</th>       
+        <th>Вес (тонн)</th>
+        <th>Изображение</th>
         <th>BV</th>       
         <th>Тип Меха</th>
         <th></th></tr>
@@ -35,7 +35,16 @@
         {
     <tr>
         <td><a href=@p.Name target="_blank">@p.Name</a></td>
-        <td>@p.Tonnage</td>       
+        <td>@p.Tonnage</td> 
+        <td>
+            @foreach (var k in Model.Images)
+            {
+                if (k._uid.ToString() == p.ImgBT)
+                {
+                    <img style='width:180px; height:160px;' src="data:image/jpeg;base64,@(Convert.ToBase64String(k.Avatar))" />
+                }
+            }
+        </td>
         <td>@p.Bv</td>       
         <td>@foreach (var t in p.TypeMechList)
             {
