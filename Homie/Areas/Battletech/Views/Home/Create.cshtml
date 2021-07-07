@@ -1,7 +1,7 @@
 ﻿@model Homie.Areas.Battletech.Models.BTMechsModel
 
 @{
-    ViewBag.Title = "Добавить Мех";
+    ViewBag.Title = "Добавить";
 
 }
 
@@ -29,7 +29,7 @@
         <input type="text" asp-for="Bv" value="@ViewBag.temp_BV_trns" class="form-control text-input-width" id="inputBV" />
     </div>
     <div class="form-group">
-        <label asp-for="TypeMech" class="control-label">Тип Меха</label>
+        <label asp-for="TypeMech" class="control-label">Тип</label>
         <select asp-for="TypeMech"
                 asp-items="@ViewBag.temp_TypeMech_trns"
                 class="form-control text-input-width" id="select" name="TypeMech">           
@@ -43,7 +43,7 @@
 
 
     <div class="form-group">
-        <input type="submit" value="Добавить мех" class="btn btn-primary" />
+        <input type="submit" value="Добавить" class="btn btn-primary" />
         <a asp-action="Index" asp-controller="Home" asp-area="Battletech" class="btn btn-danger" role="button">Назад</a>
     </div>
 </form>
@@ -59,7 +59,7 @@
         </div>
 
         <div class="form-group">
-            <label>Изображение меха</label>
+            <label>Изображение</label>
             <input name="AvatarFile" type="file" class="form-control" />
         </div>
         <div class="form-group">
