@@ -1,0 +1,37 @@
+﻿@model Homie.Models.Image
+
+@{
+    ViewBag.Title = "Изменение Изображения Меха";
+
+}
+
+<style>
+    .text-input-width {
+        width: 328px;
+    }
+
+    .number-input-width {
+        width: 80px;
+    }
+</style>
+
+<form asp-action="EditImgMech" asp-controller="Home" asp-area="Battletech" method="post" enctype="multipart/form-data">
+    <fieldset style="width:328px">
+
+        <div class="form-group">
+            <label>Изображение меха</label>
+            <input name="AvatarFile" type="file" class="form-control" />
+            <input name="tempUidImgMech" type="hidden" id="tempUidImgMech" value="@Model._uid" />
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Изменить картинку" class="btn btn-success" />
+        </div>
+        <a asp-action="DeleteImgMech" asp-controller="Home" asp-route-id="@Model.Id" class="btn btn-danger"
+           role="button">Удалить</a>
+    </fieldset>
+</form>
+
+<br>
+    <a asp-action="Index" asp-controller="Home" asp-area="Battletech" class="btn btn-secondary" role="button">Назад</a>
+</br>
+

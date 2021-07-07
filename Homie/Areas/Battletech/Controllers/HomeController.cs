@@ -23,8 +23,7 @@ namespace Homie.Areas.Battletech.Controllers
         public HomeController(ApplicationDbContext context)
         {
             db = context;
-        }        
-
+        }
 
         [HttpGet]
         public IActionResult Index()
@@ -40,6 +39,10 @@ namespace Homie.Areas.Battletech.Controllers
                 Mechs = mechs,
                 Images = image
             };
+
+            ViewBag.EditImgMech = "EditImgMech";
+            ViewBag.EditToCreateImgMech = "EditToCreateImgMech";            
+
             return View(viewModel);
         }
 
@@ -113,6 +116,123 @@ namespace Homie.Areas.Battletech.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> EditImgMech(string? id)
+        {
+            if (id != null)
+            {
+                Image query = await db.Picture.FirstOrDefaultAsync(s => s._uid.ToString() == id);
+
+                if (query != null)
+                {
+                    return View(query);
+                }
+                
+            }
+
+            return NotFound();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditImgMech(ImageViewModel pvm)
+        {
+            Image image = await db.Picture.FirstOrDefaultAsync(s => s._uid.ToString() == pvm.tempUidImgMech);
+
+            if (pvm.AvatarFile != null)
+            {
+                byte[] imageData = null;
+                // считываем переданный файл в массив байтов
+                using (var binaryReader = new BinaryReader(pvm.AvatarFile.OpenReadStream()))
+                {
+                    imageData = binaryReader.ReadBytes((int)pvm.AvatarFile.Length);
+                }
+                // установка массива байтов
+                image.Avatar = imageData;
+            }
+
+            db.Picture.Update(image);
+            await db.SaveChangesAsync();            
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditToCreateImgMech(int? id)
+        {
+            if (id != null)
+            {
+                BTMechsModel mech = await db.BTMechsEF.FirstOrDefaultAsync(p => p.Id == id);
+
+                if (mech != null)
+                    return View(mech);
+            }
+            return NotFound();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditToCreateImgMech(ImageViewModel pvm)
+        {
+            Image image = new Image { _uid = Guid.NewGuid() };
+
+            if (pvm.AvatarFile != null)
+            {
+                byte[] imageData = null;
+                // считываем переданный файл в массив байтов
+                using (var binaryReader = new BinaryReader(pvm.AvatarFile.OpenReadStream()))
+                {
+                    imageData = binaryReader.ReadBytes((int)pvm.AvatarFile.Length);
+                }
+                // установка массива байтов
+                image.Avatar = imageData;
+            }
+
+            BTMechsModel mech = await db.BTMechsEF.FirstOrDefaultAsync(p => p.Id == pvm.tempIdMech);
+            mech.ImgBT = image._uid.ToString();
+
+            db.Picture.Add(image);
+            db.BTMechsEF.Update(mech);
+            await db.SaveChangesAsync();
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        [ActionName("DeleteImgMech")]
+        public async Task<IActionResult> ConfirmDeleteImgMech(int? id)
+        {
+            if (id != null)
+            {                
+                Image image = await db.Picture.FirstOrDefaultAsync(p => p.Id == id);
+                if (image != null)
+                    return View(image);
+            }
+            return NotFound();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteImgMech(int? Id)
+        {
+            if (Id != null)
+            {
+                Image image = await db.Picture.FirstOrDefaultAsync(p => p.Id == Id);
+                if (image != null)
+                {
+                    BTMechsModel mech = await db.BTMechsEF.FirstOrDefaultAsync(p => p.ImgBT == image._uid.ToString());
+                    mech.ImgBT = null;
+
+                    db.Picture.Remove(image);
+                    db.BTMechsEF.Update(mech);
+
+                    await db.SaveChangesAsync();
+
+                    return RedirectToAction("Index");
+
+                }
+            }
+            return NotFound();
+        }
+
+
+        [HttpGet]
         [ActionName("Delete")]
         public async Task<IActionResult> ConfirmDelete(int? id)
         {
@@ -141,8 +261,8 @@ namespace Homie.Areas.Battletech.Controllers
                 }
             }
             return NotFound();
-        }
-               
+        }       
+
 
         [HttpPost]
         public IActionResult CreateImgMech(ImageViewModel pvm)
@@ -165,6 +285,8 @@ namespace Homie.Areas.Battletech.Controllers
             db.SaveChanges();
 
             //Здесь сделать удаление картинки, если в Create нажали кнопку "Назад"
+            //**
+            //**
 
             TempData["Image_UID"] = image._uid;
 

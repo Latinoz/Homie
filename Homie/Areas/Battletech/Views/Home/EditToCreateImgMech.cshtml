@@ -1,0 +1,40 @@
+﻿@model Homie.Areas.Battletech.Models.BTMechsModel
+
+@{
+    ViewBag.Title = "Добавление Изображения Меха";
+
+}
+
+<style>
+    .text-input-width {
+        width: 328px;
+    }
+
+    .number-input-width {
+        width: 80px;
+    }
+</style>
+
+<form asp-action="EditToCreateImgMech" asp-controller="Home" asp-area="Battletech" method="post" enctype="multipart/form-data">
+    <fieldset style="width:328px">
+
+        <div class="form-group">
+            <input name="tempIdMech" type="hidden" value="@Model.Id" />
+            
+        </div>
+
+        <div class="form-group">
+            <label>Изображение меха</label>
+            <input name="AvatarFile" type="file" class="form-control" />
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Добавить картинку" class="btn btn-success" />
+        </div>
+    </fieldset>
+</form>
+
+<br>
+    <a asp-action="Index" asp-controller="Home" asp-area="Battletech" class="btn btn-secondary" role="button">Назад</a>
+</br>
+
+

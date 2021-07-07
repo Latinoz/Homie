@@ -1,0 +1,27 @@
+﻿@model Homie.Models.Image
+
+@{
+    ViewBag.Title = "Удалить Изображение Меха";
+
+}
+<div>
+    <dl class="dl-horizontal">
+        <dt>Изображение меха:</dt>
+        <p></p>
+        <dd>
+            <img style='width:180px; height:160px;' src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.Avatar))"
+        </dd>
+    </dl>
+    <p></p>
+    <div>
+        <form asp-controller="Home" asp-action="DeleteImgMech" asp-route-id="@Model.Id" method="post">
+            <div class="form-group">
+                <input type="submit" class="btn btn-danger" value="Удалить" />
+                <a asp-action="Index" asp-controller="Home" asp-area="Battletech"
+                   class="btn btn-primary"
+                   role="button">Назад</a>
+            </div>
+        </form>
+    </div>
+</div>
+
