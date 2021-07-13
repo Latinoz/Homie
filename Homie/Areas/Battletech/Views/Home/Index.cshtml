@@ -9,11 +9,24 @@
 <style>
     .table-striped > tbody > tr:nth-child(odd) > td,
     .table-striped > tbody > tr:nth-child(odd) > th {
-        background-color: sandybrown;
+        background-color: #ccccff;
     }
 
     .scroll-x {
         overflow-x: auto;
+    }    
+
+    .buttons .btn {
+        width: 130px;
+    }
+
+    .buttons {
+        display: table-cell;
+        vertical-align: middle;
+    }
+
+    .scroll-x .img_centr{
+        text-align: center;
     }
 </style>
 
@@ -24,12 +37,14 @@
 
 <div class="scroll-x">
     <table class="table table-bordered table-striped table-sm">
-        <tr><th>Название</th>
+        <tr>
+        <th>Название</th>
         <th>Вес (тонн)</th>
-        <th>Изображение</th>
+        <th class="img_centr">Изображение</th>
         <th>BV</th>       
         <th>Тип</th>
-        <th></th></tr>
+        <th></th>
+        </tr>
 
         @foreach (var p in Model.Mechs)
         {
@@ -39,10 +54,18 @@
         <td>
             @foreach (var k in Model.Images)
             {
-                if (k._uid.ToString() == p.ImgBT)
+                if (p.ImgBT == k._uid.ToString())
                 {
-                    <img style='width:180px; height:160px;' src="data:image/jpeg;base64,@(Convert.ToBase64String(k.Avatar))" />
+                    <center>
+                        <img style='width:200px; height:160px;' src="data:image/jpeg;base64,@(Convert.ToBase64String(k.Avatar))" />
+                    </center>
                 }
+                @*else if (p.ImgBT == null)
+                {
+                    <center>
+                        <img style='width:200px; height:160px;' src="http://dummyimage.com/200x160/99cccc.jpg/0b0b0b&text=Battletech" />
+                    </center>
+                }*@
             }
         </td>
         <td>@p.Bv</td>       
@@ -55,33 +78,34 @@
         }
         </td>
 
-        <td>
-            <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
-               role="button">Изменить</a>
+        <td style="vertical-align: middle">
+            <div class="buttons">
+                <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
+                   role="button">Изменить</a><p></p>
 
-            <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
-               role="button">Удалить</a>
+                <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
+                   role="button">Удалить</a><p></p>
 
-            <a asp-action="@if (p.ImgBT != null)
+                <a asp-action="@if (p.ImgBT != null)
                             {
-                                @ViewBag.EditImgMech 
+                                @ViewBag.EditImgMech
                             }
-                            else 
+                            else
                             {
                                 @ViewBag.EditToCreateImgMech
                             }"
-               asp-controller="Home" 
-               asp-route-id="@if (p.ImgBT != null)
-                            { 
+                   asp-controller="Home"
+                   asp-route-id="@if (p.ImgBT != null)
+                            {
                                 @p.ImgBT
                             }
                             else
                             {
                                 @p.Id
                             }"
-
-               class="btn btn-info"
-               role="button">Изображение</a>
+                   class="btn btn-info"
+                   role="button">Изображение</a>
+            </div>
         </td>
     </tr>
 
