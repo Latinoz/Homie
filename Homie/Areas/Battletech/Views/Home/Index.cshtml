@@ -2,7 +2,7 @@
 @model IndexViewModel
 
 @{
-    ViewBag.Title = "Список Ростер";
+    ViewBag.Title = "Ростер";
     ViewBag.HeaderTitle = "BT - [Ангар]";
 }
 
@@ -59,13 +59,7 @@
                     <center>
                         <img style='width:200px; height:160px;' src="data:image/jpeg;base64,@(Convert.ToBase64String(k.Avatar))" />
                     </center>
-                }
-                @*else if (p.ImgBT == null)
-                {
-                    <center>
-                        <img style='width:200px; height:160px;' src="http://dummyimage.com/200x160/99cccc.jpg/0b0b0b&text=Battletech" />
-                    </center>
-                }*@
+                }                
             }
         </td>
         <td>@p.Bv</td>       

@@ -19,10 +19,14 @@ namespace Homie.Areas.Battletech.Controllers
     public class HomeController : Controller
     {
         ApplicationDbContext db;
+        private string emptyImg;
 
         public HomeController(ApplicationDbContext context)
         {
             db = context;
+
+            //Guid картинки заглушки BT которая находится в таблице Picture
+            emptyImg = "40a25383-1440-494b-aa0d-e9f967367795";
         }
 
         [HttpGet]
@@ -82,6 +86,12 @@ namespace Homie.Areas.Battletech.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
            
             mech.UserUid = userId;            
+            
+
+            if (mech.ImgBT == null)
+            {
+                mech.ImgBT = emptyImg;
+            }
 
             db.BTMechsEF.Add(mech);
             await db.SaveChangesAsync();
@@ -251,9 +261,18 @@ namespace Homie.Areas.Battletech.Controllers
             if (Id != null)
             {                
                 BTMechsModel mech = await db.BTMechsEF.FirstOrDefaultAsync(p => p.Id == Id);
-                if (mech != null)
+
+                Image image = db.Picture.FirstOrDefault(x => x._uid.ToString() == mech.ImgBT);
+
+                if (mech != null && image != null)
                 {
                     db.BTMechsEF.Remove(mech);
+
+                    if(image._uid.ToString() != emptyImg)
+                    {
+                        db.Picture.Remove(image);
+                    }                    
+                    
                     await db.SaveChangesAsync();
 
                     return RedirectToAction("Index");
