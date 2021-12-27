@@ -2,7 +2,6 @@
 
 @{
     ViewBag.Title = "Добавить";
-
 }
 
 <style>
@@ -37,7 +36,8 @@
     </div>
 
     <div class="form-group">
-        @*<label asp-for="ImgBT" class="control-label">Uid картинки: @ViewBag.Img_UID_trns</label>*@
+        @*<label asp-for="
+            " class="control-label">Uid картинки: @ViewBag.Img_UID_trns</label>*@
         <input type="hidden" asp-for="ImgBT" value="@ViewBag.Img_UID_trns" class="form-control text-input-width" />
     </div>
 
@@ -71,18 +71,19 @@
 
 <script>
     $(document).ready(function () {
-
-        $("#inputName").keyup(function () {
+       
+        $("#inputName").change(function () {            
             var $rtempName = $('#tempName');
             var $rinputName = $('#inputName');
             $rtempName.val($rinputName.val());
+            
         });
-        $("#inputTonnage").keyup(function () {
+        $("#inputTonnage").change(function () {
             var $rtempTonnage = $('#tempTonnage');
             var $rinputTonnage = $('#inputTonnage');
             $rtempTonnage.val($rinputTonnage.val());
         });
-        $("#inputBV").keyup(function () {
+        $("#inputBV").change(function () {
             var $rtempBV = $('#tempBV');
             var $rinputBV = $('#inputBV');
             $rtempBV.val($rinputBV.val());

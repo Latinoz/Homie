@@ -19,14 +19,13 @@ namespace Homie.Areas.Battletech.Controllers
     public class HomeController : Controller
     {
         ApplicationDbContext db;
-        private string emptyImg;
+
+        //заглушка id 55 в таблице Picture
+        const int notDel = 55;
 
         public HomeController(ApplicationDbContext context)
         {
             db = context;
-
-            //Guid картинки заглушки BT которая находится в таблице Picture
-            emptyImg = "40a25383-1440-494b-aa0d-e9f967367795";
         }
 
         [HttpGet]
@@ -85,15 +84,28 @@ namespace Homie.Areas.Battletech.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
            
-            mech.UserUid = userId;            
-            
+            mech.UserUid = userId;
+           
+            //Картинка заглушка id 55 в таблице Picture
+            var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel);           
 
-            if (mech.ImgBT == null)
+            if (mech.ImgBT != null)
             {
-                mech.ImgBT = emptyImg;
+                var img = await db.Picture.FirstOrDefaultAsync(s => s._uid.ToString() == mech.ImgBT);
+                
+                mech.Avatar = img.Avatar;
+
+                //Удаление картинки из Picture, если не была добавлена
+                Image imgtemp = db.Picture.Where(o => o._uid == Guid.Parse(mech.ImgBT)).FirstOrDefault();
+                db.Picture.Remove(imgtemp);
+            }
+            else
+            {
+                mech.Avatar = plug.Avatar;               
             }
 
             db.BTMechsEF.Add(mech);
+
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
@@ -262,21 +274,12 @@ namespace Homie.Areas.Battletech.Controllers
             {                
                 BTMechsModel mech = await db.BTMechsEF.FirstOrDefaultAsync(p => p.Id == Id);
 
-                Image image = db.Picture.FirstOrDefault(x => x._uid.ToString() == mech.ImgBT);
-
-                if (mech != null && image != null)
+                if (mech != null)
                 {
-                    db.BTMechsEF.Remove(mech);
-
-                    if(image._uid.ToString() != emptyImg)
-                    {
-                        db.Picture.Remove(image);
-                    }                    
-                    
+                    db.BTMechsEF.Remove(mech);                    
                     await db.SaveChangesAsync();
 
                     return RedirectToAction("Index");
-
                 }
             }
             return NotFound();
@@ -308,6 +311,7 @@ namespace Homie.Areas.Battletech.Controllers
             //**
 
             TempData["Image_UID"] = image._uid;
+            //TempData["Image_UID"] = image.Id;
 
             TempData["temp_BV"] = pvm.tempBV;
             TempData["temp_Tonnage"] = pvm.tempTonnage;

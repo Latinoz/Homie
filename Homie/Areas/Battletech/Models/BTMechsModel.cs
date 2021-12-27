@@ -65,6 +65,7 @@ namespace Homie.Areas.Battletech.Models
 
         public Image ImgVMid { get; set; }
         
+        public byte[] Avatar { get; set; }
     }
     
 }
