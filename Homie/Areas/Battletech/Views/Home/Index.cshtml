@@ -73,26 +73,6 @@
 
                 <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
                    role="button">Удалить</a><p></p>
-
-                <a asp-action="@if (p.ImgBT != null)
-                            {
-                                @ViewBag.EditImgMech
-                            }
-                            else
-                            {
-                                @ViewBag.EditToCreateImgMech
-                            }"
-                   asp-controller="Home"
-                   asp-route-id="@if (p.ImgBT != null)
-                            {
-                                @p.ImgBT
-                            }
-                            else
-                            {
-                                @p.Id
-                            }"
-                   class="btn btn-info"
-                   role="button">Изображение</a>
             </div>
         </td>
     </tr>

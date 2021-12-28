@@ -137,27 +137,11 @@ namespace Homie.Areas.Battletech.Controllers
             return RedirectToAction("Index");
         }
 
-        [HttpGet]
-        public async Task<IActionResult> EditImgMech(string? id)
-        {
-            if (id != null)
-            {
-                Image query = await db.Picture.FirstOrDefaultAsync(s => s._uid.ToString() == id);
-
-                if (query != null)
-                {
-                    return View(query);
-                }
-                
-            }
-
-            return NotFound();
-        }
-
         [HttpPost]
         public async Task<IActionResult> EditImgMech(ImageViewModel pvm)
         {
-            Image image = await db.Picture.FirstOrDefaultAsync(s => s._uid.ToString() == pvm.tempUidImgMech);
+            //Получение обьекта мех
+            BTMechsModel mech = await db.BTMechsEF.FirstOrDefaultAsync(s => s.Id.ToString() == pvm.tempUidImgMech);
 
             if (pvm.AvatarFile != null)
             {
@@ -167,54 +151,14 @@ namespace Homie.Areas.Battletech.Controllers
                 {
                     imageData = binaryReader.ReadBytes((int)pvm.AvatarFile.Length);
                 }
-                // установка массива байтов
-                image.Avatar = imageData;
+                // установка массива байтов                
+                mech.Avatar = imageData;
             }
-
-            db.Picture.Update(image);
-            await db.SaveChangesAsync();            
-
-            return RedirectToAction("Index");
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> EditToCreateImgMech(int? id)
-        {
-            if (id != null)
-            {
-                BTMechsModel mech = await db.BTMechsEF.FirstOrDefaultAsync(p => p.Id == id);
-
-                if (mech != null)
-                    return View(mech);
-            }
-            return NotFound();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> EditToCreateImgMech(ImageViewModel pvm)
-        {
-            Image image = new Image { _uid = Guid.NewGuid() };
-
-            if (pvm.AvatarFile != null)
-            {
-                byte[] imageData = null;
-                // считываем переданный файл в массив байтов
-                using (var binaryReader = new BinaryReader(pvm.AvatarFile.OpenReadStream()))
-                {
-                    imageData = binaryReader.ReadBytes((int)pvm.AvatarFile.Length);
-                }
-                // установка массива байтов
-                image.Avatar = imageData;
-            }
-
-            BTMechsModel mech = await db.BTMechsEF.FirstOrDefaultAsync(p => p.Id == pvm.tempIdMech);
-            mech.ImgBT = image._uid.ToString();
-
-            db.Picture.Add(image);
+            
             db.BTMechsEF.Update(mech);
-            await db.SaveChangesAsync();
-
-            return RedirectToAction("Index");
+            await db.SaveChangesAsync(); 
+            
+            return RedirectToAction("Edit", new { id = mech.Id});
         }
 
         [HttpGet]
@@ -222,10 +166,12 @@ namespace Homie.Areas.Battletech.Controllers
         public async Task<IActionResult> ConfirmDeleteImgMech(int? id)
         {
             if (id != null)
-            {                
-                Image image = await db.Picture.FirstOrDefaultAsync(p => p.Id == id);
-                if (image != null)
-                    return View(image);
+            {
+                //Получение обьекта мех
+                BTMechsModel mech = await db.BTMechsEF.FirstOrDefaultAsync(s => s.Id == id);
+
+                if (mech != null)
+                    return View(mech);
             }
             return NotFound();
         }
@@ -235,19 +181,19 @@ namespace Homie.Areas.Battletech.Controllers
         {
             if (Id != null)
             {
-                Image image = await db.Picture.FirstOrDefaultAsync(p => p.Id == Id);
-                if (image != null)
+                //Получение обьекта мех
+                BTMechsModel mech = await db.BTMechsEF.FirstOrDefaultAsync(s => s.Id == Id);
+
+                if (mech.Avatar != null)
                 {
-                    BTMechsModel mech = await db.BTMechsEF.FirstOrDefaultAsync(p => p.ImgBT == image._uid.ToString());
-                    mech.ImgBT = null;
-
-                    db.Picture.Remove(image);
+                    //Картинка заглушка id 55 в таблице Picture
+                    var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel);
+                    mech.Avatar = plug.Avatar;                 
+                    
                     db.BTMechsEF.Update(mech);
-
                     await db.SaveChangesAsync();
 
-                    return RedirectToAction("Index");
-
+                    return RedirectToAction("Edit", new { id = mech.Id });
                 }
             }
             return NotFound();

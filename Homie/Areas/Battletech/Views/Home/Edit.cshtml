@@ -15,7 +15,7 @@
     }
 </style>
 
-<form asp-action="edit" asp-controller="home" asp-route-id="@Model.Id">
+<form asp-action="Edit" asp-controller="home" asp-route-id="@Model.Id">
     <div class="form-group">
         <label asp-for="Name" class="control-label">Название</label>
         <input type="text" asp-for="Name" class="form-control text-input-width" />
@@ -33,6 +33,9 @@
         <select asp-for="TypeMech" asp-items="@ViewBag.TypeMechsForEdit" class="form-control text-input-width">
         </select>
     </div>
+    <div class="form-group">        
+        <input type="hidden" asp-for="Avatar"/>
+    </div>
 
     <div class="form-group">
         <input type="submit" value="Изменить" class="btn btn-primary" />
@@ -41,6 +44,38 @@
            role="button">Назад</a>
     </div>
 </form>
+
+<form asp-action="EditImgMech" asp-controller="Home" asp-area="Battletech" method="post" enctype="multipart/form-data">
+    <fieldset style="width:328px">
+
+        <div class="form-group">
+            <label>Изображение:</label>
+            <fieldset>
+                <img style='width:180px; height:160px;' src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.Avatar))" />
+            </fieldset>
+            <br />
+
+            <input name="AvatarFile" type="file" class="form-control" />
+            <input name="tempUidImgMech" type="hidden" id="tempUidImgMech" value="@Model.Id" />
+        </div>
+
+    </fieldset>
+    <br>
+
+        <div class="form-group">
+            <input type="submit" value="Изменить картинку" class="btn btn-success" />
+        </div>
+</form>
+
+<form asp-controller="Home" asp-action="DeleteImgMech" asp-route-id="@Model.Id" method="post">
+    
+        <div class="form-group">
+            <input type="submit" class="btn btn-danger" value="Удалить картинку" />
+        </div>
+    
+</form>
+<br>
+
 
 
 

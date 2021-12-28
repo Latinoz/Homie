@@ -27,7 +27,6 @@ namespace Homie.Data.Models {
         //..//
 
         public DbSet<FileModel> Files { get; set; }
-
         public DbSet<Image> Picture { get; set; }
 
     }
