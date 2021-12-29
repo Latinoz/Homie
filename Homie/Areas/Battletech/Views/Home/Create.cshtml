@@ -14,7 +14,7 @@
     }
 </style>
 
-<form asp-action="create" asp-controller="home">
+<form asp-action="Create" asp-controller="home">
     <div class="form-group">
         <label asp-for="Name" class="control-label">Название</label>
         <input type="text" asp-for="Name" value="@ViewBag.temp_Name_trns" class="form-control text-input-width" id="inputName" />
@@ -31,22 +31,31 @@
         <label asp-for="TypeMech" class="control-label">Тип</label>
         <select asp-for="TypeMech"
                 asp-items="@ViewBag.temp_TypeMech_trns"
-                class="form-control text-input-width" id="select" name="TypeMech">           
+                class="form-control text-input-width" id="select" name="TypeMech">
         </select>
     </div>
 
-    <div class="form-group">
-        @*<label asp-for="
-            " class="control-label">Uid картинки: @ViewBag.Img_UID_trns</label>*@
+    <div class="form-group">        
         <input type="hidden" asp-for="ImgBT" value="@ViewBag.Img_UID_trns" class="form-control text-input-width" />
     </div>
 
-
     <div class="form-group">
-        <input type="submit" value="Добавить" class="btn btn-primary" />
-        <a asp-action="Index" asp-controller="Home" asp-area="Battletech" class="btn btn-danger" role="button">Назад</a>
+
+        <div class="form-group">
+            <input type="submit" value="Добавить" class="btn btn-primary" />
+            @if (ViewBag.Img_ID_trns == null)
+            {
+                <a asp-action="Index" asp-controller="Home" asp-area="Battletech" class="btn btn-danger" role="button">Назад</a>
+            }
+            else
+            {
+                <a asp-action="DelImgIndex" asp-controller="Home" asp-area="Battletech" asp-route-id="@ViewBag.Img_ID_trns"
+                   class="btn btn-danger" role="button">Назад</a>
+            }
+
     </div>
 </form>
+
 
 <form asp-action="CreateImgMech" asp-controller="Home" asp-area="Battletech" method="post" enctype="multipart/form-data">
     <fieldset style="width:328px">

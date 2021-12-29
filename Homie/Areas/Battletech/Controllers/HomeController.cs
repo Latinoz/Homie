@@ -41,19 +41,34 @@ namespace Homie.Areas.Battletech.Controllers
             {
                 Mechs = mechs,
                 Images = image
-            };
-
-            ViewBag.EditImgMech = "EditImgMech";
-            ViewBag.EditToCreateImgMech = "EditToCreateImgMech";            
+            };                      
 
             return View(viewModel);
+        }
+
+        
+        public async Task<IActionResult> DelImgIndex(int? Id)
+        {
+            if (Id != null)
+            {
+                //Удаление картинки из Picture, если не был Добавлен мех
+                Image imgtemp = db.Picture.Where(o => o.Id == Id).FirstOrDefault();
+                db.Picture.Remove(imgtemp);
+
+                await db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+            return NotFound();
         }
 
         [HttpGet]
         public IActionResult Create()
         {
-            var model = new BTMechsModel();
+            var model = new BTMechsModel();            
             
+            ViewBag.Img_ID_trns = TempData["Image_ID"];
+
+            //Нужно ViewBag.Img_UID_trns и TempData["Image_UID"]?
             ViewBag.Img_UID_trns = TempData["Image_UID"];
 
             ViewBag.temp_BV_trns = TempData["temp_BV"];
@@ -72,13 +87,11 @@ namespace Homie.Areas.Battletech.Controllers
                 if (TempData.ContainsKey("temp_TypeMech") & TempData["temp_TypeMech"].ToString() != "ASS")
                 {
                     //Сюда подставляется переданный тип меха
-                    var q = TempData["temp_TypeMech"].ToString();
-                    
+                    var q = TempData["temp_TypeMech"].ToString();                    
                     model.TypeMech = q;
                     ViewBag.temp_TypeMech_trns = model.TypeMechList;                    
                 }
             }
-
             return View(model);
         }
 
@@ -136,10 +149,7 @@ namespace Homie.Areas.Battletech.Controllers
 
             //Здесь сделать удаление картинки, если в Create нажали кнопку "Назад"
             //**
-            
-
-            //**
-
+            TempData["Image_ID"] = image.Id;
             TempData["Image_UID"] = image._uid;
             TempData["temp_PicAdd"] = "Добавлено";
 
