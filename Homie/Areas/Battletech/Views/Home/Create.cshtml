@@ -59,7 +59,15 @@
         </div>
 
         <div class="form-group">
-            <label>Изображение</label>
+            @if (ViewBag.temp_PicAdd != null)
+            {
+                <label>Изображение: Добавлено</label>
+            }
+            else
+            {
+                <label>Изображение: </label>
+            }
+
             <input name="AvatarFile" type="file" class="form-control" />
         </div>
         <div class="form-group">

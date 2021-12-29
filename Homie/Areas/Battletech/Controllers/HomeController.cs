@@ -60,6 +60,9 @@ namespace Homie.Areas.Battletech.Controllers
             ViewBag.temp_Tonnage_trns = TempData["temp_Tonnage"];
             ViewBag.temp_Name_trns = TempData["temp_Name"];
 
+            //Слово Изображение: Добавлено
+            ViewBag.temp_PicAdd = TempData["temp_PicAdd"];
+
             if (TempData["temp_TypeMech"] == null)
             {                
                 ViewBag.temp_TypeMech_trns = model.TypeMechList;                
@@ -89,6 +92,7 @@ namespace Homie.Areas.Battletech.Controllers
             //Картинка заглушка id 55 в таблице Picture
             var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel);           
 
+            //Разобраться с ImgBT (лишний?)
             if (mech.ImgBT != null)
             {
                 var img = await db.Picture.FirstOrDefaultAsync(s => s._uid.ToString() == mech.ImgBT);
@@ -108,6 +112,43 @@ namespace Homie.Areas.Battletech.Controllers
 
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public IActionResult CreateImgMech(ImageViewModel pvm)
+        {
+            Image image = new Image { _uid = Guid.NewGuid() };
+
+            if (pvm.AvatarFile != null)
+            {
+                byte[] imageData = null;
+                // считываем переданный файл в массив байтов
+                using (var binaryReader = new BinaryReader(pvm.AvatarFile.OpenReadStream()))
+                {
+                    imageData = binaryReader.ReadBytes((int)pvm.AvatarFile.Length);
+                }
+                // установка массива байтов
+                image.Avatar = imageData;
+            }
+
+            db.Picture.Add(image);
+            db.SaveChanges();
+
+            //Здесь сделать удаление картинки, если в Create нажали кнопку "Назад"
+            //**
+            
+
+            //**
+
+            TempData["Image_UID"] = image._uid;
+            TempData["temp_PicAdd"] = "Добавлено";
+
+            TempData["temp_BV"] = pvm.tempBV;
+            TempData["temp_Tonnage"] = pvm.tempTonnage;
+            TempData["temp_Name"] = pvm.tempName;
+            TempData["temp_TypeMech"] = pvm.tempTypeMech;
+
+            return RedirectToAction("Create");
         }
 
         [HttpGet]
@@ -229,42 +270,6 @@ namespace Homie.Areas.Battletech.Controllers
                 }
             }
             return NotFound();
-        }       
-
-
-        [HttpPost]
-        public IActionResult CreateImgMech(ImageViewModel pvm)
-        {            
-            Image image = new Image { _uid = Guid.NewGuid() };            
-
-            if (pvm.AvatarFile != null)
-            {
-                byte[] imageData = null;
-                // считываем переданный файл в массив байтов
-                using (var binaryReader = new BinaryReader(pvm.AvatarFile.OpenReadStream()))
-                {
-                    imageData = binaryReader.ReadBytes((int)pvm.AvatarFile.Length);
-                }
-                // установка массива байтов
-                image.Avatar = imageData;
-            }                     
-
-            db.Picture.Add(image);
-            db.SaveChanges();
-
-            //Здесь сделать удаление картинки, если в Create нажали кнопку "Назад"
-            //**
-            //**
-
-            TempData["Image_UID"] = image._uid;
-            //TempData["Image_UID"] = image.Id;
-
-            TempData["temp_BV"] = pvm.tempBV;
-            TempData["temp_Tonnage"] = pvm.tempTonnage;
-            TempData["temp_Name"] = pvm.tempName;
-            TempData["temp_TypeMech"] = pvm.tempTypeMech;
-
-            return RedirectToAction("Create");
-        }
+        } 
     }
 }

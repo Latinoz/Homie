@@ -28,10 +28,7 @@ namespace Homie.Areas.Battletech.Models
         //    Normal = 1,
         //    Damaged = 2,
         //    Destroyed = 3
-        //}
-
-        //[EnumDataType(typeof(TypeMechEnum))]
-        //public TypeMechEnum TypeMech { get; set; }
+        //}        
 
         //public enum TypeMechEnum
         //{
