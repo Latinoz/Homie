@@ -35,12 +35,12 @@ namespace Homie.Areas.Battletech.Controllers
                     
             IQueryable<BTMechsModel> mechs = db.BTMechsEF.Where(a => a.UserUid == userId);
 
-            var image = db.Picture.ToList();
+            //var image = db.Picture.ToList();
 
             IndexViewModel viewModel = new IndexViewModel
             {
-                Mechs = mechs,
-                Images = image
+                Mechs = mechs //,
+                //Images = image
             };                      
 
             return View(viewModel);
@@ -53,7 +53,12 @@ namespace Homie.Areas.Battletech.Controllers
             {
                 //Удаление картинки из Picture, если не был Добавлен мех
                 Image imgtemp = db.Picture.Where(o => o.Id == Id).FirstOrDefault();
-                db.Picture.Remove(imgtemp);
+
+                //Проверка, что не удалится картинка заглушка
+                if(imgtemp.Id != notDel)
+                {
+                    db.Picture.Remove(imgtemp);
+                }                
 
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
@@ -112,9 +117,15 @@ namespace Homie.Areas.Battletech.Controllers
                 
                 mech.Avatar = img.Avatar;
 
-                //Удаление картинки из Picture, если не была добавлена
+                //Удаление картинки из Picture, так как картинка помещается в таблицу Picture временно
                 Image imgtemp = db.Picture.Where(o => o._uid == Guid.Parse(mech.ImgBT)).FirstOrDefault();
-                db.Picture.Remove(imgtemp);
+
+                //Проверка, что не удалится картинка заглушка
+                if (imgtemp.Id != notDel)
+                {
+                    db.Picture.Remove(imgtemp);
+                }
+                
             }
             else
             {
@@ -146,9 +157,7 @@ namespace Homie.Areas.Battletech.Controllers
 
             db.Picture.Add(image);
             db.SaveChanges();
-
-            //Здесь сделать удаление картинки, если в Create нажали кнопку "Назад"
-            //**
+            
             TempData["Image_ID"] = image.Id;
             TempData["Image_UID"] = image._uid;
             TempData["temp_PicAdd"] = "Добавлено";
