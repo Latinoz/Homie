@@ -1,10 +1,138 @@
 ﻿@model Homie.Areas.Identity.ViewModels.LoginViewModel
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Авторизация";
     Layout = "_LayoutLogin";
 }
 
-<h2>Вход в приложение</h2>
+
+<style>
+    * {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    font-family: arial
+}
+
+body {
+    background: white;
+}
+
+h1 {
+    color: #ccc;
+    text-align: center;
+    font-family: 'Vibur', cursive;
+    font-size: 50px
+}
+
+.login-form {
+    width: 350px;
+    padding: 40px 30px;
+    background: #eee;
+    margin: auto;
+    border: 1px solid #fff;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 10%
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 15px
+}
+
+.form-control {
+    width: 100%;
+    height: 50px;
+    border: none;
+    padding: 5px 7px 5px 15px;
+    background: #fff;
+    color: #666;
+    border: 2px solid #ddd
+}
+
+.form-group .mdi {
+    position: absolute;
+    right: 15px;
+    top: 17px;
+    color: #999
+}
+
+.mdi {
+    top: 13px !important;
+    color: #0AC986 !important
+}
+
+/*Здесь если вводишь пароль и/или email вводит буквы белым цветом (непонятно зачем делали)*/
+/*.form-control:focus {
+    color: #fff !important;
+    background-color: #fff;
+    border-color: #fff !important;
+    outline: none;
+    box-shadow: none
+}*/
+
+.log-status.wrong-entry .form-control,
+.wrong-entry .form-control+.mdi {
+    border-color: #ed1c24;
+    color: #ed1c24
+}
+
+.log-btn {
+    background: #3f51b5;
+    dispaly: inline-block;
+    width: 100%;
+    font-size: 16px;
+    height: 50px;
+    color: #fff;
+    text-decoration: none;
+    border: none
+}
+
+.link {
+    text-decoration: none;
+    color: #C6C6C6;
+    float: right;
+    font-size: 12px;
+    margin-bottom: 15px
+}
+
+.alert {
+    display: none;
+    font-size: 12px;
+    color: #f00;
+    float: left
+}
+
+a {
+    text-decoration: none !important
+}
+</style>
+
+<form method="post" asp-controller="Account" asp-action="Login"
+      asp-route-returnUrl="@Model.ReturnUrl">
+      <div asp-validation-summary="ModelOnly"></div>
+<div class="login-form">
+    <h1>Homie</h1>
+
+    <div class="form-group "> 
+        <input asp-for="Email" type="text" class="form-control" placeholder="Email " id="Email"> <i class="mdi mdi-account"></i> 
+        <span asp-validation-for="Email"></span>
+    </div>
+
+    <div class="form-group log-status"> 
+        <input asp-for="Password" type="password" class="form-control" placeholder="Пароль" id="Password"> <i class="mdi mdi-lock"></i> 
+        <span asp-validation-for="Password"></span>
+    </div> 
+
+    <span class="alert">Invalid Credentials</span> 
+    @*<a class="link" href="#">Lost your password?</a> *@
+
+    <button type="submit" class="log-btn"><i class="mdi mdi-account"></i>Вход</button>
+</div>
+</form>
+
+@*<h2>Вход в приложение</h2>
 <form method="post" asp-controller="Account" asp-action="Login"
       asp-route-returnUrl="@Model.ReturnUrl">
     <div asp-validation-summary="ModelOnly"></div>
@@ -17,14 +145,10 @@
         <label asp-for="Password"></label><br />
         <input asp-for="Password" />
         <span asp-validation-for="Password"></span>
-    </div>
-    @*<div>
-        <label asp-for="RememberMe"></label><br />
-        <input asp-for="RememberMe" />
-    </div>*@
+    </div>   
+
     <p></p>
     <div>
         <input type="submit" value="Войти" />
     </div>
-</form>
-
+</form>*@
