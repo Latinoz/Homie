@@ -59,8 +59,6 @@ namespace Homie.Areas.Battletech.Models
 
         [Column(TypeName = "varchar(255)")]
         public string ImgBT { get; set; }
-
-        public Image ImgVMid { get; set; }
         
         public byte[] Avatar { get; set; }
     }
