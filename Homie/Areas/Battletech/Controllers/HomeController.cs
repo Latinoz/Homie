@@ -33,7 +33,7 @@ namespace Homie.Areas.Battletech.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                     
-            IQueryable<BTMechsModel> mechs = db.BTMechsEF.Where(a => a.UserUid == userId);
+            IQueryable<BTMechsModel> mechs = db.BtEF.Where(a => a.UserUid == userId);
 
             //var image = db.Picture.ToList();
 
@@ -132,7 +132,7 @@ namespace Homie.Areas.Battletech.Controllers
                 mech.Avatar = plug.Avatar;               
             }
 
-            db.BTMechsEF.Add(mech);
+            db.BtEF.Add(mech);
 
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
@@ -175,7 +175,7 @@ namespace Homie.Areas.Battletech.Controllers
         {
             if (id != null)
             {                
-                BTMechsModel mech = await db.BTMechsEF.FirstOrDefaultAsync(p => p.Id == id);
+                BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(p => p.Id == id);
 
                 ViewBag.TypeMechsForEdit = mech.TypeMechList;                
 
@@ -192,7 +192,7 @@ namespace Homie.Areas.Battletech.Controllers
 
             mech.UserUid = userId;         
 
-            db.BTMechsEF.Update(mech);
+            db.BtEF.Update(mech);
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
@@ -201,7 +201,7 @@ namespace Homie.Areas.Battletech.Controllers
         public async Task<IActionResult> EditImgMech(ImageViewModel pvm)
         {
             //Получение обьекта мех
-            BTMechsModel mech = await db.BTMechsEF.FirstOrDefaultAsync(s => s.Id.ToString() == pvm.tempUidImgMech);
+            BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(s => s.Id.ToString() == pvm.tempUidImgMech);
 
             if (pvm.AvatarFile != null)
             {
@@ -215,7 +215,7 @@ namespace Homie.Areas.Battletech.Controllers
                 mech.Avatar = imageData;
             }
             
-            db.BTMechsEF.Update(mech);
+            db.BtEF.Update(mech);
             await db.SaveChangesAsync(); 
             
             return RedirectToAction("Edit", new { id = mech.Id});
@@ -228,7 +228,7 @@ namespace Homie.Areas.Battletech.Controllers
             if (id != null)
             {
                 //Получение обьекта мех
-                BTMechsModel mech = await db.BTMechsEF.FirstOrDefaultAsync(s => s.Id == id);
+                BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(s => s.Id == id);
 
                 if (mech != null)
                     return View(mech);
@@ -242,7 +242,7 @@ namespace Homie.Areas.Battletech.Controllers
             if (Id != null)
             {
                 //Получение обьекта мех
-                BTMechsModel mech = await db.BTMechsEF.FirstOrDefaultAsync(s => s.Id == Id);
+                BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(s => s.Id == Id);
 
                 if (mech.Avatar != null)
                 {
@@ -250,7 +250,7 @@ namespace Homie.Areas.Battletech.Controllers
                     var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel);
                     mech.Avatar = plug.Avatar;                 
                     
-                    db.BTMechsEF.Update(mech);
+                    db.BtEF.Update(mech);
                     await db.SaveChangesAsync();
 
                     return RedirectToAction("Edit", new { id = mech.Id });
@@ -266,7 +266,7 @@ namespace Homie.Areas.Battletech.Controllers
         {
             if (id != null)
             {                
-                BTMechsModel mech = await db.BTMechsEF.FirstOrDefaultAsync(p => p.Id == id);
+                BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(p => p.Id == id);
                   if (mech != null)
                 return View(mech);
             }
@@ -278,11 +278,11 @@ namespace Homie.Areas.Battletech.Controllers
         {
             if (Id != null)
             {                
-                BTMechsModel mech = await db.BTMechsEF.FirstOrDefaultAsync(p => p.Id == Id);
+                BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(p => p.Id == Id);
 
                 if (mech != null)
                 {
-                    db.BTMechsEF.Remove(mech);                    
+                    db.BtEF.Remove(mech);                    
                     await db.SaveChangesAsync();
 
                     return RedirectToAction("Index");
