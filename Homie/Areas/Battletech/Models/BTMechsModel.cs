@@ -28,15 +28,7 @@ namespace Homie.Areas.Battletech.Models
         //    Normal = 1,
         //    Damaged = 2,
         //    Destroyed = 3
-        //}        
-
-        //public enum TypeMechEnum
-        //{
-        //    Assault = 1,
-        //    Heavy   = 2,
-        //    Medium  = 3,
-        //    Light   = 4
-        //}
+        //}  
 
         public string TypeMech { get; set; }
 
@@ -47,6 +39,7 @@ namespace Homie.Areas.Battletech.Models
             new SelectListItem { Value = "HEA", Text = "Heavy" },
             new SelectListItem { Value = "MED", Text = "Medium"  },
             new SelectListItem { Value = "LIG", Text = "Light"  },
+            new SelectListItem { Value = "Empty", Text = "" }
         };
 
         [Column(TypeName = "varchar(255)")]
