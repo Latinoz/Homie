@@ -25,13 +25,12 @@ namespace Homie.Areas.Series.Controllers
         }
         
 
-        public async Task<IActionResult> Index(int page = 1)
-        {
+        public async Task<IActionResult> Index(int page = 1)       {
             int pageSize = 40;   // количество элементов на странице
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            IQueryable<MoviesModel> source = db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == false);
+            IQueryable<MoviesModel> source = db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == false && a.Watching == false);
             var count = await source.CountAsync();
             var items = await source.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
@@ -43,7 +42,26 @@ namespace Homie.Areas.Series.Controllers
             };
             return View(viewModel);
         }
-       
+
+        public async Task<IActionResult> Watching(int page = 1)
+        {
+            int pageSize = 20;   // количество элементов на странице
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            IQueryable<MoviesModel> source = db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == false && a.Watching == true);
+            var count = await source.CountAsync();
+            var items = await source.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            PageViewModel pageViewModel = new PageViewModel(count, page, pageSize);
+            IndexViewModel viewModel = new IndexViewModel
+            {
+                PageViewModel = pageViewModel,
+                Series = items
+            };
+            return View(viewModel);
+        }
+
 
         public async Task<IActionResult> ArchMovies(int page = 1)
         {
@@ -107,6 +125,32 @@ namespace Homie.Areas.Series.Controllers
             return NotFound();
         }
 
+        public async Task<IActionResult> GoToWatching(int? Id)
+        {
+            if (Id != null)
+            {
+                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
+                movie.Watching = true;
+
+                await db.SaveChangesAsync();
+                return RedirectToAction("Watching");
+            }
+            return NotFound();
+        }
+
+        public async Task<IActionResult> WatchingBackToList(int? Id)
+        {
+            if (Id != null)
+            {
+                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
+                movie.Watching = false;
+
+                await db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+            return NotFound();
+        }
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id != null)
@@ -128,11 +172,15 @@ namespace Homie.Areas.Series.Controllers
             db.MoviesEF.Update(movie);
             await db.SaveChangesAsync();
 
-            if (movie.Archive == false)
+            if (movie.Archive == true && movie.Watching == false)
             {
-                return RedirectToAction("Index");
+                return RedirectToAction("ArchMovies", "Home", new { area = "Series" });
             }
-            return RedirectToAction("ArchMovies", "Home", new { area = "Series" });
+            else if(movie.Archive == false && movie.Watching == true)
+            {
+                return RedirectToAction("Watching", "Home", new { area = "Series" });
+            }            
+            return RedirectToAction("Index");
         }
 
         [HttpGet]

@@ -16,7 +16,8 @@ namespace Homie.Areas.Series.Models
         public int Episode { get; set; }
         public string HoldPlay { get; set; }       
         public bool Archive { get; set; }
-        
+        public bool Watching { get; set; }
+
         [Column(TypeName = "varchar(255)")]
         public string UserUid { get; set; }        
 

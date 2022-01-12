@@ -23,8 +23,12 @@
             <i class="fa fa-film fa-fw fa-lg"></i>&nbsp; Сериалы <i class="fa fa-caret-down"></i>
         </button>
         <div id="seriesAcc" class="w3-hide w3-light-gray w3-card">
+            <a asp-area="Series" asp-controller="Home" asp-action="Watching" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fa fa-tv fa-fw" aria-hidden="true"></i>&nbsp; Просмотр
+            </a>
+
             <a asp-area="Series" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
-                <i class="fa fa-video fa-fw" aria-hidden="true"></i>&nbsp; Просмотр
+                <i class="fa fa-list-alt fa-fw" aria-hidden="true"></i>&nbsp; Список
             </a>
 
             <a asp-area="Series" asp-controller="Home" asp-action="ArchMovies" class="w3-bar-item w3-button w3-hover-white">

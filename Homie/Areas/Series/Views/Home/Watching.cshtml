@@ -3,7 +3,7 @@
 
 @{
     ViewBag.Title = "Список сериалов";
-    ViewBag.HeaderTitle = "Сериалы - [Список]";
+    ViewBag.HeaderTitle = "Сериалы - [Просмотр]";
 }
 
 <style>
@@ -38,11 +38,6 @@
     }
 </style>
 
-<a asp-action="Create" asp-controller="Home" asp-area="Series"
-   class="btn btn-primary"
-   role="button">Добавить</a>
-<p></p>
-
 <div class="scroll-x">
     <table class="table table-bordered table-striped table-sm">
         <tr><th>Название</th><th>Сезон</th><th>Серия</th><th>Жанр</th><th>Стоп Время</th><th></th></tr>
@@ -56,8 +51,8 @@
                 <td>@p.HoldPlay</td>
 
                 <td>
-                    <a asp-action="GoToWatching" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-primary"
-                       role="button">В Просмотр</a>
+                    <a asp-action="WatchingBackToList" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-primary"
+                       role="button">В Список</a>
                     <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
                        role="button">Изменить</a>
                     <a asp-action="GoToArchive" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-secondary"
@@ -71,23 +66,23 @@
     </table>
 </div>
 
-    @if (Model.PageViewModel.HasPreviousPage)
-    {
-        <a asp-action="Index"
-           asp-route-page="@(Model.PageViewModel.PageNumber - 1)"
-           class="btn btn-outline-dark">
-            <i class="glyphicon glyphicon-chevron-left"></i>
-            Назад
-        </a>
-    }
-    @if (Model.PageViewModel.HasNextPage)
-    {
-        <a asp-action="Index"
-           asp-route-page="@(Model.PageViewModel.PageNumber + 1)"
-           class="btn btn-outline-dark">
-            Вперед
-            <i class="glyphicon glyphicon-chevron-right"></i>
-        </a>
-    }
-    <p></p>
+@if (Model.PageViewModel.HasPreviousPage)
+{
+    <a asp-action="Index"
+       asp-route-page="@(Model.PageViewModel.PageNumber - 1)"
+       class="btn btn-outline-dark">
+        <i class="glyphicon glyphicon-chevron-left"></i>
+        Назад
+    </a>
+}
+@if (Model.PageViewModel.HasNextPage)
+{
+    <a asp-action="Index"
+       asp-route-page="@(Model.PageViewModel.PageNumber + 1)"
+       class="btn btn-outline-dark">
+        Вперед
+        <i class="glyphicon glyphicon-chevron-right"></i>
+    </a>
+}
+<p></p>
 
