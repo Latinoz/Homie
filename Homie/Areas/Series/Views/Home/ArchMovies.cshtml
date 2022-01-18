@@ -48,7 +48,16 @@
                 <td>@p.Season</td>
                 <td>@p.Episode</td>
                 <td>@p.Category</td>
-                <td>@p.HoldPlay</td>
+                <td>
+                    @if (p.HoldPlay.HasValue)
+                    {
+                        @p.HoldPlay.Value.TimeOfDay
+                    }
+                    else
+                    {
+                        @String.Empty
+                    }
+                </td>
 
                 <td>
                     <a asp-action="BackToList" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-secondary"

@@ -16,7 +16,7 @@
 
 </style>
 
-<form asp-action="edit" asp-controller="home" asp-route-id="@Model.Id">
+<form asp-action="Edit" asp-controller="home" asp-route-id="@Model.Id">
     <div class="form-group">
         <label asp-for="Name" class="control-label">Название</label>
         <input type="text" asp-for="Name" class="form-control text-input-width" />
@@ -39,29 +39,8 @@
     </div>
     <div class="form-group">
         <label asp-for="HoldPlay" class="control-label">Время</label>
-        <input id="result" type="hidden" asp-for="HoldPlay" class="form-control" />
+        <input id="result" asp-for="HoldPlay" asp-format="{0:HH:mm:ss}" step="1" class="form-control text-input-width" />
     </div>
-    <div align="left">
-        <input id="inpval1" type="text" maxlength="2" size="2" />
-        <input id="inpval2" type="text" maxlength="2" size="2" />
-        <input id="inpval3" type="text" maxlength="2" size="2" />
-    </div>
-
-    <script>
-        $(document).ready(function () {
-            var $oneInput = $('#inpval1');
-            var $twoInput = $('#inpval2');
-            var $threeInput = $('#inpval3');
-            var $result = $('#result');
-
-            function updateRange() {
-                $result.val($oneInput.val() + ":" + $twoInput.val() + ":" + $threeInput.val());
-            }
-            $('#inpval1,#inpval2,#inpval3').on('change', updateRange);
-        });
-
-    </script>
-
     <div class="form-group">
         @Html.HiddenFor(m => m.Archive)
     </div>
@@ -70,7 +49,21 @@
     </div>
     <div class="form-group">
         <input type="submit" value="Изменить" class="btn btn-primary" />
-        <a asp-action="Index" asp-controller="Home" asp-area="Series" class="btn btn-danger" role="button">Назад</a>
+
+        @if (Model.Archive == true)
+        {
+            <a asp-action="ArchMovies" asp-controller="Home" asp-area="Series" class="btn btn-danger" role="button">Назад</a>
+        }
+        else if (Model.Watching == true)
+        {
+            <a asp-action="Watching" asp-controller="Home" asp-area="Series" class="btn btn-danger" role="button">Назад</a>
+        }
+        else
+        {
+            <a asp-action="Index" asp-controller="Home" asp-area="Series" class="btn btn-danger" role="button">Назад</a>
+        }
+
+
     </div>
 </form>
 
