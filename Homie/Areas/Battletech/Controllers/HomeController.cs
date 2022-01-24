@@ -177,7 +177,7 @@ namespace Homie.Areas.Battletech.Controllers
             {                
                 BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(p => p.Id == id);
 
-                ViewBag.TypeMechsForEdit = mech.TypeMechList;                
+                ViewBag.TypeMechsForEdit = mech.TypeMechList;
 
                 if (mech != null)
                     return View(mech);
@@ -201,7 +201,7 @@ namespace Homie.Areas.Battletech.Controllers
         public async Task<IActionResult> EditImgMech(ImageViewModel pvm)
         {
             //Получение обьекта мех
-            BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(s => s.Id.ToString() == pvm.tempUidImgMech);
+            BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(s => s.Id == pvm.tempIdMech);
 
             if (pvm.AvatarFile != null)
             {
