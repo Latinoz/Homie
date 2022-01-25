@@ -18,19 +18,19 @@
 <form asp-action="Edit" asp-controller="home" asp-route-id="@Model.Id">
     <div class="form-group">
         <label asp-for="Name" class="control-label">Название</label>
-        <input type="text" asp-for="Name" class="form-control text-input-width" />
+        <input type="text" asp-for="Name" class="form-control text-input-width" id="inputName"/>
     </div>
     <div class="form-group">
         <label asp-for="Tonnage" class="control-label">Вес (тонн)</label>
-        <input type="text" asp-for="Tonnage" class="form-control text-input-width" />
+        <input type="text" asp-for="Tonnage" class="form-control text-input-width" id="inputTonnage"/>
     </div>
     <div class="form-group">
         <label asp-for="Bv" class="control-label">BV</label>
-        <input type="text" asp-for="Bv" class="form-control text-input-width" />
+        <input type="text" asp-for="Bv" class="form-control text-input-width" id="inputBV"/>
     </div>
     <div class="form-group">
         <label asp-for="TypeMech" class="control-label">Тип</label>
-        <select asp-for="TypeMech" asp-items="@ViewBag.TypeMechsForEdit" class="form-control text-input-width">
+        <select asp-for="TypeMech" asp-items="@ViewBag.TypeMechsForEdit" class="form-control text-input-width" id="select">
         </select>
     </div>
     <div class="form-group">        
@@ -57,6 +57,10 @@
 
             <input name="AvatarFile" type="file" class="form-control" />
             <input name="tempIdMech" type="hidden" value="@Model.Id" />
+            <input name="tempName" type="hidden" id="tempName" />
+            <input name="tempTonnage" type="hidden" id="tempTonnage" />
+            <input name="tempBV" type="hidden" id="tempBV" />
+            <input name="tempTypeMech" type="hidden" id="tempTypeMech" />
         </div>
 
     </fieldset>
@@ -76,6 +80,39 @@
 </form>
 <br>
 
+<script>
+    $(document).ready(function () {
+
+        $("#inputName").change(function () {
+            var $rtempName = $('#tempName');
+            var $rinputName = $('#inputName');
+            $rtempName.val($rinputName.val());
+
+        });
+        $("#inputTonnage").change(function () {
+            var $rtempTonnage = $('#tempTonnage');
+            var $rinputTonnage = $('#inputTonnage');
+            $rtempTonnage.val($rinputTonnage.val());
+        });
+        $("#inputBV").change(function () {
+            var $rtempBV = $('#tempBV');
+            var $rinputBV = $('#inputBV');
+            $rtempBV.val($rinputBV.val());
+        });
+
+    });
+
+    $(document).ready(function () {
+        const select = ('select[name=TypeMech]');
+        var input = $('#tempTypeMech');
+
+        $(select).change(function () {
+            let val = $(this).val();
+
+            $(input).val(val);
+        })
+    })
+</script>
 
 
 

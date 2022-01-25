@@ -19,10 +19,10 @@ namespace Homie.Models
         public string? tempName { get; set; }
 
         [TempData]
-        public string? tempTonnage { get; set; }
+        public int? tempTonnage { get; set; }
 
         [TempData]
-        public string? tempBV { get; set; }
+        public int? tempBV { get; set; }
 
         [TempData]
         public string? tempTypeMech { get; set; }

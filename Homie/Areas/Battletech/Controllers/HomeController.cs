@@ -214,9 +214,29 @@ namespace Homie.Areas.Battletech.Controllers
                 // установка массива байтов                
                 mech.Avatar = imageData;
             }
+
+            if(pvm.tempName != null)
+            {
+                mech.Name = pvm.tempName;
+            }
+            
+            if(pvm.tempTonnage != null)
+            {
+                mech.Tonnage = (int)pvm.tempTonnage;
+            }
+            
+            if(pvm.tempBV != null)
+            {
+                mech.Bv = (int)pvm.tempBV;
+            }
+
+            if (pvm.tempTypeMech != null)
+            {
+                mech.TypeMech = pvm.tempTypeMech;
+            }
             
             db.BtEF.Update(mech);
-            await db.SaveChangesAsync(); 
+            await db.SaveChangesAsync();
             
             return RedirectToAction("Edit", new { id = mech.Id});
         }
