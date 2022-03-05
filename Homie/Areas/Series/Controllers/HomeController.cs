@@ -107,6 +107,12 @@ namespace Homie.Areas.Series.Controllers
                 movie.Archive = true;                
 
                 await db.SaveChangesAsync();
+                
+                if (movie.Watching == true)
+                {
+                    return RedirectToAction("Watching", "Home", new { area = "Series" });
+                }
+
                 return RedirectToAction("Index");
             }            
             return NotFound();
