@@ -13,6 +13,7 @@ namespace Homie.Models
         public IEnumerable<MoviesModel> Series { get; set; }
         public IEnumerable<CigarsModel> Cigars { get; set; }
         public IEnumerable<BTMechsModel> Mechs { get; set; }
+        public IEnumerable<BTPilotsModel> Pilots { get; set; }
         public IEnumerable<Image> Images { get; set; }
         public PageViewModel PageViewModel { get; set; }
         public FilterViewModel FilterViewModel { get; set; }

@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Homie.Models;
-using System.IO;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Homie.Areas.Battletech.Models
@@ -22,14 +15,7 @@ namespace Homie.Areas.Battletech.Models
         public int Sent { get; set; }
         public int Return { get; set; }
         public int State { get; set; }
-
-        //public enum State
-        //{
-        //    Normal = 1,
-        //    Damaged = 2,
-        //    Destroyed = 3
-        //}  
-
+        
         public string TypeMech { get; set; }
 
         [NotMapped]
@@ -45,8 +31,7 @@ namespace Homie.Areas.Battletech.Models
         [Column(TypeName = "varchar(255)")]
         public string UserUid { get; set; }
 
-        [Column(TypeName = "varchar(255)")]
-        public string PilotUid { get; set; }
+        public int BTPilotsModelId { get; set; }
 
         public int GameType { get; set; }
 
@@ -54,6 +39,7 @@ namespace Homie.Areas.Battletech.Models
         public string ImgBT { get; set; }
         
         public byte[] Avatar { get; set; }
+        
     }
     
 }
