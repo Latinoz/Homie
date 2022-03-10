@@ -3,14 +3,16 @@ using System;
 using Homie.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Homie.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220308091454_BTPilotsFixModel")]
+    partial class BTPilotsFixModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,7 +28,7 @@ namespace Homie.Migrations
                     b.Property<byte[]>("Avatar")
                         .HasColumnType("longblob");
 
-                    b.Property<int?>("BTPilotsModelId")
+                    b.Property<int>("BTPilotsModelId")
                         .HasColumnType("int");
 
                     b.Property<int>("Bv")
@@ -64,8 +66,7 @@ namespace Homie.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BTPilotsModelId")
-                        .IsUnique();
+                    b.HasIndex("BTPilotsModelId");
 
                     b.ToTable("BtEF");
                 });
@@ -107,6 +108,9 @@ namespace Homie.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Stats")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.Property<string>("TypeMech")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<string>("UserUid")
@@ -458,9 +462,11 @@ namespace Homie.Migrations
 
             modelBuilder.Entity("Homie.Areas.Battletech.Models.BTMechsModel", b =>
                 {
-                    b.HasOne("Homie.Areas.Battletech.Models.BTPilotsModel", "BTPilotsModel")
-                        .WithOne("BTMechsModel")
-                        .HasForeignKey("Homie.Areas.Battletech.Models.BTMechsModel", "BTPilotsModelId");
+                    b.HasOne("Homie.Areas.Battletech.Models.BTPilotsModel", null)
+                        .WithMany("BTMechsModel")
+                        .HasForeignKey("BTPilotsModelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Homie.Areas.Cigars.Models.CigarsModel", b =>

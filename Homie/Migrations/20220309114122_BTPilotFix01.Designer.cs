@@ -3,14 +3,16 @@ using System;
 using Homie.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Homie.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220309114122_BTPilotFix01")]
+    partial class BTPilotFix01
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,9 +27,6 @@ namespace Homie.Migrations
 
                     b.Property<byte[]>("Avatar")
                         .HasColumnType("longblob");
-
-                    b.Property<int?>("BTPilotsModelId")
-                        .HasColumnType("int");
 
                     b.Property<int>("Bv")
                         .HasColumnType("int");
@@ -64,9 +63,6 @@ namespace Homie.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BTPilotsModelId")
-                        .IsUnique();
-
                     b.ToTable("BtEF");
                 });
 
@@ -78,6 +74,9 @@ namespace Homie.Migrations
 
                     b.Property<byte[]>("Avatar")
                         .HasColumnType("longblob");
+
+                    b.Property<int>("BTMechsModelId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Experience")
                         .HasColumnType("int");
@@ -113,6 +112,9 @@ namespace Homie.Migrations
                         .HasColumnType("varchar(255)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BTMechsModelId")
+                        .IsUnique();
 
                     b.ToTable("BtPilotEF");
                 });
@@ -456,11 +458,13 @@ namespace Homie.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("Homie.Areas.Battletech.Models.BTMechsModel", b =>
+            modelBuilder.Entity("Homie.Areas.Battletech.Models.BTPilotsModel", b =>
                 {
-                    b.HasOne("Homie.Areas.Battletech.Models.BTPilotsModel", "BTPilotsModel")
-                        .WithOne("BTMechsModel")
-                        .HasForeignKey("Homie.Areas.Battletech.Models.BTMechsModel", "BTPilotsModelId");
+                    b.HasOne("Homie.Areas.Battletech.Models.BTMechsModel", "BTMechsModel")
+                        .WithOne("BTPilotsModel")
+                        .HasForeignKey("Homie.Areas.Battletech.Models.BTPilotsModel", "BTMechsModelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Homie.Areas.Cigars.Models.CigarsModel", b =>

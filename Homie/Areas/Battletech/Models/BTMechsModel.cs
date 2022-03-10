@@ -7,6 +7,12 @@ namespace Homie.Areas.Battletech.Models
 {
     public class BTMechsModel
     {
+        //public BTMechsModel()
+        //{
+        //    BTPilotsModel = new List<BTPilotsModel> ();
+        //}
+
+
         public int Id { get; set; }
         public string Name { get; set; }
         public int Tonnage { get; set; }        
@@ -29,9 +35,7 @@ namespace Homie.Areas.Battletech.Models
         };
 
         [Column(TypeName = "varchar(255)")]
-        public string UserUid { get; set; }
-
-        public int BTPilotsModelId { get; set; }
+        public string UserUid { get; set; }        
 
         public int GameType { get; set; }
 
@@ -39,7 +43,11 @@ namespace Homie.Areas.Battletech.Models
         public string ImgBT { get; set; }
         
         public byte[] Avatar { get; set; }
-        
+
+        public int? BTPilotsModelId { get; set; }
+
+        public BTPilotsModel BTPilotsModel { get; set; }
+
     }
     
 }

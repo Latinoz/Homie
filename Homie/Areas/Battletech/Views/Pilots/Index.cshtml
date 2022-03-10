@@ -1,5 +1,5 @@
 ﻿@using Homie.Models
-@model IndexViewModel
+@model IEnumerable<BTPilotsModel>
 
 @{
     ViewBag.Title = "Пилоты";
@@ -47,7 +47,7 @@
             <th></th>
         </tr>
 
-        @foreach (var p in Model.Pilots)
+        @foreach (var p in Model)
         {
             <tr>
                 <td><a href=@p.Name target="_blank">@p.Name</a></td>
@@ -58,13 +58,14 @@
                 <td>@p.Hits</td>      
                 <td>@p.Raiting</td>
                 <td>
-                    @*@foreach (var t in p.MechId)
+                    @*@foreach (var t in Model)
                     {
-                        if (t.Value == p.TypeMech)
+                        if (t.BTPilotsModelId == p.Id)
                         {
-                            @t.Text
+                            @t.Name
                         }
                     }*@
+                    @p.BTMechsModel.Name
                  </td>
 
             <td style="vertical-align: middle">
@@ -78,7 +79,7 @@
             </td>
         </tr>
 
-    }
+         }
     </table>
 </div>
 

@@ -3,6 +3,7 @@ using Homie.Data.Models;
 using Homie.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,15 +29,22 @@ namespace Homie.Areas.Battletech.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            IQueryable<BTPilotsModel> pilots = db.BtPilotEF.Where(a => a.UserUid == userId);
+            var test = db.BtPilotEF.Where(a => a.UserUid == userId);
+                //.
+                //Include(u => u.BTPilotsModel).ToList();
 
+            var test2 = db.BtEF.Where(a => a.UserUid == userId);
 
-            IndexViewModel viewModel = new IndexViewModel
-            {
-                Pilots = pilots 
-            };
+            //List<BTPilotsModel> pilots = new List<BTPilotsModel>();           
 
-            return View(viewModel);
+            //foreach(BTMechsModel mech in db.BtEF.Where(a => a.UserUid == userId).
+            //    Include(u => u.BTPilotsModel).ToList())
+            //{
+            //    pilots.Add(mech.BTPilotsModel);
+            //}
+
+            //return View(pilots);
+            return null;
         }
     }
 }
