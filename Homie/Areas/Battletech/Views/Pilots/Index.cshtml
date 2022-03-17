@@ -57,16 +57,7 @@
                 </td>
                 <td>@p.Hits</td>      
                 <td>@p.Raiting</td>
-                <td>
-                    @*@foreach (var t in Model)
-                    {
-                        if (t.BTPilotsModelId == p.Id)
-                        {
-                            @t.Name
-                        }
-                    }*@
-                    @p.BTMechsModel.Name
-                 </td>
+                <td>@p.BTMechsModel?.Name</td>
 
             <td style="vertical-align: middle">
                 <div class="buttons">

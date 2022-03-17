@@ -29,22 +29,12 @@ namespace Homie.Areas.Battletech.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var test = db.BtPilotEF.Where(a => a.UserUid == userId);
-                //.
-                //Include(u => u.BTPilotsModel).ToList();
+            List<BTPilotsModel> pilots = new List<BTPilotsModel>();
 
-            var test2 = db.BtEF.Where(a => a.UserUid == userId);
+            pilots = db.BtPilotEF.Where(a => a.UserUid == userId)
+                .Include(u => u.BTMechsModel).ToList();
 
-            //List<BTPilotsModel> pilots = new List<BTPilotsModel>();           
-
-            //foreach(BTMechsModel mech in db.BtEF.Where(a => a.UserUid == userId).
-            //    Include(u => u.BTPilotsModel).ToList())
-            //{
-            //    pilots.Add(mech.BTPilotsModel);
-            //}
-
-            //return View(pilots);
-            return null;
+            return View(pilots);            
         }
     }
 }
