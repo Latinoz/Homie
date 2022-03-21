@@ -7,12 +7,6 @@ namespace Homie.Areas.Battletech.Models
 {
     public class BTMechsModel
     {
-        //public BTMechsModel()
-        //{
-        //    BTPilotsModel = new List<BTPilotsModel> ();
-        //}
-
-
         public int Id { get; set; }
         public string Name { get; set; }
         public int Tonnage { get; set; }        

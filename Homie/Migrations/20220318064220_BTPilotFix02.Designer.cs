@@ -3,14 +3,16 @@ using System;
 using Homie.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Homie.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220318064220_BTPilotFix02")]
+    partial class BTPilotFix02
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -325,8 +327,7 @@ namespace Homie.Migrations
                     b.Property<string>("NameImg")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("_uid")
-                        .IsRequired()
+                    b.Property<Guid>("_uid")
                         .HasColumnType("char(36)");
 
                     b.HasKey("Id");

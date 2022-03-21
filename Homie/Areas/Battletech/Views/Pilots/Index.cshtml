@@ -30,7 +30,7 @@
     }
 </style>
 
-<a asp-action="Create" asp-controller="Home" asp-area="Battletech"
+<a asp-action="Create" asp-controller="Pilots" asp-area="Battletech"
    class="btn btn-primary"
    role="button">Добавить</a>
 <p></p>
@@ -40,7 +40,8 @@
         <tr>
             <th>Имя</th>
             <th>Опыт</th>
-            <th>Характеристики</th>
+            <th>Стрельба</th>
+            <th>Пилотинг</th>            
             <th>Хиты</th>
             <th>Рейтинг</th>
             <th>Мех</th>
@@ -49,26 +50,27 @@
 
         @foreach (var p in Model)
         {
-            <tr>
-                <td><a href=@p.Name target="_blank">@p.Name</a></td>
-                <td>@p.Experience</td>
-                <td>
-                    @p.Stats
-                </td>
-                <td>@p.Hits</td>      
-                <td>@p.Raiting</td>
-                <td>@p.BTMechsModel?.Name</td>
+    <tr>
+        <td><a href=@p.Name target="_blank">@p.Name</a></td>
+        <td>@p.Experience</td>
+        <td>@p.Gunnery
+        </td>
+        <td>@p.Piloting
+        </td>
+        <td>@p.Hits</td>
+        <td>@p.Raiting</td>
+        <td>@p.BTMechsModel?.Name</td>
 
-            <td style="vertical-align: middle">
-                <div class="buttons">
-                    <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
-                       role="button">Изменить</a><p></p>
+        <td style="vertical-align: middle">
+            <div class="buttons">
+                <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
+                   role="button">Изменить</a><p></p>
 
-                    <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
-                       role="button">Удалить</a><p></p>
-                </div>
-            </td>
-        </tr>
+                <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
+                   role="button">Удалить</a><p></p>
+            </div>
+        </td>
+    </tr>
 
          }
     </table>
