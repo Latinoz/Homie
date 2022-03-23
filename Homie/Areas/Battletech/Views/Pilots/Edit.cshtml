@@ -1,5 +1,58 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model Homie.Areas.Battletech.Models.BTPilotsModel
+
 @{
+    ViewBag.Title = "Изменение Пилота";
+
 }
+
+<style>
+    .text-input-width {
+        width: 328px;
+    }
+
+    .number-input-width {
+        width: 80px;
+    }
+</style>
+
+<form asp-action="Edit" asp-controller="Pilots" asp-route-id="@Model.Id">
+    <div class="form-group">
+        <label asp-for="Name" class="control-label">Имя</label>
+        <input type="text" asp-for="Name" class="form-control text-input-width" id="inputNamePilot" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Experience" class="control-label">Опыт</label>
+        <input type="number" asp-for="Experience" class="form-control number-input-width" id="inputTonnagePilot" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Gunnery" class="control-label">Стрельба</label>
+        <input type="number" asp-for="Gunnery" class="form-control number-input-width" max="8" id="inputBVPilot" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Piloting" class="control-label">Пилотинг</label>
+        <input type="number" asp-for="Piloting" class="form-control number-input-width" max="8" id="inputBVPilot" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Hits" class="control-label">Хиты</label>
+        <input type="number" asp-for="Hits" class="form-control number-input-width" id="inputBVPilot" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Raiting" class="control-label">Рейтинг</label>
+        <input type="text" asp-for="Raiting" class="form-control text-input-width" id="inputBVPilot" />
+    </div>
+
+    <div class="form-group">
+        <label class="control-label">Мех</label>
+        <select asp-for="MechId" class="form-control" style="width:328px;"
+                asp-items="@(new SelectList(@ViewBag.ListofMechs,"Id","Name",Model.BTMechsModel?.Id == null ? 0 : Model.BTMechsModel?.Id))"
+                
+                ></select>
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Изменить" class="btn btn-primary" />
+        <a asp-action="Index" asp-controller="Pilots" asp-area="Battletech"
+           class="btn btn-danger"
+           role="button">Назад</a>
+    </div>
+</form>

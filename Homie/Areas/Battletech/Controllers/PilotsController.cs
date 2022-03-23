@@ -73,5 +73,73 @@ namespace Homie.Areas.Battletech.Controllers
 
             return RedirectToAction("Index");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id != null)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                BTPilotsModel pilot = await db.BtPilotEF.FirstOrDefaultAsync(p => p.Id == id);                
+
+                if (pilot != null)
+                {
+                    List<BTMechsModel> mechs = db.BtEF.Where(a => a.UserUid == userId).ToList();
+
+                    ViewBag.ListofMechs = mechs;
+
+                    return View(pilot);
+                }
+                    
+            }
+            return NotFound();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(BTPilotsModel pilot)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            pilot.UserUid = userId;
+
+            if(pilot.MechId != 0)
+            {
+                BTMechsModel currentMech = db.BtEF.FirstOrDefault(b => b.BTPilotsModelId == pilot.Id);
+
+                BTMechsModel changedMech = db.BtEF.FirstOrDefault(b => b.Id == pilot.MechId);
+
+                if(currentMech != null)
+                {
+                    //Убераем связь пилота с текущем мехом
+                    currentMech.BTPilotsModelId = null;
+                }
+                
+                if(changedMech.BTPilotsModelId != null)
+                {
+                    //Убераем свзяь меха(в котором меняем пилота) и пилота который сейчас связан с ним (MechId)
+                    BTPilotsModel changedPilot = db.BtPilotEF.FirstOrDefault(p => p.Id == changedMech.BTPilotsModelId);
+
+                    changedPilot.MechId = 0;
+                }
+
+                //Устанавляиваем связь пилота с другим мехом
+                
+                changedMech.BTPilotsModelId = pilot.Id;
+
+                db.BtEF.Update(changedMech);
+
+                db.BtPilotEF.Update(pilot);                
+
+                await db.SaveChangesAsync();
+
+                return RedirectToAction("Index");
+            }            
+
+            db.BtPilotEF.Update(pilot);
+            await db.SaveChangesAsync();
+
+            return RedirectToAction("Index");
+        }
     }
 }
