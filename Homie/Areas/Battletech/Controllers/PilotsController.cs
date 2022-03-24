@@ -109,10 +109,10 @@ namespace Homie.Areas.Battletech.Controllers
 
             pilot.UserUid = userId;
 
+            BTMechsModel currentMech = db.BtEF.FirstOrDefault(b => b.BTPilotsModelId == pilot.Id);
+
             if (pilot.MechId != 0)
             {
-                BTMechsModel currentMech = db.BtEF.FirstOrDefault(b => b.BTPilotsModelId == pilot.Id);
-
                 BTMechsModel changedMech = db.BtEF.FirstOrDefault(b => b.Id == pilot.MechId);
 
                 if (currentMech != null)
@@ -142,8 +142,6 @@ namespace Homie.Areas.Battletech.Controllers
             }
             else 
             {
-                BTMechsModel currentMech = db.BtEF.FirstOrDefault(b => b.BTPilotsModelId == pilot.Id);
-
                 if (currentMech != null)
                 {
                     //Убераем связь пилота с текущем мехом
@@ -160,6 +158,54 @@ namespace Homie.Areas.Battletech.Controllers
                 
             }
             
+        }
+
+        [HttpGet]
+        [ActionName("Delete")]
+        public async Task<IActionResult> ConfirmDelete(int? id)
+        {
+            if (id != null)
+            {
+                BTPilotsModel pilot = await db.BtPilotEF.FirstOrDefaultAsync(p => p.Id == id);
+                if (pilot != null)
+                    return View(pilot);
+            }
+            return NotFound();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(int? Id)
+        {
+            if (Id != null)
+            {
+                BTPilotsModel pilot = await db.BtPilotEF.FirstOrDefaultAsync(p => p.Id == Id);
+
+                if (pilot != null)
+                {
+                    //Удалить связь пилота и меха
+                    BTMechsModel currentMech = db.BtEF.FirstOrDefault(b => b.BTPilotsModelId == pilot.Id);
+
+                    if (currentMech != null)
+                    {
+                        //Убераем связь пилота с текущем мехом
+                        currentMech.BTPilotsModelId = null;
+
+                        db.BtEF.Update(currentMech);
+
+                        //Удаляем пилота
+                        db.BtPilotEF.Remove(pilot);
+                        await db.SaveChangesAsync();
+
+                        return RedirectToAction("Index");
+                    }
+
+                    db.BtPilotEF.Remove(pilot);
+                    await db.SaveChangesAsync();
+
+                    return RedirectToAction("Index");
+                }
+            }
+            return NotFound();
         }
     }
 }
