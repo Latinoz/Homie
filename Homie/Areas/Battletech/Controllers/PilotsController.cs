@@ -85,7 +85,13 @@ namespace Homie.Areas.Battletech.Controllers
 
                 if (pilot != null)
                 {
-                    List<BTMechsModel> mechs = db.BtEF.Where(a => a.UserUid == userId).ToList();
+                    List<BTMechsModel> mechs = db.BtEF.Where(a => a.UserUid == userId).ToList();   
+                    
+                    BTMechsModel item = new BTMechsModel();
+                    item.Id = 0;
+                    item.Name = "";                   
+
+                    mechs.Insert(0, item);                    
 
                     ViewBag.ListofMechs = mechs;
 
@@ -103,19 +109,19 @@ namespace Homie.Areas.Battletech.Controllers
 
             pilot.UserUid = userId;
 
-            if(pilot.MechId != 0)
+            if (pilot.MechId != 0)
             {
                 BTMechsModel currentMech = db.BtEF.FirstOrDefault(b => b.BTPilotsModelId == pilot.Id);
 
                 BTMechsModel changedMech = db.BtEF.FirstOrDefault(b => b.Id == pilot.MechId);
 
-                if(currentMech != null)
+                if (currentMech != null)
                 {
                     //Убераем связь пилота с текущем мехом
                     currentMech.BTPilotsModelId = null;
                 }
-                
-                if(changedMech.BTPilotsModelId != null)
+
+                if (changedMech.BTPilotsModelId != null)
                 {
                     //Убераем свзяь меха(в котором меняем пилота) и пилота который сейчас связан с ним (MechId)
                     BTPilotsModel changedPilot = db.BtPilotEF.FirstOrDefault(p => p.Id == changedMech.BTPilotsModelId);
@@ -124,22 +130,36 @@ namespace Homie.Areas.Battletech.Controllers
                 }
 
                 //Устанавляиваем связь пилота с другим мехом
-                
                 changedMech.BTPilotsModelId = pilot.Id;
 
                 db.BtEF.Update(changedMech);
 
-                db.BtPilotEF.Update(pilot);                
+                db.BtPilotEF.Update(pilot);
 
                 await db.SaveChangesAsync();
 
                 return RedirectToAction("Index");
-            }            
+            }
+            else 
+            {
+                BTMechsModel currentMech = db.BtEF.FirstOrDefault(b => b.BTPilotsModelId == pilot.Id);
 
-            db.BtPilotEF.Update(pilot);
-            await db.SaveChangesAsync();
+                if (currentMech != null)
+                {
+                    //Убераем связь пилота с текущем мехом
+                    currentMech.BTPilotsModelId = null;
+                }
 
-            return RedirectToAction("Index");
+                db.BtEF.Update(currentMech);
+
+                db.BtPilotEF.Update(pilot);
+
+                await db.SaveChangesAsync();
+
+                return RedirectToAction("Index");
+                
+            }
+            
         }
     }
 }
