@@ -77,27 +77,23 @@ namespace Homie.Areas.Battletech.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id != null)
-            {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-                BTPilotsModel pilot = await db.BtPilotEF.FirstOrDefaultAsync(p => p.Id == id);                
+            BTPilotsModel pilot = await db.BtPilotEF.FirstOrDefaultAsync(p => p.Id == id && p.UserUid == userId);
 
-                if (pilot != null)
-                {
-                    List<BTMechsModel> mechs = db.BtEF.Where(a => a.UserUid == userId).ToList();   
+            if (id != null && pilot != null)
+            {             
+               List<BTMechsModel> mechs = db.BtEF.Where(a => a.UserUid == userId).ToList();   
                     
-                    BTMechsModel item = new BTMechsModel();
-                    item.Id = 0;
-                    item.Name = "";                   
+               BTMechsModel item = new BTMechsModel();
+               item.Id = 0;
+               item.Name = "";                   
 
-                    mechs.Insert(0, item);                    
+               mechs.Insert(0, item);                    
 
-                    ViewBag.ListofMechs = mechs;
+               ViewBag.ListofMechs = mechs;
 
-                    return View(pilot);
-                }
-                    
+               return View(pilot);                    
             }
             return NotFound();
         }
