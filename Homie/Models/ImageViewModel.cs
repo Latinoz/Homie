@@ -28,7 +28,7 @@ namespace Homie.Models
         public string? tempTypeMech { get; set; }
 
         [TempData]
-        public string? tempUidImgMech { get; set; }
+        public string? tempUidMech { get; set; }
 
         [TempData]
         public int? tempIdMech { get; set; }

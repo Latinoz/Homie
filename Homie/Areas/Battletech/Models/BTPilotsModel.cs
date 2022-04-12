@@ -7,7 +7,10 @@ namespace Homie.Areas.Battletech.Models
     public class BTPilotsModel
     {
         public int Id { get; set; }
-        public string Name { get; set; }        
+        public string Name { get; set; }
+
+        [Column(TypeName = "varchar(255)")]
+        public string PilotUid { get; set; }
         public int Experience { get; set; }        
         public int Sent { get; set; }
         public int Return { get; set; }        

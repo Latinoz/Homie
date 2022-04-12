@@ -60,6 +60,9 @@ namespace Homie.Areas.Battletech.Controllers
 
             pilot.UserUid = userId;
 
+            //Добавление GUID для пилота
+            pilot.PilotUid = Guid.NewGuid().ToString();
+
             BTMechsModel mech = db.BtEF.FirstOrDefault(b => b.Id == pilot.MechId);           
 
             db.BtPilotEF.Add(pilot);

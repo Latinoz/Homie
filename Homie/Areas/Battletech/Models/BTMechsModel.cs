@@ -9,6 +9,9 @@ namespace Homie.Areas.Battletech.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
+
+        [Column(TypeName = "varchar(255)")]
+        public string MechUid { get; set; }
         public int Tonnage { get; set; }        
         public int Experience { get; set; }
         public int Bv { get; set; }        

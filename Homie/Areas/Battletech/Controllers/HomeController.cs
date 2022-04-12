@@ -66,8 +66,8 @@ namespace Homie.Areas.Battletech.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            var model = new BTMechsModel();            
-            
+            BTMechsModel model = new BTMechsModel();
+
             ViewBag.Img_ID_trns = TempData["Image_ID"];
 
             //Нужно ViewBag.Img_UID_trns и TempData["Image_UID"]?
@@ -75,7 +75,7 @@ namespace Homie.Areas.Battletech.Controllers
 
             ViewBag.temp_BV_trns = TempData["temp_BV"];
             ViewBag.temp_Tonnage_trns = TempData["temp_Tonnage"];
-            ViewBag.temp_Name_trns = TempData["temp_Name"];
+            ViewBag.temp_Name_trns = TempData["temp_Name"];            
 
             //Слово Изображение: Добавлено
             ViewBag.temp_PicAdd = TempData["temp_PicAdd"];
@@ -103,7 +103,10 @@ namespace Homie.Areas.Battletech.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
            
             mech.UserUid = userId;
-           
+
+            //
+            mech.MechUid = Guid.NewGuid().ToString();
+
             //Картинка заглушка id 55 в таблице Picture
             var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel);           
 
@@ -162,7 +165,7 @@ namespace Homie.Areas.Battletech.Controllers
             TempData["temp_BV"] = pvm.tempBV;
             TempData["temp_Tonnage"] = pvm.tempTonnage;
             TempData["temp_Name"] = pvm.tempName;
-            TempData["temp_TypeMech"] = pvm.tempTypeMech;
+            TempData["temp_TypeMech"] = pvm.tempTypeMech;            
 
             return RedirectToAction("Create");
         }
@@ -234,7 +237,11 @@ namespace Homie.Areas.Battletech.Controllers
             {
                 mech.TypeMech = pvm.tempTypeMech;
             }
-            
+            if (pvm.tempUidMech != null)
+            {
+                mech.MechUid = pvm.tempUidMech;
+            }
+
             db.BtEF.Update(mech);
             await db.SaveChangesAsync();
             
