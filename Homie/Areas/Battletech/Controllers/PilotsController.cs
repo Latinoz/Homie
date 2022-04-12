@@ -46,7 +46,13 @@ namespace Homie.Areas.Battletech.Controllers
 
             List<BTMechsModel> mechs = new List<BTMechsModel>();
 
+            BTMechsModel item = new BTMechsModel();
+            item.Id = 0;
+            item.Name = "";            
+
             mechs = db.BtEF.Where(a => a.UserUid == userId && a.BTPilotsModelId == null).ToList();
+
+            mechs.Insert(0, item);
 
             ViewBag.ListofMechs = mechs;
 
@@ -68,11 +74,16 @@ namespace Homie.Areas.Battletech.Controllers
             db.BtPilotEF.Add(pilot);
             db.SaveChanges();            
 
-            mech.BTPilotsModelId = pilot.Id;
+            if(pilot.MechId != 0) 
+            {
+                mech.BTPilotsModelId = pilot.Id;
 
-            db.BtEF.Update(mech);
+                db.BtEF.Update(mech);
 
-            await db.SaveChangesAsync();
+                await db.SaveChangesAsync();
+
+                return RedirectToAction("Index");
+            }
 
             return RedirectToAction("Index");
         }
