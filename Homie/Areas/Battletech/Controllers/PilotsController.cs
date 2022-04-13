@@ -156,9 +156,9 @@ namespace Homie.Areas.Battletech.Controllers
                 {
                     //Убераем связь пилота с текущем мехом
                     currentMech.BTPilotsModelId = null;
-                }
 
-                db.BtEF.Update(currentMech);
+                    db.BtEF.Update(currentMech);
+                }                
 
                 db.BtPilotEF.Update(pilot);
 
