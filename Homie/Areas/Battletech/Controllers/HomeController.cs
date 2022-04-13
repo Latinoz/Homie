@@ -51,14 +51,16 @@ namespace Homie.Areas.Battletech.Controllers
                 //Удаление картинки из Picture, если не был Добавлен мех
                 Image imgtemp = db.Picture.Where(o => o.Id == Id).FirstOrDefault();
 
-                //Проверка, что не удалится картинка заглушка
-                if(imgtemp.Id != notDel)
+                //Проверка, что не удалится картинка заглушка и картинка существует
+                if (imgtemp != null && imgtemp.Id != notDel) 
                 {
-                    db.Picture.Remove(imgtemp);
-                }                
+                   db.Picture.Remove(imgtemp);
 
-                await db.SaveChangesAsync();
-                return RedirectToAction("Index");
+                   await db.SaveChangesAsync();
+                   return RedirectToAction("Index");                    
+                }
+
+                return NotFound();
             }
             return NotFound();
         }
@@ -171,11 +173,11 @@ namespace Homie.Areas.Battletech.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(string? id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(p => p.Id == id && p.UserUid == userId);
+            BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(p => p.MechUid == id && p.UserUid == userId);
 
             if (id != null && mech != null)
             { 
@@ -245,17 +247,17 @@ namespace Homie.Areas.Battletech.Controllers
             db.BtEF.Update(mech);
             await db.SaveChangesAsync();
             
-            return RedirectToAction("Edit", new { id = mech.Id});
+            return RedirectToAction("Edit", new { id = mech.MechUid});
         }
 
         [HttpGet]
         [ActionName("DeleteImgMech")]
-        public async Task<IActionResult> ConfirmDeleteImgMech(int? id)
+        public async Task<IActionResult> ConfirmDeleteImgMech(string? id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             //Получение обьекта мех
-            BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(s => s.Id == id && s.UserUid == userId);
+            BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(s => s.MechUid == id && s.UserUid == userId);
 
             if (id != null && mech != null)
             {
@@ -265,12 +267,12 @@ namespace Homie.Areas.Battletech.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> DeleteImgMech(int? Id)
+        public async Task<IActionResult> DeleteImgMech(string? Id)
         {
             if (Id != null)
             {
                 //Получение обьекта мех
-                BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(s => s.Id == Id);
+                BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(s => s.MechUid == Id);
 
                 if (mech.Avatar != null)
                 {
@@ -281,7 +283,7 @@ namespace Homie.Areas.Battletech.Controllers
                     db.BtEF.Update(mech);
                     await db.SaveChangesAsync();
 
-                    return RedirectToAction("Edit", new { id = mech.Id });
+                    return RedirectToAction("Edit", new { id = mech.MechUid });
                 }
             }
             return NotFound();
@@ -290,11 +292,11 @@ namespace Homie.Areas.Battletech.Controllers
 
         [HttpGet]
         [ActionName("Delete")]
-        public async Task<IActionResult> ConfirmDelete(int? id)
+        public async Task<IActionResult> ConfirmDelete(string? id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(p => p.Id == id && p.UserUid == userId);
+            BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(p => p.MechUid == id && p.UserUid == userId);
 
             if (id != null && mech != null)
             {  
@@ -304,11 +306,11 @@ namespace Homie.Areas.Battletech.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int? Id)
+        public async Task<IActionResult> Delete(string? Id)
         {
             if (Id != null)
             {                
-                BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(p => p.Id == Id);
+                BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(p => p.MechUid == Id);
 
                 if (mech != null)
                 {
