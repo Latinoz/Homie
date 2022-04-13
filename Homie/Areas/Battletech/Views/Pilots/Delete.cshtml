@@ -14,7 +14,7 @@
     </dl>
     <p></p>
     <div>
-        <form asp-controller="Pilots" asp-action="Delete" asp-route-id="@Model.Id" method="post">
+        <form asp-controller="Pilots" asp-action="Delete" asp-route-id="@Model.PilotUid" method="post">
             <div class="form-group">
                 <input type="submit" class="btn btn-danger" value="Удалить" />
                 <a asp-action="Index" asp-controller="Pilots" asp-area="Battletech"

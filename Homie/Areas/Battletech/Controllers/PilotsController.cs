@@ -89,11 +89,11 @@ namespace Homie.Areas.Battletech.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Edit(int? id)
+        public async Task<IActionResult> Edit(string? id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            BTPilotsModel pilot = await db.BtPilotEF.FirstOrDefaultAsync(p => p.Id == id && p.UserUid == userId);
+            BTPilotsModel pilot = await db.BtPilotEF.FirstOrDefaultAsync(p => p.PilotUid == id && p.UserUid == userId);
 
             if (id != null && pilot != null)
             {             
@@ -172,11 +172,11 @@ namespace Homie.Areas.Battletech.Controllers
 
         [HttpGet]
         [ActionName("Delete")]
-        public async Task<IActionResult> ConfirmDelete(int? id)
+        public async Task<IActionResult> ConfirmDelete(string? id)
         {
             if (id != null)
             {
-                BTPilotsModel pilot = await db.BtPilotEF.FirstOrDefaultAsync(p => p.Id == id);
+                BTPilotsModel pilot = await db.BtPilotEF.FirstOrDefaultAsync(p => p.PilotUid == id);
                 if (pilot != null)
                     return View(pilot);
             }
@@ -184,11 +184,11 @@ namespace Homie.Areas.Battletech.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int? Id)
+        public async Task<IActionResult> Delete(string? Id)
         {
             if (Id != null)
             {
-                BTPilotsModel pilot = await db.BtPilotEF.FirstOrDefaultAsync(p => p.Id == Id);
+                BTPilotsModel pilot = await db.BtPilotEF.FirstOrDefaultAsync(p => p.PilotUid == Id);
 
                 if (pilot != null)
                 {
