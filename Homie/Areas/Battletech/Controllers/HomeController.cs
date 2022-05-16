@@ -32,8 +32,11 @@ namespace Homie.Areas.Battletech.Controllers
         public IActionResult Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                    
-            IQueryable<BTMechsModel> mechs = db.BtEF.Where(a => a.UserUid == userId);            
+
+            List<BTMechsModel> mechs = new List<BTMechsModel>();            
+
+            mechs = db.BtEF.Where(a => a.UserUid == userId)
+                .Include(u => u.BTPilotsModel).ToList();
 
             IndexViewModel viewModel = new IndexViewModel
             {
