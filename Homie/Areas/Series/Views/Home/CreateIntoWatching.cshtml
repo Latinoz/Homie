@@ -1,0 +1,46 @@
+﻿@model Homie.Areas.Series.Models.MoviesModel
+
+@{
+    ViewBag.Title = "Добавить";
+    
+}
+
+<style>
+        .text-input-width {
+            width: 328px;
+        }
+
+        .number-input-width {
+            width: 80px;
+        }
+</style>
+
+<form asp-action="CreateIntoWatching" asp-controller="home">
+    <div class="form-group">
+        <label asp-for="Name" class="control-label">Название</label>
+        <input type="text" asp-for="Name" class="form-control text-input-width" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Link" class="control-label">Ссылка</label>
+        <input type="text" asp-for="Link" class="form-control text-input-width" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Category" class="control-label">Категория</label>
+        <input type="text" asp-for="Category" class="form-control text-input-width" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Season" class="control-label">Сезон</label>
+        <input type="number" asp-for="Season" class="form-control number-input-width" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Episode" class="control-label">Серия</label>
+        <input type="number" asp-for="Episode" class="form-control number-input-width" />
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Добавить" class="btn btn-primary" />
+        <a asp-action="Watching" asp-controller="Home" asp-area="Series"
+           class="btn btn-primary"
+           role="button">Назад</a>
+    </div>
+</form>

@@ -82,13 +82,18 @@ namespace Homie.Areas.Series.Controllers
             return View(viewModel);
         }
 
-        public IActionResult Create()
+        public IActionResult CreateIntoMovies()
+        {
+            return View();
+        }
+
+        public IActionResult CreateIntoWatching()
         {
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(MoviesModel movie)
+        public async Task<IActionResult> CreateIntoMovies(MoviesModel movie)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -97,6 +102,20 @@ namespace Homie.Areas.Series.Controllers
             db.MoviesEF.Add(movie);
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateIntoWatching(MoviesModel movie)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            movie.UserUid = userId;
+
+            movie.Watching = true;
+
+            db.MoviesEF.Add(movie);
+            await db.SaveChangesAsync();
+            return RedirectToAction("Watching");
         }
 
         public async Task<IActionResult> GoToArchive(int? Id)
@@ -213,11 +232,18 @@ namespace Homie.Areas.Series.Controllers
                     db.MoviesEF.Remove(movie);
                     await db.SaveChangesAsync();
 
-                    if(movie.Archive == false)
+                    if(movie.Archive == false && movie.Watching == false)
                     {
                         return RedirectToAction("Index");
                     }
-                    return RedirectToAction("ArchMovies", "Home", new { area = "Series" });
+                    else if(movie.Archive == false && movie.Watching == true)
+                    {
+                        return RedirectToAction("Watching");
+                    }
+                    else
+                    {
+                        return RedirectToAction("ArchMovies", "Home", new { area = "Series" });
+                    }                    
                 }
             }
             return NotFound();
