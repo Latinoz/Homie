@@ -60,8 +60,10 @@
                 </td>
 
                 <td>
-                    <a asp-action="BackToList" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-secondary"
-                       role="button">Вернуть</a>
+                    <a asp-action="FromArchiveGoToWatching" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-primary"
+                       role="button">В Просмотр</a>
+                    <a asp-action="FromArchiveGoToIndex" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-secondary"
+                       role="button">В Список</a>
                     <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
                        role="button">Изменить</a>
                     <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
