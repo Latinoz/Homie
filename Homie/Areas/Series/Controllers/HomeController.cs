@@ -7,12 +7,13 @@ using Homie.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Homie.Models;
+using SmartBreadcrumbs.Attributes;
 
 namespace Homie.Areas.Series.Controllers
 {
     [Area("Series")]
     [Authorize(Roles = "admin,user")]
-    
+    //[DefaultBreadcrumb]
     public class HomeController : Controller
     {
         ApplicationDbContext db;
@@ -22,7 +23,9 @@ namespace Homie.Areas.Series.Controllers
             db = context;
         }
 
-        [HttpGet]
+        //[DefaultBreadcrumb(OverwriteTitleOnExactMatch = true, Title = "Test112")]
+        [DefaultBreadcrumb(Title = "Test112")]
+        [HttpGet]        
         public async Task<IActionResult> Index(int page = 1)       {
             int pageSize = 40;   // количество элементов на странице
 
@@ -41,6 +44,7 @@ namespace Homie.Areas.Series.Controllers
             return View(viewModel);
         }
 
+        [Breadcrumb(Title = "Тестинг")]
         [HttpGet]
         public async Task<IActionResult> Watching(int page = 1)
         {

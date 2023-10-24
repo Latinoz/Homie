@@ -4,7 +4,6 @@
     Layout = "_LayoutLogin";
 }
 
-
 <style>
     * {
     box-sizing: border-box;
@@ -63,15 +62,6 @@ h1 {
     color: #0AC986 !important
 }
 
-/*Здесь если вводишь пароль и/или email вводит буквы белым цветом (непонятно зачем делали)*/
-/*.form-control:focus {
-    color: #fff !important;
-    background-color: #fff;
-    border-color: #fff !important;
-    outline: none;
-    box-shadow: none
-}*/
-
 .log-status.wrong-entry .form-control,
 .wrong-entry .form-control+.mdi {
     border-color: #ed1c24;
@@ -79,8 +69,8 @@ h1 {
 }
 
 .log-btn {
-    background: #3f51b5;
-    dispaly: inline-block;
+    background: #008080;
+    display: inline-block;
     width: 100%;
     font-size: 16px;
     height: 50px;
@@ -125,30 +115,8 @@ a {
         <span asp-validation-for="Password"></span>
     </div> 
 
-    <span class="alert">Invalid Credentials</span> 
-    @*<a class="link" href="#">Lost your password?</a> *@
+    <span class="alert">Invalid Credentials</span>
 
     <button type="submit" class="log-btn"><i class="mdi mdi-account"></i>Вход</button>
 </div>
 </form>
-
-@*<h2>Вход в приложение</h2>
-<form method="post" asp-controller="Account" asp-action="Login"
-      asp-route-returnUrl="@Model.ReturnUrl">
-    <div asp-validation-summary="ModelOnly"></div>
-    <div>
-        <label asp-for="Email"></label><br />
-        <input asp-for="Email" />
-        <span asp-validation-for="Email"></span>
-    </div>
-    <div>
-        <label asp-for="Password"></label><br />
-        <input asp-for="Password" />
-        <span asp-validation-for="Password"></span>
-    </div>   
-
-    <p></p>
-    <div>
-        <input type="submit" value="Войти" />
-    </div>
-</form>*@

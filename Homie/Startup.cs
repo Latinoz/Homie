@@ -1,22 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Homie.Areas.Series.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Pomelo.EntityFrameworkCore;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
-using Pomelo.EntityFrameworkCore.MySql.Storage.Internal;
 using Microsoft.AspNetCore.Identity;
 using Homie.Data.Models;
 using Homie.Areas.Identity.Models;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using SmartBreadcrumbs.Extensions;
+using System.Reflection;
 
 namespace Homie
 {
@@ -62,6 +55,15 @@ namespace Homie
 
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            services.AddBreadcrumbs(Assembly.GetExecutingAssembly(), options =>
+            {
+                options.TagName = "nav";
+                options.TagClasses = "";
+                options.OlClasses = "breadcrumb";
+                options.LiClasses = "breadcrumb-item";
+                options.ActiveLiClasses = "breadcrumb-item active";
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -87,7 +89,7 @@ namespace Homie
             app.UseAuthentication();    // подключение аутентификации
             app.UseAuthorization();
 
-            //app.UseSession();
+            app.UseSession();
 
             app.UseEndpoints(endpoints =>
             {

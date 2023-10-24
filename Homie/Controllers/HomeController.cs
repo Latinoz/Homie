@@ -9,11 +9,12 @@ using Microsoft.AspNetCore.Hosting;
 using Homie.Models;
 using Homie.Areas.Battletech.Models;
 using System;
+using SmartBreadcrumbs.Attributes;
 
 namespace Homie.Controllers
 {
     
-    [Authorize(Roles = "admin,user")]
+    [Authorize(Roles = "admin,user")]    
     public class HomeController : Controller
     {
         ApplicationDbContext db;
