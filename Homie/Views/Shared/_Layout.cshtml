@@ -57,18 +57,16 @@
             </a>
         </div>
 
-        <a method="post" asp-area="Identity" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-none"><i class="fas fa-sign-in-alt fa-lg"></i>&nbsp;&nbsp; Выход</a>
+        <a method="post" asp-area="Identity" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-none">
+            <i class="fas fa-sign-in-alt fa-lg"></i>&nbsp;&nbsp; Выход</a>
     </div>
 
     <!-- Page Content -->
     <div class="w3-main" style="margin-left:200px">
 
-        <!-- Block Right Page -->
+        <!-- Block Hamburger -->
         <div class="w3-teal">
-            <button class="w3-button w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
-            <div class="w3-container w3-teal">
-                <h1>@ViewBag.HeaderTitle</h1>
-            </div>
+            <button class="w3-button w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>            
         </div>
         <p></p>
 

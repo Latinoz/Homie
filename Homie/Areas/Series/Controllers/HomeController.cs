@@ -12,8 +12,7 @@ using SmartBreadcrumbs.Attributes;
 namespace Homie.Areas.Series.Controllers
 {
     [Area("Series")]
-    [Authorize(Roles = "admin,user")]
-    //[DefaultBreadcrumb]
+    [Authorize(Roles = "admin,user")]    
     public class HomeController : Controller
     {
         ApplicationDbContext db;
@@ -23,8 +22,7 @@ namespace Homie.Areas.Series.Controllers
             db = context;
         }
 
-        //[DefaultBreadcrumb(OverwriteTitleOnExactMatch = true, Title = "Test112")]
-        [DefaultBreadcrumb(Title = "Test112")]
+        [DefaultBreadcrumb("Главная")]        
         [HttpGet]        
         public async Task<IActionResult> Index(int page = 1)       {
             int pageSize = 40;   // количество элементов на странице
@@ -44,7 +42,7 @@ namespace Homie.Areas.Series.Controllers
             return View(viewModel);
         }
 
-        [Breadcrumb(Title = "Тестинг")]
+        [Breadcrumb(Title = "Просмотр")]
         [HttpGet]
         public async Task<IActionResult> Watching(int page = 1)
         {
@@ -65,6 +63,7 @@ namespace Homie.Areas.Series.Controllers
             return View(viewModel);
         }
 
+        [Breadcrumb(Title = "Архив")]
         [HttpGet]
         public async Task<IActionResult> ArchMovies(int page = 1)
         {
@@ -85,12 +84,13 @@ namespace Homie.Areas.Series.Controllers
             return View(viewModel);
         }
 
+        [Breadcrumb(Title = "Добавить")]
         [HttpGet]
         public IActionResult CreateIntoMovies()
         {
             return View();
         }
-
+        
         [HttpGet]
         public IActionResult CreateIntoWatching()
         {
@@ -108,7 +108,7 @@ namespace Homie.Areas.Series.Controllers
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
-
+        
         [HttpPost]
         public async Task<IActionResult> CreateIntoWatching(MoviesModel movie)
         {
@@ -122,7 +122,7 @@ namespace Homie.Areas.Series.Controllers
             await db.SaveChangesAsync();
             return RedirectToAction("Watching");
         }
-
+        
         public async Task<IActionResult> GoToArchive(int? Id)
         {
             if (Id != null)
@@ -196,6 +196,7 @@ namespace Homie.Areas.Series.Controllers
             return NotFound();
         }
 
+        [Breadcrumb(Title = "Изменить")]
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -229,6 +230,7 @@ namespace Homie.Areas.Series.Controllers
             return RedirectToAction("Index");
         }
 
+        [Breadcrumb(Title = "Удалить")]
         [HttpGet]
         [ActionName("Delete")]
         public async Task<IActionResult> ConfirmDelete(int? id)

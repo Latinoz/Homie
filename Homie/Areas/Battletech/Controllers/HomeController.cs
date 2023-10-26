@@ -11,9 +11,10 @@ using System.Security.Claims;
 using Homie.Models;
 using System.IO;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using SmartBreadcrumbs.Attributes;
 
 namespace Homie.Areas.Battletech.Controllers
-{
+{    
     [Area("Battletech")]
     [Authorize(Roles = "admin,user,battletech")]
     public class HomeController : Controller
@@ -27,7 +28,7 @@ namespace Homie.Areas.Battletech.Controllers
         {
             db = context;
         }
-
+        
         [HttpGet]
         public IActionResult Index()
         {
@@ -45,7 +46,6 @@ namespace Homie.Areas.Battletech.Controllers
 
             return View(viewModel);
         }
-
         
         public async Task<IActionResult> DelImgIndex(int? Id)
         {
@@ -67,7 +67,7 @@ namespace Homie.Areas.Battletech.Controllers
             }
             return NotFound();
         }
-
+        
         [HttpGet]
         public IActionResult Create()
         {
@@ -174,7 +174,7 @@ namespace Homie.Areas.Battletech.Controllers
 
             return RedirectToAction("Create");
         }
-
+        
         [HttpGet]
         public async Task<IActionResult> Edit(string? id)
         {
@@ -252,7 +252,7 @@ namespace Homie.Areas.Battletech.Controllers
             
             return RedirectToAction("Edit", new { id = mech.MechUid});
         }
-
+        
         [HttpGet]
         [ActionName("DeleteImgMech")]
         public async Task<IActionResult> ConfirmDeleteImgMech(string? id)
@@ -291,8 +291,7 @@ namespace Homie.Areas.Battletech.Controllers
             }
             return NotFound();
         }
-
-
+        
         [HttpGet]
         [ActionName("Delete")]
         public async Task<IActionResult> ConfirmDelete(string? id)

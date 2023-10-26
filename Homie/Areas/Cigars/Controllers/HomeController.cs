@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Homie.Models;
+using SmartBreadcrumbs.Attributes;
 
 namespace Homie.Areas.Cigars.Controllers
 {
@@ -21,8 +22,8 @@ namespace Homie.Areas.Cigars.Controllers
         public HomeController(ApplicationDbContext context)
         {
             db = context;
-        }        
-
+        }
+        
         public async Task<IActionResult> Index(int? format, string name, int page = 1,
             SortState sortOrder = SortState.NameAsc)
         {
@@ -62,8 +63,7 @@ namespace Homie.Areas.Cigars.Controllers
             // пагинация
             var count = await cigars.CountAsync();
             var items = await cigars.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
-
-            // формируем модель представления
+            
             IndexViewModel viewModel = new IndexViewModel
             {
                 PageViewModel = new PageViewModel(count, page, pageSize),
@@ -73,7 +73,7 @@ namespace Homie.Areas.Cigars.Controllers
             };
             return View(viewModel);
         }
-
+        
         public IActionResult Create()
         {
             List<Format> shapeslist = new List<Format>();
@@ -103,8 +103,8 @@ namespace Homie.Areas.Cigars.Controllers
             db.CigarsEF.Add(cigar);
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
-        }        
-
+        }
+        
         public async Task<IActionResult> Edit(int? id)
         {
             List<Format> shapeslist = new List<Format>();
@@ -141,7 +141,7 @@ namespace Homie.Areas.Cigars.Controllers
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
-
+        
         [HttpGet]
         [ActionName("Delete")]
         public async Task<IActionResult> ConfirmDelete(int? id)
