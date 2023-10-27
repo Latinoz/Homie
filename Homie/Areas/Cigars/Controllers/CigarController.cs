@@ -15,11 +15,11 @@ namespace Homie.Areas.Cigars.Controllers
 {
     [Area("Cigars")]
     [Authorize(Roles = "admin,user")]
-    public class HomeController : Controller
+    public class CigarController : Controller
     {
         ApplicationDbContext db;
 
-        public HomeController(ApplicationDbContext context)
+        public CigarController(ApplicationDbContext context)
         {
             db = context;
         }

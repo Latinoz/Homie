@@ -15,7 +15,7 @@
         }
 </style>
 
-<form asp-controller="Home" asp-action="Create">
+<form asp-controller="Cigar" asp-action="Create">
         <div class="form-group">
             <label asp-for="Name" class="control-label">Название</label>
             <input type="text" asp-for="Name" class="form-control text-input-width" />
@@ -48,7 +48,7 @@
 
         <div class="form-group">
             <input type="submit" value="Добавить" class="btn btn-primary" />
-            <a asp-action="Index" asp-controller="Home" asp-area="Cigars"
+            <a asp-action="Index" asp-controller="Cigar" asp-area="Cigars"
                class="btn btn-primary"
                role="button">Назад</a>
         </div>

@@ -20,7 +20,7 @@
     }
 </style>
 
-<a asp-action="Create" asp-controller="Home" asp-area="Cigars"
+<a asp-action="Create" asp-controller="Cigar" asp-area="Cigars"
    class="btn btn-primary"
    role="button">Добавить</a>
 <p></p>
@@ -73,9 +73,9 @@
                 <td>@p.Strength</td>
                 <td>
 
-                    <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
+                    <a asp-action="Edit" asp-controller="Cigar" asp-route-id="@p.Id" class="btn btn-success"
                        role="button">Изменить</a>
-                    <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
+                    <a asp-action="Delete" asp-controller="Cigar" asp-route-id="@p.Id" class="btn btn-danger"
                        role="button">Удалить</a>
                 </td>
             </tr>
