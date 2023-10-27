@@ -16,7 +16,7 @@
 
 </style>
 
-<form asp-action="Edit" asp-controller="home" asp-route-id="@Model.Id">
+<form asp-action="Edit" asp-controller="Serie" asp-route-id="@Model.Id">
     <div class="form-group">
         <label asp-for="Name" class="control-label">Название</label>
         <input type="text" asp-for="Name" class="form-control text-input-width" />
@@ -52,15 +52,15 @@
 
         @if (Model.Archive == true)
         {
-            <a asp-action="ArchMovies" asp-controller="Home" asp-area="Series" class="btn btn-danger" role="button">Назад</a>
+            <a asp-action="ArchMovies" asp-controller="Serie" asp-area="Series" class="btn btn-danger" role="button">Назад</a>
         }
         else if (Model.Watching == true)
         {
-            <a asp-action="Watching" asp-controller="Home" asp-area="Series" class="btn btn-danger" role="button">Назад</a>
+            <a asp-action="Watching" asp-controller="Serie" asp-area="Series" class="btn btn-danger" role="button">Назад</a>
         }
         else
         {
-            <a asp-action="Index" asp-controller="Home" asp-area="Series" class="btn btn-danger" role="button">Назад</a>
+            <a asp-action="Index" asp-controller="Serie" asp-area="Series" class="btn btn-danger" role="button">Назад</a>
         }
 
 

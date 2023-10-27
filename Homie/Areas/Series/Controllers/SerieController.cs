@@ -13,11 +13,11 @@ namespace Homie.Areas.Series.Controllers
 {
     [Area("Series")]
     [Authorize(Roles = "admin,user")]    
-    public class HomeController : Controller
+    public class SerieController : Controller
     {
         ApplicationDbContext db;
 
-        public HomeController(ApplicationDbContext context)
+        public SerieController(ApplicationDbContext context)
         {            
             db = context;
         }
@@ -134,7 +134,7 @@ namespace Homie.Areas.Series.Controllers
                 
                 if (movie.Watching == true)
                 {
-                    return RedirectToAction("Watching", "Home", new { area = "Series" });
+                    return RedirectToAction("Watching", "Serie", new { area = "Series" });
                 }
 
                 return RedirectToAction("Index");
@@ -221,11 +221,11 @@ namespace Homie.Areas.Series.Controllers
 
             if (movie.Archive == true && movie.Watching == false)
             {
-                return RedirectToAction("ArchMovies", "Home", new { area = "Series" });
+                return RedirectToAction("ArchMovies", "Serie", new { area = "Series" });
             }
             else if(movie.Archive == false && movie.Watching == true)
             {
-                return RedirectToAction("Watching", "Home", new { area = "Series" });
+                return RedirectToAction("Watching", "Serie", new { area = "Series" });
             }            
             return RedirectToAction("Index");
         }
@@ -265,7 +265,7 @@ namespace Homie.Areas.Series.Controllers
                     }
                     else
                     {
-                        return RedirectToAction("ArchMovies", "Home", new { area = "Series" });
+                        return RedirectToAction("ArchMovies", "Serie", new { area = "Series" });
                     }                    
                 }
             }

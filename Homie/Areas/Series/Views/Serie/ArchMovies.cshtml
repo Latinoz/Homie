@@ -2,8 +2,8 @@
 @model IndexViewModel
 
 @{
-    ViewBag.Title = "Список сериалов";
-    ViewBag.HeaderTitle = "Сериалы - [Список]";
+    ViewBag.Title = "Архив сериалов";
+    ViewBag.HeaderTitle = "Сериалы - [Архив]";
 }
 
 <style>
@@ -38,11 +38,6 @@
     }
 </style>
 
-<a asp-action="CreateIntoMovies" asp-controller="Home" asp-area="Series"
-   class="btn btn-primary"
-   role="button">Добавить</a>
-<p></p>
-
 <div class="scroll-x">
     <table class="table table-bordered table-striped table-sm">
         <tr><th>Название</th><th>Сезон</th><th>Серия</th><th>Жанр</th><th>Стоп Время</th><th></th></tr>
@@ -65,13 +60,13 @@
                 </td>
 
                 <td>
-                    <a asp-action="GoToWatching" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-primary"
+                    <a asp-action="FromArchiveGoToWatching" asp-controller="Serie" asp-route-id="@p.Id" class="btn btn-primary"
                        role="button">В Просмотр</a>
-                    <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-success"
+                    <a asp-action="FromArchiveGoToIndex" asp-controller="Serie" asp-route-id="@p.Id" class="btn btn-secondary"
+                       role="button">В Список</a>
+                    <a asp-action="Edit" asp-controller="Serie" asp-route-id="@p.Id" class="btn btn-success"
                        role="button">Изменить</a>
-                    <a asp-action="GoToArchive" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-secondary"
-                       role="button">В Архив</a>
-                    <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.Id" class="btn btn-danger"
+                    <a asp-action="Delete" asp-controller="Serie" asp-route-id="@p.Id" class="btn btn-danger"
                        role="button">Удалить</a>
                 </td>
             </tr>
@@ -82,7 +77,7 @@
 
     @if (Model.PageViewModel.HasPreviousPage)
     {
-        <a asp-action="Index"
+        <a asp-action="ArchMovies"
            asp-route-page="@(Model.PageViewModel.PageNumber - 1)"
            class="btn btn-outline-dark">
             <i class="glyphicon glyphicon-chevron-left"></i>
@@ -91,7 +86,7 @@
     }
     @if (Model.PageViewModel.HasNextPage)
     {
-        <a asp-action="Index"
+        <a asp-action="ArchMovies"
            asp-route-page="@(Model.PageViewModel.PageNumber + 1)"
            class="btn btn-outline-dark">
             Вперед
@@ -99,4 +94,3 @@
         </a>
     }
     <p></p>
-

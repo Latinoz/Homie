@@ -15,7 +15,7 @@
         }
 </style>
 
-<form asp-action="CreateIntoMovies" asp-controller="home">
+<form asp-action="CreateIntoWatching" asp-controller="Serie">
     <div class="form-group">
         <label asp-for="Name" class="control-label">Название</label>
         <input type="text" asp-for="Name" class="form-control text-input-width" />
@@ -39,7 +39,7 @@
 
     <div class="form-group">
         <input type="submit" value="Добавить" class="btn btn-primary" />
-        <a asp-action="Index" asp-controller="Home" asp-area="Series"
+        <a asp-action="Watching" asp-controller="Serie" asp-area="Series"
            class="btn btn-primary"
            role="button">Назад</a>
     </div>
