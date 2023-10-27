@@ -21,8 +21,8 @@ namespace Homie.Areas.Series.Controllers
         {            
             db = context;
         }
-
-        [DefaultBreadcrumb("Главная")]        
+        
+        [Breadcrumb(Title = "Список")]
         [HttpGet]        
         public async Task<IActionResult> Index(int page = 1)       {
             int pageSize = 40;   // количество элементов на странице

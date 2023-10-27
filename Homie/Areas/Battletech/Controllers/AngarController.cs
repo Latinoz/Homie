@@ -28,7 +28,8 @@ namespace Homie.Areas.Battletech.Controllers
         {
             db = context;
         }
-        
+
+        [Breadcrumb(Title = "Ангар")]
         [HttpGet]
         public IActionResult Index()
         {
@@ -67,7 +68,8 @@ namespace Homie.Areas.Battletech.Controllers
             }
             return NotFound();
         }
-        
+
+        [Breadcrumb(Title = "Добавить")]
         [HttpGet]
         public IActionResult Create()
         {
@@ -174,7 +176,8 @@ namespace Homie.Areas.Battletech.Controllers
 
             return RedirectToAction("Create");
         }
-        
+
+        [Breadcrumb(Title = "Изменить")]
         [HttpGet]
         public async Task<IActionResult> Edit(string? id)
         {
@@ -252,7 +255,8 @@ namespace Homie.Areas.Battletech.Controllers
             
             return RedirectToAction("Edit", new { id = mech.MechUid});
         }
-        
+
+        [Breadcrumb(Title = "Удалить")]
         [HttpGet]
         [ActionName("DeleteImgMech")]
         public async Task<IActionResult> ConfirmDeleteImgMech(string? id)
@@ -291,7 +295,8 @@ namespace Homie.Areas.Battletech.Controllers
             }
             return NotFound();
         }
-        
+
+        [Breadcrumb(Title = "Удалить")]
         [HttpGet]
         [ActionName("Delete")]
         public async Task<IActionResult> ConfirmDelete(string? id)

@@ -4,6 +4,7 @@ using Homie.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SmartBreadcrumbs.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,7 @@ namespace Homie.Areas.Battletech.Controllers
             db = context;
         }
 
+        [Breadcrumb(Title = "Пилоты")]
         [HttpGet]
         public IActionResult Index()
         {
@@ -37,6 +39,7 @@ namespace Homie.Areas.Battletech.Controllers
             return View(pilots);            
         }
 
+        [Breadcrumb(Title = "Добавить")]
         [HttpGet]
         public IActionResult Create()
         {
@@ -88,6 +91,7 @@ namespace Homie.Areas.Battletech.Controllers
             return RedirectToAction("Index");
         }
 
+        [Breadcrumb(Title = "Изменить")]
         [HttpGet]
         public async Task<IActionResult> Edit(string? id)
         {
@@ -172,6 +176,7 @@ namespace Homie.Areas.Battletech.Controllers
             
         }
 
+        [Breadcrumb(Title = "Удалить")]
         [HttpGet]
         [ActionName("Delete")]
         public async Task<IActionResult> ConfirmDelete(string? id)

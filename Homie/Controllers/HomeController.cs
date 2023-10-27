@@ -26,6 +26,7 @@ namespace Homie.Controllers
             _appEnvironment = appEnvironment;
         }
 
+        [DefaultBreadcrumb("Главная")]
         [HttpGet]
         public IActionResult Index()
         {
