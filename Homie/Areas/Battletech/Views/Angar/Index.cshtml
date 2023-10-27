@@ -30,7 +30,7 @@
     }
 </style>
 
-<a asp-action="Create" asp-controller="Home" asp-area="Battletech"
+<a asp-action="Create" asp-controller="Angar" asp-area="Battletech"
    class="btn btn-primary"
    role="button">Добавить</a>
 <p></p>
@@ -70,10 +70,10 @@
 
         <td style="vertical-align: middle">
             <div class="buttons">
-                <a asp-action="Edit" asp-controller="Home" asp-route-id="@p.MechUid" class="btn btn-success"
+                <a asp-action="Edit" asp-controller="Angar" asp-route-id="@p.MechUid" class="btn btn-success"
                    role="button">Изменить</a><p></p>
 
-                <a asp-action="Delete" asp-controller="Home" asp-route-id="@p.MechUid" class="btn btn-danger"
+                <a asp-action="Delete" asp-controller="Angar" asp-route-id="@p.MechUid" class="btn btn-danger"
                    role="button">Удалить</a><p></p>
             </div>
         </td>

@@ -17,14 +17,14 @@ namespace Homie.Areas.Battletech.Controllers
 {    
     [Area("Battletech")]
     [Authorize(Roles = "admin,user,battletech")]
-    public class HomeController : Controller
+    public class AngarController : Controller
     {
         ApplicationDbContext db;
 
         //заглушка id 55 в таблице Picture
         const int notDel = 55;
 
-        public HomeController(ApplicationDbContext context)
+        public AngarController(ApplicationDbContext context)
         {
             db = context;
         }

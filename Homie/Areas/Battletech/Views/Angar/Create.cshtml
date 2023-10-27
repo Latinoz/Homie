@@ -14,7 +14,7 @@
     }
 </style>
 
-<form asp-action="Create" asp-controller="home">
+<form asp-action="Create" asp-controller="Angar">
     <div class="form-group">
         <label asp-for="Name" class="control-label">Название</label>
         <input type="text" asp-for="Name" value="@ViewBag.temp_Name_trns" class="form-control text-input-width" id="inputName" />
@@ -45,11 +45,11 @@
             <input type="submit" value="Добавить" class="btn btn-primary" />
             @if (ViewBag.Img_ID_trns == null)
             {
-                <a asp-action="Index" asp-controller="Home" asp-area="Battletech" class="btn btn-danger" role="button">Назад</a>
+                <a asp-action="Index" asp-controller="Angar" asp-area="Battletech" class="btn btn-danger" role="button">Назад</a>
             }
             else
             {
-                <a asp-action="DelImgIndex" asp-controller="Home" asp-area="Battletech" asp-route-id="@ViewBag.Img_ID_trns"
+                <a asp-action="DelImgIndex" asp-controller="Angar" asp-area="Battletech" asp-route-id="@ViewBag.Img_ID_trns"
                    class="btn btn-danger" role="button">Назад</a>
             }
 
@@ -57,7 +57,7 @@
 </form>
 
 
-<form asp-action="CreateImgMech" asp-controller="Home" asp-area="Battletech" method="post" enctype="multipart/form-data">
+<form asp-action="CreateImgMech" asp-controller="Angar" asp-area="Battletech" method="post" enctype="multipart/form-data">
     <fieldset style="width:328px">
 
         <div class="form-group">

@@ -15,7 +15,7 @@
     }
 </style>
 
-<form asp-action="Edit" asp-controller="home" asp-route-id="@Model.Id">
+<form asp-action="Edit" asp-controller="Angar" asp-route-id="@Model.Id">
     <div class="form-group">
         <label asp-for="Name" class="control-label">Название</label>
         <input type="text" asp-for="Name" class="form-control text-input-width" id="inputName"/>
@@ -41,13 +41,13 @@
 
     <div class="form-group">
         <input type="submit" value="Изменить" class="btn btn-primary" />
-        <a asp-action="Index" asp-controller="Home" asp-area="Battletech"
+        <a asp-action="Index" asp-controller="Angar" asp-area="Battletech"
            class="btn btn-danger"
            role="button">Назад</a>
     </div>
 </form>
 
-<form asp-action="EditImgMech" asp-controller="Home" asp-area="Battletech" method="post" enctype="multipart/form-data">
+<form asp-action="EditImgMech" asp-controller="Angar" asp-area="Battletech" method="post" enctype="multipart/form-data">
     <fieldset style="width:328px">
 
         <div class="form-group">
@@ -62,8 +62,7 @@
             <input name="tempName" type="hidden" id="tempName" />
             <input name="tempTonnage" type="hidden" id="tempTonnage" />
             <input name="tempBV" type="hidden" id="tempBV" />
-            <input name="tempTypeMech" type="hidden" id="tempTypeMech" />
-            @*<input name="tempUidMech" type="hidden" id="tempUidMech" />*@
+            <input name="tempTypeMech" type="hidden" id="tempTypeMech" />            
         </div>
 
     </fieldset>
@@ -74,7 +73,7 @@
         </div>
 </form>
 
-<form asp-controller="Home" asp-action="DeleteImgMech" asp-route-id="@Model.MechUid" method="post">
+<form asp-controller="Angar" asp-action="DeleteImgMech" asp-route-id="@Model.MechUid" method="post">
     
         <div class="form-group">
             <input type="submit" class="btn btn-danger" value="Удалить картинку" />
