@@ -97,22 +97,49 @@ namespace Homie.Areas.Series.Controllers
 
         [Breadcrumb(Title = "Архив")]
         [HttpGet]
-        public async Task<IActionResult> ArchMovies(int page = 1)
+        public async Task<IActionResult> ArchMovies(string name, int page = 1,
+            SortState sortOrder = SortState.NameAsc)
         {
-            int pageSize = 50;   // количество элементов на странице
+            int pageSize = 40;   // количество элементов на странице
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            IQueryable<MoviesModel> source = db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == true);
-            var count = await source.CountAsync();
-            var items = await source.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            IQueryable<MoviesModel> movies = db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == true);
 
-            PageViewModel pageViewModel = new PageViewModel(count, page, pageSize);
+            if (!String.IsNullOrEmpty(name))
+            {
+                movies = movies.Where(p => p.Name.Contains(name));
+            }
+
+            // сортировка
+            switch (sortOrder)
+            {
+                case SortState.NameDesc:
+                    movies = movies.OrderByDescending(s => s.Name);
+                    break;
+                case SortState.FormatAsc:
+                    movies = movies.OrderBy(s => s.Name);
+                    break;
+                case SortState.FormatDesc:
+                    movies = movies.OrderByDescending(s => s.Name);
+                    break;
+                default:
+                    movies = movies.OrderBy(s => s.Name);
+                    break;
+            }
+
+            // пагинация
+            var count = await movies.CountAsync();
+            var items = await movies.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
             IndexViewModel viewModel = new IndexViewModel
             {
-                PageViewModel = pageViewModel,
+                PageViewModel = new PageViewModel(count, page, pageSize),
+                SortViewModel = new SortViewModel(sortOrder),
+                MovieFilterViewModel = new MovieFilterViewModel(name),
                 Series = items
             };
+
             return View(viewModel);
         }
 
