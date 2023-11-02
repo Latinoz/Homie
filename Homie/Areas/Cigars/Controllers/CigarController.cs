@@ -68,7 +68,7 @@ namespace Homie.Areas.Cigars.Controllers
             {
                 PageViewModel = new PageViewModel(count, page, pageSize),
                 SortViewModel = new SortViewModel(sortOrder),
-                FilterViewModel = new FilterViewModel(db.FormatsEF.ToList(), format, name),
+                FilterViewModel = new CigarFilterViewModel(db.FormatsEF.ToList(), format, name),
                 Cigars = items
             };
             return View(viewModel);

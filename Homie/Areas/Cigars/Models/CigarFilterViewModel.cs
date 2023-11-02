@@ -3,13 +3,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Homie.Areas.Cigars.Models;
 
-namespace Homie.Models
+namespace Homie.Areas.Cigars.Models
 {
-    public class FilterViewModel
+    public class CigarFilterViewModel
     {
-        public FilterViewModel(List<Format> formats, int? format, string name)
+        public CigarFilterViewModel(List<Format> formats, int? format, string name)
         {
             // устанавливаем начальный элемент, который позволит выбрать всех
             formats.Insert(0, new Format { ShapeName = "Все", Id = 0 });

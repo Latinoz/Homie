@@ -24,7 +24,8 @@ namespace Homie.Areas.Series.Controllers
         
         [Breadcrumb(Title = "Список")]
         [HttpGet]        
-        public async Task<IActionResult> Index(int page = 1)       {
+        public async Task<IActionResult> Index(int page = 1)       
+        {
             int pageSize = 40;   // количество элементов на странице
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

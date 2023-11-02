@@ -16,7 +16,7 @@ namespace Homie.Models
         public IEnumerable<BTPilotsModel> Pilots { get; set; }
         public IEnumerable<Image> Images { get; set; }
         public PageViewModel PageViewModel { get; set; }
-        public FilterViewModel FilterViewModel { get; set; }
+        public CigarFilterViewModel FilterViewModel { get; set; }
         public SortViewModel SortViewModel { get; set; }
     }
 }
