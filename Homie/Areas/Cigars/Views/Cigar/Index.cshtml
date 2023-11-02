@@ -14,7 +14,6 @@
         background-color: sandybrown;
     }
 
-
     .scroll-x {
         overflow-x: auto;
     }
@@ -28,10 +27,10 @@
 <form method="get">
     <div class="form-inline">
         <label>Название: </label>
-        <input name="name" value="@Model.FilterViewModel.SelectedName" class="form-control" />
+        <input name="name" value="@Model.CigarFilterViewModel.SelectedName" class="form-control" />
 
         <label>Формат: </label>        
-        <select name="format" asp-items="Model.FilterViewModel.Formats" class="form-control"></select>        
+        <select name="format" asp-items="Model.CigarFilterViewModel.Formats" class="form-control"></select>        
 
         <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
     </div>
@@ -48,16 +47,16 @@
             <th>
                 <a asp-action="Index"
                    asp-route-sortOrder="@(Model.SortViewModel.NameSort)"
-                   asp-route-name="@(Model.FilterViewModel.SelectedName)"
-                   asp-route-format="@(Model.FilterViewModel.SelectedFormat)">Название</a>
+                   asp-route-name="@(Model.CigarFilterViewModel.SelectedName)"
+                   asp-route-format="@(Model.CigarFilterViewModel.SelectedFormat)">Название</a>
             </th>
             <th>Страна</th>
             <th>Цена</th>
             <th>Рейтинг</th>
             <th>
                 <a asp-action="Index" asp-route-sortOrder="@(Model.SortViewModel.FormatSort)"
-                   asp-route-name="@(Model.FilterViewModel.SelectedName)"
-                   asp-route-format="@(Model.FilterViewModel.SelectedFormat)">Формат</a>
+                   asp-route-name="@(Model.CigarFilterViewModel.SelectedName)"
+                   asp-route-format="@(Model.CigarFilterViewModel.SelectedFormat)">Формат</a>
             </th>
             <th>Крепость</th>
             <th></th>
@@ -85,8 +84,8 @@
 </div>
     <p></p>
     <page-link page-model="Model.PageViewModel" page-action="Index"
-               page-url-name="@(Model.FilterViewModel.SelectedName)"
-               page-url-format="@(Model.FilterViewModel.SelectedFormat)"
+               page-url-name="@(Model.CigarFilterViewModel.SelectedName)"
+               page-url-format="@(Model.CigarFilterViewModel.SelectedFormat)"
                page-url-sortorder="@(Model.SortViewModel.Current)"></page-link>
 
 
