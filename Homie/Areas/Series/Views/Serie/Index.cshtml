@@ -43,6 +43,16 @@
    role="button">Добавить</a>
 <p></p>
 
+<form method="get">
+    <div class="form-inline">
+        <label>Название: </label>
+        <input name="name" value="@Model.MovieFilterViewModel.SelectedName" class="form-control" />
+
+        <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
+    </div>
+</form>
+<p></p>
+
 <div class="scroll-x">
     <table class="table table-bordered table-striped table-sm">
         <tr><th>Название</th><th>Сезон</th><th>Серия</th><th>Жанр</th><th>Стоп Время</th><th></th></tr>
