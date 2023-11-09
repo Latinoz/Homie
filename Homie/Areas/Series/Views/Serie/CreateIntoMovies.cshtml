@@ -44,3 +44,31 @@
            role="button">Назад</a>
     </div>
 </form>
+
+<form asp-action="CreateImgSerieIntoMovies" asp-controller="Serie" asp-area="Series" method="post" enctype="multipart/form-data">
+    <fieldset style="width:328px">
+
+        <div class="form-group">
+            <input name="tempName" type="hidden" id="tempName" />
+            <input name="tempTonnage" type="hidden" id="tempTonnage" />
+            <input name="tempBV" type="hidden" id="tempBV" />
+            <input name="tempTypeMech" type="hidden" id="tempTypeMech" />
+        </div>
+
+        <div class="form-group">
+            @if (ViewBag.temp_PicAdd != null)
+            {
+                <label>Изображение: Добавлено</label>
+            }
+            else
+            {
+                <label>Изображение: </label>
+            }
+
+            <input name="AvatarFile" type="file" class="form-control" />
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Добавить картинку" class="btn btn-success" />
+        </div>
+    </fieldset>
+</form>

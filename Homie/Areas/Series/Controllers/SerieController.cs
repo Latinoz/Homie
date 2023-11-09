@@ -8,9 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Homie.Models;
 using SmartBreadcrumbs.Attributes;
-using Homie.Areas.Cigars.Models;
-using System.Xml.Linq;
 using System;
+using System.IO;
 
 namespace Homie.Areas.Series.Controllers
 {
@@ -181,7 +180,34 @@ namespace Homie.Areas.Series.Controllers
             await db.SaveChangesAsync();
             return RedirectToAction("Watching");
         }
-        
+
+        [HttpPost]
+        public IActionResult CreateImgSerieIntoMovies(MovieImageModel pvm)
+        {
+            Image image = new Image { _uid = Guid.NewGuid() };
+
+            if (pvm.AvatarFile != null)
+            {
+                byte[] imageData = null;
+                // считываем переданный файл в массив байтов
+                using (var binaryReader = new BinaryReader(pvm.AvatarFile.OpenReadStream()))
+                {
+                    imageData = binaryReader.ReadBytes((int)pvm.AvatarFile.Length);
+                }
+                // установка массива байтов
+                image.Avatar = imageData;
+            }
+
+            db.Picture.Add(image);
+            db.SaveChanges();
+
+            TempData["Image_ID"] = image.Id;
+            TempData["Image_UID"] = image._uid;
+            TempData["temp_PicAdd"] = "Добавлено";            
+
+            return RedirectToAction("CreateIntoMovies");
+        }
+
         public async Task<IActionResult> GoToArchive(int? Id)
         {
             if (Id != null)

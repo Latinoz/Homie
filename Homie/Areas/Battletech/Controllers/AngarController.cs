@@ -146,7 +146,7 @@ namespace Homie.Areas.Battletech.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateImgMech(ImageViewModel pvm)
+        public IActionResult CreateImgMech(BTImageModel pvm)
         {
             Image image = new Image { _uid = Guid.NewGuid() };
 
@@ -209,7 +209,7 @@ namespace Homie.Areas.Battletech.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditImgMech(ImageViewModel pvm)
+        public async Task<IActionResult> EditImgMech(BTImageModel pvm)
         {
             //Получение обьекта мех
             BTMechsModel mech = await db.BtEF.FirstOrDefaultAsync(s => s.Id == pvm.tempIdMech);
