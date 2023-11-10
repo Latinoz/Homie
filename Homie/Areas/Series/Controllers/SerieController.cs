@@ -19,6 +19,9 @@ namespace Homie.Areas.Series.Controllers
     {
         ApplicationDbContext db;
 
+        //заглушка id 55 в таблице Picture
+        const int notDel = 55;
+
         public SerieController(ApplicationDbContext context)
         {            
             db = context;
@@ -146,6 +149,16 @@ namespace Homie.Areas.Series.Controllers
         [HttpGet]
         public IActionResult CreateIntoMovies()
         {
+            ViewBag.Img_ID_trns = TempData["Image_ID"];            
+            ViewBag.Img_UID_trns = TempData["Image_UID"];
+
+            //ViewBag.temp_BV_trns = TempData["temp_BV"];
+            //ViewBag.temp_Tonnage_trns = TempData["temp_Tonnage"];
+            //ViewBag.temp_Name_trns = TempData["temp_Name"];
+
+            //Слово Изображение: Добавлено
+            ViewBag.temp_PicAdd = TempData["temp_PicAdd"];
+
             return View();
         }
         
@@ -161,6 +174,30 @@ namespace Homie.Areas.Series.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             movie.UserUid = userId;
+
+            //Картинка заглушка id 55 в таблице Picture
+            var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel);
+
+            //Разобраться с ImgBT (лишний?)
+            if (movie.ImgBT != null)
+            {
+                var img = await db.Picture.FirstOrDefaultAsync(s => s._uid.ToString() == movie.ImgBT);
+
+                movie.Avatar = img.Avatar;
+
+                //Удаление картинки из Picture, так как картинка помещается в таблицу Picture временно
+                Image imgtemp = db.Picture.Where(o => o._uid == Guid.Parse(movie.ImgBT)).FirstOrDefault();
+
+                //Проверка, что не удалится картинка заглушка
+                if (imgtemp.Id != notDel)
+                {
+                    db.Picture.Remove(imgtemp);
+                }
+            }
+            else
+            {
+                movie.Avatar = plug.Avatar;
+            }
 
             db.MoviesEF.Add(movie);
             await db.SaveChangesAsync();

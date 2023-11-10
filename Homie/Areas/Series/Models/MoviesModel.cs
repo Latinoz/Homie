@@ -20,7 +20,12 @@ namespace Homie.Areas.Series.Models
         public bool Watching { get; set; }
 
         [Column(TypeName = "varchar(255)")]
-        public string UserUid { get; set; }        
+        public string UserUid { get; set; }
+
+        [Column(TypeName = "varchar(255)")]
+        public string ImgBT { get; set; }
+
+        public byte[] Avatar { get; set; }
 
     }
 }
