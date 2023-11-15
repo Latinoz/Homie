@@ -10,19 +10,15 @@ namespace Homie.Areas.Series.Models
         public string? tempName { get; set; }
 
         [TempData]
-        public int? tempTonnage { get; set; }
+        public int? tempLink { get; set; }
 
         [TempData]
-        public int? tempBV { get; set; }
+        public int? tempCategory { get; set; }
 
         [TempData]
-        public string? tempTypeMech { get; set; }
+        public string? tempSeason { get; set; }
 
         [TempData]
-        public string? tempUidMech { get; set; }
-
-        [TempData]
-        public int? tempIdMech { get; set; }
-
+        public string? tempEpisode { get; set; }
     }
 }

@@ -17,23 +17,27 @@
 <form asp-action="CreateIntoMovies" asp-controller="Serie">
     <div class="form-group">
         <label asp-for="Name" class="control-label">Название</label>
-        <input type="text" asp-for="Name" class="form-control text-input-width" />
+        <input type="text" asp-for="Name" value="@ViewBag.tempNameSerie" class="form-control text-input-width" id="inputNameSerie" />
     </div>
     <div class="form-group">
         <label asp-for="Link" class="control-label">Ссылка</label>
-        <input type="text" asp-for="Link" class="form-control text-input-width" />
+        <input type="text" asp-for="Link" value="@ViewBag.tempLinkSerie" class="form-control text-input-width" id="inputLinkSerie" />
     </div>
     <div class="form-group">
         <label asp-for="Category" class="control-label">Категория</label>
-        <input type="text" asp-for="Category" class="form-control text-input-width" />
+        <input type="text" asp-for="Category" value="@ViewBag.tempCategorySerie" class="form-control text-input-width" id="inputCategorySerie" />
     </div>
     <div class="form-group">
         <label asp-for="Season" class="control-label">Сезон</label>
-        <input type="number" asp-for="Season" class="form-control number-input-width" />
+        <input type="number" asp-for="Season" value="@ViewBag.tempSeasonSerie" class="form-control number-input-width" id="inputSeasonSerie" />
     </div>
     <div class="form-group">
         <label asp-for="Episode" class="control-label">Серия</label>
-        <input type="number" asp-for="Episode" class="form-control number-input-width" />
+        <input type="number" asp-for="Episode" value="@ViewBag.tempEpisodeSerie" class="form-control number-input-width" id="inputEpisodeSerie" />
+    </div>
+
+    <div class="form-group">
+        <input type="hidden" asp-for="ImgBT" value="@ViewBag.Img_UID_trns" class="form-control text-input-width" />
     </div>
 
     <div class="form-group">
@@ -49,9 +53,10 @@
 
         <div class="form-group">
             <input name="tempName" type="hidden" id="tempName" />
-            <input name="tempTonnage" type="hidden" id="tempTonnage" />
-            <input name="tempBV" type="hidden" id="tempBV" />
-            <input name="tempTypeMech" type="hidden" id="tempTypeMech" />
+            <input name="tempLink" type="hidden" id="tempLink" />
+            <input name="tempCategory" type="hidden" id="tempCategory" />
+            <input name="tempSeason" type="hidden" id="tempSeason" />
+            <input name="tempEpisode" type="hidden" id="tempEpisode" />
         </div>
 
         <div class="form-group">
@@ -71,3 +76,36 @@
         </div>
     </fieldset>
 </form>
+
+<script>
+    $(document).ready(function () {
+
+        $("#inputNameSerie").change(function () {
+            var $rtempName = $('#tempName');
+            var $rinputNameSerie = $('#inputNameSerie');
+            $rtempName.val($rinputNameSerie.val());
+
+        });
+        $("#inputLinkSerie").change(function () {
+            var $rtempLink = $('#tempLink');
+            var $rinputLinkSerie = $('#inputLinkSerie');
+            $rtempLink.val($rinputLinkSerie.val());
+        });
+        $("#inputCategorySerie").change(function () {
+            var $rtempCategory = $('#tempCategory');
+            var $rinputCategorySerie = $('#inputCategorySerie');
+            $rtempCategory.val($rinputCategorySerie.val());
+        });
+        $("#inputSeasonSerie").change(function () {
+            var $rtempSeason = $('#tempSeason');
+            var $rinputSeasonSerie = $('#inputSeasonSerie');
+            $rtempSeason.val($rinputSeasonSerie.val());
+        });
+        $("#inputEpisodeSerie").change(function () {
+            var $rtempEpisode = $('#tempEpisode');
+            var $rinputEpisodeSerie = $('#inputEpisodeSerie');
+            $rtempEpisode.val($rinputEpisodeSerie.val());
+        });
+
+    });
+</script>

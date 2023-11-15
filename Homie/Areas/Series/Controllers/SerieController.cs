@@ -152,9 +152,11 @@ namespace Homie.Areas.Series.Controllers
             ViewBag.Img_ID_trns = TempData["Image_ID"];            
             ViewBag.Img_UID_trns = TempData["Image_UID"];
 
-            //ViewBag.temp_BV_trns = TempData["temp_BV"];
-            //ViewBag.temp_Tonnage_trns = TempData["temp_Tonnage"];
-            //ViewBag.temp_Name_trns = TempData["temp_Name"];
+            ViewBag.tempNameSerie = TempData["tempName"];
+            ViewBag.tempLinkSerie = TempData["tempLink"];
+            ViewBag.tempCategorySerie = TempData["tempCategory"];
+            ViewBag.tempSeasonSerie = TempData["tempSeason"];
+            ViewBag.tempEpisodeSerie = TempData["tempEpisode"];
 
             //Слово Изображение: Добавлено
             ViewBag.temp_PicAdd = TempData["temp_PicAdd"];
@@ -240,7 +242,13 @@ namespace Homie.Areas.Series.Controllers
 
             TempData["Image_ID"] = image.Id;
             TempData["Image_UID"] = image._uid;
-            TempData["temp_PicAdd"] = "Добавлено";            
+            TempData["temp_PicAdd"] = "Добавлено";
+
+            TempData["tempName"] = pvm.tempName;
+            TempData["tempLink"] = pvm.tempLink;
+            TempData["tempCategory"] = pvm.tempCategory;
+            TempData["tempSeason"] = pvm.tempSeason;
+            TempData["tempEpisode"] = pvm.tempEpisode;
 
             return RedirectToAction("CreateIntoMovies");
         }
