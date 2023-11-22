@@ -55,11 +55,25 @@
 
 <div class="scroll-x">
     <table class="table table-bordered table-striped table-sm">
-        <tr><th>Название</th><th>Сезон</th><th>Серия</th><th>Жанр</th><th>Стоп Время</th><th></th></tr>
+        <tr>
+            <th>Название</th>
+            <th>Сезон</th>
+            <th>Серия</th>
+            <th>Жанр</th>
+            <th>Стоп Время</th>
+            <th></th>
+        </tr>
         @foreach (var p in Model.Series)
         {
             <tr>
-                <td><a href=@p.Link target="_blank">@p.Name</a></td>
+                <td>
+                    <a href=@p.Link target="_blank">@p.Name</a>
+                    <p>
+                        <center>
+                            <img style='width:200px; height:160px;' src="data:image/jpeg;base64,@(Convert.ToBase64String(p.Avatar))" />
+                        </center>
+                    </p>
+                </td>
                 <td>@p.Season</td>
                 <td>@p.Episode</td>
                 <td>@p.Category</td>
@@ -108,5 +122,5 @@
             <i class="glyphicon glyphicon-chevron-right"></i>
         </a>
     }
-    <p></p>
+<p></p>
 

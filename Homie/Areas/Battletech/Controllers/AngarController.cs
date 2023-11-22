@@ -21,8 +21,9 @@ namespace Homie.Areas.Battletech.Controllers
     {
         ApplicationDbContext db;
 
-        //заглушка id 55 в таблице Picture
-        const int notDel = 55;
+        //ToDo: заглушки id 55,80 в таблице Picture
+        const int notDel55 = 55;
+        const int notDel80 = 80;
 
         public AngarController(ApplicationDbContext context)
         {
@@ -56,7 +57,7 @@ namespace Homie.Areas.Battletech.Controllers
                 Image imgtemp = db.Picture.Where(o => o.Id == Id).FirstOrDefault();
 
                 //Проверка, что не удалится картинка заглушка и картинка существует
-                if (imgtemp != null && imgtemp.Id != notDel) 
+                if (imgtemp != null && imgtemp.Id != notDel55 && imgtemp.Id != notDel80) 
                 {
                    db.Picture.Remove(imgtemp);
 
@@ -115,7 +116,7 @@ namespace Homie.Areas.Battletech.Controllers
             mech.MechUid = Guid.NewGuid().ToString();
 
             //Картинка заглушка id 55 в таблице Picture
-            var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel);           
+            var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel55);           
 
             //Разобраться с ImgBT (лишний?)
             if (mech.ImgBT != null)
@@ -128,7 +129,7 @@ namespace Homie.Areas.Battletech.Controllers
                 Image imgtemp = db.Picture.Where(o => o._uid == Guid.Parse(mech.ImgBT)).FirstOrDefault();
 
                 //Проверка, что не удалится картинка заглушка
-                if (imgtemp.Id != notDel)
+                if (imgtemp.Id != notDel55 | imgtemp.Id != notDel80)
                 {
                     db.Picture.Remove(imgtemp);
                 }
@@ -284,7 +285,7 @@ namespace Homie.Areas.Battletech.Controllers
                 if (mech.Avatar != null)
                 {
                     //Картинка заглушка id 55 в таблице Picture
-                    var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel);
+                    var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel55);
                     mech.Avatar = plug.Avatar;                 
                     
                     db.BtEF.Update(mech);

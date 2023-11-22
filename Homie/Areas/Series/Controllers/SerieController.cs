@@ -19,8 +19,9 @@ namespace Homie.Areas.Series.Controllers
     {
         ApplicationDbContext db;
 
-        //заглушка id 55 в таблице Picture
-        const int notDel = 55;
+        //ToDo: заглушки id 55,80 в таблице Picture
+        const int notDel55 = 55;
+        const int notDel80 = 80;
 
         public SerieController(ApplicationDbContext context)
         {            
@@ -178,7 +179,7 @@ namespace Homie.Areas.Series.Controllers
             movie.UserUid = userId;
 
             //Картинка заглушка id 55 в таблице Picture
-            var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel);
+            var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel80);
 
             //Разобраться с ImgBT (лишний?)
             if (movie.ImgBT != null)
@@ -191,7 +192,7 @@ namespace Homie.Areas.Series.Controllers
                 Image imgtemp = db.Picture.Where(o => o._uid == Guid.Parse(movie.ImgBT)).FirstOrDefault();
 
                 //Проверка, что не удалится картинка заглушка
-                if (imgtemp.Id != notDel)
+                if (imgtemp.Id != notDel80 | imgtemp.Id != notDel55)
                 {
                     db.Picture.Remove(imgtemp);
                 }
