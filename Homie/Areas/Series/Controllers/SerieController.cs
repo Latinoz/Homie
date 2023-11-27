@@ -33,7 +33,7 @@ namespace Homie.Areas.Series.Controllers
         public async Task<IActionResult> Index(string name, int page = 1,
             SortState sortOrder = SortState.NameAsc)       
         {
-            int pageSize = 40;   // количество элементов на странице
+            int pageSize = 10;   // количество элементов на странице
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -178,7 +178,7 @@ namespace Homie.Areas.Series.Controllers
 
             movie.UserUid = userId;
 
-            //Картинка заглушка id 55 в таблице Picture
+            //Картинка заглушка id 80 в таблице Picture
             var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel80);
 
             //Разобраться с ImgBT (лишний?)

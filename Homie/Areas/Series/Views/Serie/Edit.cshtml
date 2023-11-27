@@ -1,8 +1,7 @@
 ﻿@model Homie.Areas.Series.Models.MoviesModel
 
 @{
-    ViewBag.Title = "Изменение";
-    
+    ViewBag.Title = "Изменение";    
 }
 
 <style>
@@ -13,7 +12,6 @@
     .number-input-width{
         width: 80px;
     }
-
 </style>
 
 <form asp-action="Edit" asp-controller="Serie" asp-route-id="@Model.Id">
@@ -62,7 +60,6 @@
         {
             <a asp-action="Index" asp-controller="Serie" asp-area="Series" class="btn btn-danger" role="button">Назад</a>
         }
-
 
     </div>
 </form>
