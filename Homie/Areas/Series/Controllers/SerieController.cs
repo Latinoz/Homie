@@ -10,7 +10,6 @@ using Homie.Models;
 using SmartBreadcrumbs.Attributes;
 using System;
 using System.IO;
-using Homie.Areas.Battletech.Models;
 
 namespace Homie.Areas.Series.Controllers
 {
