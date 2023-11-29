@@ -17,33 +17,36 @@
 <form asp-action="Edit" asp-controller="Serie" asp-route-id="@Model.Id">
     <div class="form-group">
         <label asp-for="Name" class="control-label">Название</label>
-        <input type="text" asp-for="Name" class="form-control text-input-width" />
+        <input type="text" asp-for="Name" class="form-control text-input-width" id="inputName />
     </div>
     <div class="form-group">
         <label asp-for="Link" class="control-label">Ссылка</label>
-        <input type="text" asp-for="Link" class="form-control text-input-width" />
+        <input type="text" asp-for="Link" class="form-control text-input-width" id="inputLink  />
     </div>
     <div class="form-group">
         <label asp-for="Category" class="control-label">Категория</label>
-        <input type="text" asp-for="Category" class="form-control text-input-width" />
+        <input type="text" asp-for="Category" class="form-control text-input-width" id="inputCategory  />
     </div>
     <div class="form-group">
         <label asp-for="Season" class="control-label">Сезон</label>
-        <input type="number" asp-for="Season" class="form-control number-input-width" />
+        <input type="number" asp-for="Season" class="form-control number-input-width" id="inputSeason  />
     </div>
     <div class="form-group">
         <label asp-for="Episode" class="control-label">Серия</label>
-        <input type="number" asp-for="Episode" class="form-control number-input-width" />
+        <input type="number" asp-for="Episode" class="form-control number-input-width" id="inputEpisode  />
     </div>
     <div class="form-group">
         <label asp-for="HoldPlay" class="control-label">Время</label>
-        <input id="result" asp-for="HoldPlay" asp-format="{0:HH:mm:ss}" step="1" class="form-control text-input-width" />
+        <input id="result" asp-for="HoldPlay" asp-format="{0:HH:mm:ss}" step="1" class="form-control text-input-width" id="inputHoldPlay  />
     </div>
     <div class="form-group">
         @Html.HiddenFor(m => m.Archive)
     </div>
     <div class="form-group">
         @Html.HiddenFor(m => m.Watching)
+    </div>
+    <div class="form-group">
+        @Html.HiddenFor(m => m.Avatar)
     </div>
     <div class="form-group">
         <input type="submit" value="Изменить" class="btn btn-primary" />
@@ -63,6 +66,82 @@
 
     </div>
 </form>
+
+<form asp-action="EditImgMovie" asp-controller="Serie" asp-area="Series" method="post" enctype="multipart/form-data">
+    <fieldset style="width:328px">
+
+        <div class="form-group">
+            <label>Изображение:</label>
+            <fieldset>
+                <img style='width:180px; height:160px;' src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.Avatar))" />
+            </fieldset>
+            <br />
+
+            <input name="AvatarFile" type="file" class="form-control" />
+            <input name="tempIdMovie" type="hidden" value="@Model.Id" />
+            <input name="tempName" type="hidden" id="tempName" />
+            <input name="tempLink" type="hidden" id="tempLink" />
+            <input name="tempCategory" type="hidden" id="tempCategory" />
+            <input name="tempSeason" type="hidden" id="tempSeason" />
+            <input name="tempEpisode" type="hidden" id="tempEpisode" />
+            <input name="tempHoldPlay" type="hidden" id="tempHoldPlay" />
+        </div>
+
+    </fieldset>
+    <br>
+
+    <div class="form-group">
+        <input type="submit" value="Изменить картинку" class="btn btn-success" />
+    </div>
+</form>
+
+<form asp-controller="Serie" asp-action="DeleteImgMovie" asp-route-id="@Model.Id" method="post">
+
+    <div class="form-group">
+        <input type="submit" class="btn btn-danger" value="Удалить картинку" />
+    </div>
+
+</form>
+<br>
+
+<script>
+    $(document).ready(function () {
+
+        $("#inputName").change(function () {
+            var $rtempName = $('#tempName');
+            var $rinputName = $('#inputName');
+            $rtempName.val($rinputName.val());
+
+        });
+        $("#inputLink").change(function () {
+            var $rtempLink = $('#tempLink');
+            var $rinputLink = $('#inputLink');
+            $rtempLink.val($rinputLink.val());
+        });
+        $("#inputCategory").change(function () {
+            var $rtempCategory = $('#tempCategory');
+            var $rinputCategory = $('#inputCategory');
+            $rtempCategory.val($rinputCategory.val());
+        });
+        $("#inputSeason").change(function () {
+            var $rtempSeason = $('#tempSeason');
+            var $rinputSeason = $('#inputSeason');
+            $rtempSeason.val($rinputSeason.val());
+
+        });
+        $("#inputEpisode").change(function () {
+            var $rtempEpisode = $('#tempEpisode');
+            var $rinputEpisode = $('#inputEpisode');
+            $rtempEpisode.val($rinputEpisode.val());
+        });
+        $("#inputHoldPlay").change(function () {
+            var $rtempHoldPlay = $('#tempHoldPlay');
+            var $rinputHoldPlay = $('#inputHoldPlay');
+            $rtempHoldPlay.val($rinputHoldPlay.val());
+        });
+
+    });
+</script>
 
     
 

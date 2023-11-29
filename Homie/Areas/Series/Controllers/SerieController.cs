@@ -10,6 +10,7 @@ using Homie.Models;
 using SmartBreadcrumbs.Attributes;
 using System;
 using System.IO;
+using Homie.Areas.Battletech.Models;
 
 namespace Homie.Areas.Series.Controllers
 {
@@ -361,6 +362,57 @@ namespace Homie.Areas.Series.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
+        public async Task<IActionResult> EditImgMovie(MovieImageModel pvm)
+        {            
+            MoviesModel movies = await db.MoviesEF.FirstOrDefaultAsync(s => s.Id == pvm.tempIdMovie);
+
+            if (pvm.AvatarFile != null)
+            {
+                byte[] imageData = null;
+                // считываем переданный файл в массив байтов
+                using (var binaryReader = new BinaryReader(pvm.AvatarFile.OpenReadStream()))
+                {
+                    imageData = binaryReader.ReadBytes((int)pvm.AvatarFile.Length);
+                }
+                // установка массива байтов                
+                movies.Avatar = imageData;
+            }
+
+            if (pvm.tempName != null)
+            {
+                movies.Name = pvm.tempName;
+            }
+
+            if (pvm.tempLink != null)
+            {
+                movies.Link = pvm.tempLink;
+            }
+
+            if (pvm.tempCategory != null)
+            {
+                movies.Category = pvm.tempCategory;
+            }
+
+            if (pvm.tempSeason != null)
+            {
+                movies.Season = (int)pvm.tempSeason;
+            }
+            if (pvm.tempEpisode != null)
+            {
+                movies.Episode = (int)pvm.tempEpisode;
+            }
+            if (pvm.tempHoldPlay != null)
+            {
+                movies.HoldPlay = pvm.tempHoldPlay;
+            }
+
+            db.MoviesEF.Update(movies);
+            await db.SaveChangesAsync();
+
+            return RedirectToAction("Edit", new { id = movies.Id });
+        }
+
         [Breadcrumb(Title = "Удалить")]
         [HttpGet]
         [ActionName("Delete")]
@@ -398,6 +450,44 @@ namespace Homie.Areas.Series.Controllers
                     {
                         return RedirectToAction("ArchMovies", "Serie", new { area = "Series" });
                     }                    
+                }
+            }
+            return NotFound();
+        }
+
+        [Breadcrumb(Title = "Удалить")]
+        [HttpGet]
+        [ActionName("DeleteImgMovie")]
+        public async Task<IActionResult> ConfirmDeleteImgMovie(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(s => s.Id == id && s.UserUid == userId);
+
+            if (id != null && movie != null)
+            {
+                return View(movie);
+            }
+            return NotFound();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteImgMovie(int Id)
+        {
+            if (Id != null)
+            {               
+                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(s => s.Id == Id);
+
+                if (movie.Avatar != null)
+                {
+                    //Картинка заглушка id 80 в таблице Picture
+                    var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel80);
+                    movie.Avatar = plug.Avatar;
+
+                    db.MoviesEF.Update(movie);
+                    await db.SaveChangesAsync();
+
+                    return RedirectToAction("Edit", new { id = movie.Id });
                 }
             }
             return NotFound();
