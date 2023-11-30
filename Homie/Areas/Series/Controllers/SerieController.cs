@@ -38,7 +38,7 @@ namespace Homie.Areas.Series.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             //фильтрация
-            IQueryable<MoviesModel> movies = db.MoviesEF.Where(a => a.UserUid == userId);
+            IQueryable<MoviesModel> movies = db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == false && a.Watching == false);
             
             if (!String.IsNullOrEmpty(name))
             {
