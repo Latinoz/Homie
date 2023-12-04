@@ -383,10 +383,7 @@ namespace Homie.Areas.Series.Controllers
                 movies.Name = pvm.tempName;
             }
 
-            if (pvm.tempLink != null)
-            {
-                movies.Link = pvm.tempLink;
-            }
+            movies.Link = pvm.tempLink;            
 
             if (pvm.tempCategory != null)
             {
@@ -401,6 +398,7 @@ namespace Homie.Areas.Series.Controllers
             {
                 movies.Episode = (int)pvm.tempEpisode;
             }
+            
             if (pvm.tempHoldPlay != null)
             {
                 movies.HoldPlay = pvm.tempHoldPlay;
