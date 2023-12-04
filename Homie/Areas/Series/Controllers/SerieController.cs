@@ -79,20 +79,28 @@ namespace Homie.Areas.Series.Controllers
 
         [Breadcrumb(Title = "Просмотр")]
         [HttpGet]
-        public async Task<IActionResult> Watching(int page = 1)
+        public async Task<IActionResult> Watching(string name, int page = 1,
+            SortState sortOrder = SortState.NameAsc)
         {
-            int pageSize = 20;   // количество элементов на странице
+            int pageSize = 10;   // количество элементов на странице
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            IQueryable<MoviesModel> source = db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == false && a.Watching == true);
-            var count = await source.CountAsync();
-            var items = await source.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            IQueryable<MoviesModel> movies = db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == false && a.Watching == true);
+
+            if (!String.IsNullOrEmpty(name))
+            {
+                movies = movies.Where(p => p.Name.Contains(name));
+            }
+
+            var count = await movies.CountAsync();
+            var items = await movies.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
             PageViewModel pageViewModel = new PageViewModel(count, page, pageSize);
             IndexViewModel viewModel = new IndexViewModel
             {
                 PageViewModel = pageViewModel,
+                MovieFilterViewModel = new MovieFilterViewModel(name),
                 Series = items
             };
             return View(viewModel);
