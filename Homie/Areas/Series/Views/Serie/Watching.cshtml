@@ -103,11 +103,11 @@
                 </td>
 
                 <td>
-                    <a asp-action="GoToWatching" asp-controller="Serie" asp-route-id="@p.Id" class="btn btn-primary"
-                       role="button">В Просмотр</a>
+                    <a asp-action="GoToIndex" asp-controller="Serie" asp-route-id="@p.Id" class="btn btn-primary"
+                       role="button">В Список</a>
                     <a asp-action="Edit" asp-controller="Serie" asp-route-id="@p.Id" class="btn btn-success"
                        role="button">Изменить</a>
-                    <a asp-action="GoToArchive" asp-controller="Serie" asp-route-id="@p.Id" class="btn btn-secondary"
+                    <a asp-action="GoToArchiveFromWatching" asp-controller="Serie" asp-route-id="@p.Id" class="btn btn-secondary"
                        role="button">В Архив</a>
                     <a asp-action="Delete" asp-controller="Serie" asp-route-id="@p.Id" class="btn btn-danger"
                        role="button">Удалить</a>
