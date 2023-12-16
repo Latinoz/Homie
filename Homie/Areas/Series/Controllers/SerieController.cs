@@ -172,10 +172,23 @@ namespace Homie.Areas.Series.Controllers
 
             return View();
         }
-        
+
+        [Breadcrumb(Title = "Добавить")]
         [HttpGet]
         public IActionResult CreateIntoWatching()
         {
+            ViewBag.Img_ID_trns = TempData["Image_ID"];
+            ViewBag.Img_UID_trns = TempData["Image_UID"];
+
+            ViewBag.tempNameSerie = TempData["tempName"];
+            ViewBag.tempLinkSerie = TempData["tempLink"];
+            ViewBag.tempCategorySerie = TempData["tempCategory"];
+            ViewBag.tempSeasonSerie = TempData["tempSeason"];
+            ViewBag.tempEpisodeSerie = TempData["tempEpisode"];
+
+            //Слово Изображение: Добавлено
+            ViewBag.temp_PicAdd = TempData["temp_PicAdd"];
+
             return View();
         }
 
@@ -221,8 +234,31 @@ namespace Homie.Areas.Series.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             movie.UserUid = userId;
-
             movie.Watching = true;
+
+            //Картинка заглушка id 80 в таблице Picture
+            var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel80);
+
+            //Разобраться с ImgBT (лишний?)
+            if (movie.ImgBT != null)
+            {
+                var img = await db.Picture.FirstOrDefaultAsync(s => s._uid.ToString() == movie.ImgBT);
+
+                movie.Avatar = img.Avatar;
+
+                //Удаление картинки из Picture, так как картинка помещается в таблицу Picture временно
+                Image imgtemp = db.Picture.Where(o => o._uid == Guid.Parse(movie.ImgBT)).FirstOrDefault();
+
+                //Проверка, что не удалится картинка заглушка
+                if (imgtemp.Id != notDel80 | imgtemp.Id != notDel55)
+                {
+                    db.Picture.Remove(imgtemp);
+                }
+            }
+            else
+            {
+                movie.Avatar = plug.Avatar;
+            }
 
             db.MoviesEF.Add(movie);
             await db.SaveChangesAsync();
