@@ -14,7 +14,7 @@ using System.IO;
 namespace Homie.Areas.Series.Controllers
 {
     [Area("Series")]
-    [Authorize(Roles = "admin,user")]    
+    [Authorize(Roles = "admin,user")]
     public class SerieController : Controller
     {
         ApplicationDbContext db;
@@ -24,14 +24,14 @@ namespace Homie.Areas.Series.Controllers
         const int notDel80 = 80;
 
         public SerieController(ApplicationDbContext context)
-        {            
+        {
             db = context;
         }
-        
+
         [Breadcrumb(Title = "Список")]
-        [HttpGet]        
+        [HttpGet]
         public async Task<IActionResult> Index(string name, int page = 1,
-            SortState sortOrder = SortState.NameAsc)       
+            SortState sortOrder = SortState.NameAsc)
         {
             int pageSize = 10;   // количество элементов на странице
 
@@ -39,7 +39,7 @@ namespace Homie.Areas.Series.Controllers
 
             //фильтрация
             IQueryable<MoviesModel> movies = db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == false && a.Watching == false);
-            
+
             if (!String.IsNullOrEmpty(name))
             {
                 movies = movies.Where(p => p.Name.Contains(name));
@@ -158,7 +158,7 @@ namespace Homie.Areas.Series.Controllers
         [HttpGet]
         public IActionResult CreateIntoMovies()
         {
-            ViewBag.Img_ID_trns = TempData["Image_ID"];            
+            ViewBag.Img_ID_trns = TempData["Image_ID"];
             ViewBag.Img_UID_trns = TempData["Image_UID"];
 
             ViewBag.tempNameSerie = TempData["tempName"];
@@ -227,7 +227,7 @@ namespace Homie.Areas.Series.Controllers
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
-        
+
         [HttpPost]
         public async Task<IActionResult> CreateIntoWatching(MoviesModel movie)
         {
@@ -306,10 +306,10 @@ namespace Homie.Areas.Series.Controllers
                 movie.Archive = true;
                 movie.Watching = false;
 
-                await db.SaveChangesAsync();               
+                await db.SaveChangesAsync();
 
                 return RedirectToAction("Watching");
-            }            
+            }
             return NotFound();
         }
 
@@ -318,9 +318,9 @@ namespace Homie.Areas.Series.Controllers
             if (Id != null)
             {
                 MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
-                movie.Archive = true;                
+                movie.Archive = true;
 
-                await db.SaveChangesAsync();                
+                await db.SaveChangesAsync();
 
                 return RedirectToAction("Index");
             }
@@ -409,16 +409,16 @@ namespace Homie.Areas.Series.Controllers
             {
                 return RedirectToAction("ArchMovies", "Serie", new { area = "Series" });
             }
-            else if(movie.Archive == false && movie.Watching == true)
+            else if (movie.Archive == false && movie.Watching == true)
             {
                 return RedirectToAction("Watching", "Serie", new { area = "Series" });
-            }            
+            }
             return RedirectToAction("Index");
         }
 
         [HttpPost]
         public async Task<IActionResult> EditImgMovie(MovieImageModel pvm)
-        {            
+        {
             MoviesModel movies = await db.MoviesEF.FirstOrDefaultAsync(s => s.Id == pvm.tempIdMovie);
 
             if (pvm.AvatarFile != null)
@@ -438,7 +438,10 @@ namespace Homie.Areas.Series.Controllers
                 movies.Name = pvm.tempName;
             }
 
-            movies.Link = pvm.tempLink;            
+            if (pvm.tempLink != null)
+            {
+                movies.Link = pvm.tempLink;
+            }
 
             if (pvm.tempCategory != null)
             {
@@ -453,7 +456,7 @@ namespace Homie.Areas.Series.Controllers
             {
                 movies.Episode = (int)pvm.tempEpisode;
             }
-            
+
             if (pvm.tempHoldPlay != null)
             {
                 movies.HoldPlay = pvm.tempHoldPlay;
@@ -490,18 +493,18 @@ namespace Homie.Areas.Series.Controllers
                     db.MoviesEF.Remove(movie);
                     await db.SaveChangesAsync();
 
-                    if(movie.Archive == false && movie.Watching == false)
+                    if (movie.Archive == false && movie.Watching == false)
                     {
                         return RedirectToAction("Index");
                     }
-                    else if(movie.Archive == false && movie.Watching == true)
+                    else if (movie.Archive == false && movie.Watching == true)
                     {
                         return RedirectToAction("Watching");
                     }
                     else
                     {
                         return RedirectToAction("ArchMovies", "Serie", new { area = "Series" });
-                    }                    
+                    }
                 }
             }
             return NotFound();
@@ -513,7 +516,7 @@ namespace Homie.Areas.Series.Controllers
         public async Task<IActionResult> ConfirmDeleteImgMovie(int id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
+
             MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(s => s.Id == id && s.UserUid == userId);
 
             if (id != null && movie != null)
@@ -527,7 +530,7 @@ namespace Homie.Areas.Series.Controllers
         public async Task<IActionResult> DeleteImgMovie(int Id)
         {
             if (Id != null)
-            {               
+            {
                 MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(s => s.Id == Id);
 
                 if (movie.Avatar != null)
