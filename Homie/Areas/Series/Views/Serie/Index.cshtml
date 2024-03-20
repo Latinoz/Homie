@@ -9,9 +9,7 @@
 <style>
     @@font-face {
         font-family: 'FontAwesome';
-        src: url('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/fonts/fontawesome-webfont.woff2') format('woff2'), 
-            url('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/fonts/fontawesome-webfont.woff') format('woff'), 
-            url('https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/fonts/fontawesome-webfont.ttf') format('truetype');
+        src: url('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/fonts/fontawesome-webfont.woff2') format('woff2'), url('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/fonts/fontawesome-webfont.woff') format('woff'), url('https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/fonts/fontawesome-webfont.ttf') format('truetype');
         font-weight: normal;
         font-style: normal
     }
@@ -71,18 +69,32 @@
             <th>
                 <center>Стоп Время</center>
             </th>
-            <th></th>
+            <th>
+                <center>Комментарии</center>
+            </th>
         </tr>
         @foreach (var p in Model.Series)
         {
             <tr>
                 <td>
                     <center>
-                    <a href=@p.Link target="_blank">@p.Name</a>
+                        <a href=@p.Link target="_blank">@p.Name</a>
                     </center>
                     <p>
                         <center>
                             <img style='width:200px; height:260px;' src="data:image/jpeg;base64,@(Convert.ToBase64String(p.Avatar))" />
+                        </center>
+                    </p>
+                    <p>
+                        <center>
+                            <a asp-action="GoToWatching" asp-controller="Serie" asp-route-id="@p.Id" class="fas fa-play-circle fa-lg fa-border" style="color: #0080ff;
+                           role="button" title="В Просмотр"></a>
+                            <a asp-action="Edit" asp-controller="Serie" asp-route-id="@p.Id" class="fas fa-pen fa-lg fa-border" style="color: #008000;
+                           role="button" title="Изменить"></a>
+                            <a asp-action="GoToArchiveFromIndex" asp-controller="Serie" asp-route-id="@p.Id" class="fas fa-archive fa-lg fa-border" style="color: #B197FC;
+                           role="button" title="В Архив"></a>
+                            <a asp-action="Delete" asp-controller="Serie" asp-route-id="@p.Id" class="fas fa-trash-alt fa-lg fa-border" style="color: #ff0000;
+                           role="button" title="Удалить"></a>
                         </center>
                     </p>
                 </td>
@@ -91,49 +103,41 @@
                 <td><center>@p.Category</center></td>
                 <td>
                     <center>
-                    @if (p.HoldPlay.HasValue)
-                    {
-                        @p.HoldPlay.Value.TimeOfDay
-                    }
-                    else
-                    {
-                        @String.Empty
-                    }
+                        @if (p.HoldPlay.HasValue)
+                        {
+                            @p.HoldPlay.Value.TimeOfDay
+                        }
+                        else
+                        {
+                            @String.Empty
+                        }
                     </center>
                 </td>
 
-                <td>
-                    <a asp-action="GoToWatching" asp-controller="Serie" asp-route-id="@p.Id" class="btn btn-primary"
-                       role="button">В Просмотр</a>
-                    <a asp-action="Edit" asp-controller="Serie" asp-route-id="@p.Id" class="btn btn-success"
-                       role="button">Изменить</a>
-                    <a asp-action="GoToArchiveFromIndex" asp-controller="Serie" asp-route-id="@p.Id" class="btn btn-secondary"
-                       role="button">В Архив</a>
-                    <a asp-action="Delete" asp-controller="Serie" asp-route-id="@p.Id" class="btn btn-danger"
-                       role="button">Удалить</a>
+                <td>                    
                 </td>
             </tr>
         }
     </table>
 </div>
 
-    @if (Model.PageViewModel.HasPreviousPage)
-    {
-        <a asp-action="Index"
-           asp-route-page="@(Model.PageViewModel.PageNumber - 1)"
-           class="btn btn-outline-dark">
-            <i class="glyphicon glyphicon-chevron-left"></i>
-            Назад
-        </a>
-    }
-    @if (Model.PageViewModel.HasNextPage)
-    {
-        <a asp-action="Index"
-           asp-route-page="@(Model.PageViewModel.PageNumber + 1)"
-           class="btn btn-outline-dark">
-            Вперед
-            <i class="glyphicon glyphicon-chevron-right"></i>
-        </a>
-    }
+@if (Model.PageViewModel.HasPreviousPage)
+{
+    <a asp-action="Index"
+       asp-route-page="@(Model.PageViewModel.PageNumber - 1)"
+       class="btn btn-outline-dark">
+        <i class="glyphicon glyphicon-chevron-left"></i>
+        Назад
+    </a>
+}
+@if (Model.PageViewModel.HasNextPage)
+{
+    <a asp-action="Index"
+       asp-route-page="@(Model.PageViewModel.PageNumber + 1)"
+       class="btn btn-outline-dark">
+        Вперед
+        <i class="glyphicon glyphicon-chevron-right"></i>
+    </a>
+}
 <p></p>
 
