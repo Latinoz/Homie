@@ -66,7 +66,9 @@
             <th>
                 <center>Стоп Время</center>
             </th>
-            <th></th>
+            <th>
+                <center>Комментарии</center>
+            </th>
         </tr>
         @foreach (var p in Model.Series)
         {
@@ -78,6 +80,18 @@
                     <p>
                         <center>
                             <img style='width:200px; height:260px;' src="data:image/jpeg;base64,@(Convert.ToBase64String(p.Avatar))" />
+                        </center>
+                    </p>
+                    <p>
+                        <center>
+                            <a asp-action="FromArchiveGoToWatching" asp-controller="Serie" asp-route-id="@p.Id" class="fas fa-play-circle fa-lg fa-border" style="color: #0080ff;
+                           role="button" title="В Просмотр"></a>
+                            <a asp-action="FromArchiveGoToIndex" asp-controller="Serie" asp-route-id="@p.Id" class="fas fa-film fa-lg fa-border" style="color: #0080ff;
+                           role="button" title="В Список"></a>
+                            <a asp-action="Edit" asp-controller="Serie" asp-route-id="@p.Id" class="fas fa-pen fa-lg fa-border" style="color: #008000;
+                           role="button" title="Изменить"></a>                            
+                            <a asp-action="Delete" asp-controller="Serie" asp-route-id="@p.Id" class="fas fa-trash-alt fa-lg fa-border" style="color: #ff0000;
+                           role="button" title="Удалить"></a>
                         </center>
                     </p>
                 </td>
@@ -97,15 +111,7 @@
                     </center>
                 </td>
 
-                <td>
-                    <a asp-action="FromArchiveGoToWatching" asp-controller="Serie" asp-route-id="@p.Id" class="btn btn-primary"
-                       role="button">В Просмотр</a>
-                    <a asp-action="FromArchiveGoToIndex" asp-controller="Serie" asp-route-id="@p.Id" class="btn btn-secondary"
-                       role="button">В Список</a>
-                    <a asp-action="Edit" asp-controller="Serie" asp-route-id="@p.Id" class="btn btn-success"
-                       role="button">Изменить</a>
-                    <a asp-action="Delete" asp-controller="Serie" asp-route-id="@p.Id" class="btn btn-danger"
-                       role="button">Удалить</a>
+                <td>                    
                 </td>
             </tr>
 
