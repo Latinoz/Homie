@@ -29,8 +29,8 @@
         <label>Название: </label>
         <input name="name" value="@Model.CigarFilterViewModel.SelectedName" class="form-control" />
 
-        <label>Формат: </label>        
-        <select name="format" asp-items="Model.CigarFilterViewModel.Formats" class="form-control"></select>        
+        <label>Формат: </label>
+        <select name="format" asp-items="Model.CigarFilterViewModel.Formats" class="form-control"></select>
 
         <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
     </div>
@@ -49,6 +49,7 @@
                    asp-route-sortOrder="@(Model.SortViewModel.NameSort)"
                    asp-route-name="@(Model.CigarFilterViewModel.SelectedName)"
                    asp-route-format="@(Model.CigarFilterViewModel.SelectedFormat)">Название</a>
+
             </th>
             <th>Страна</th>
             <th>Цена</th>
@@ -64,28 +65,32 @@
         @foreach (var p in Model.Cigars)
         {
             <tr>
-                <td>@p.Name</td>
+                <td>
+                    <center>
+                        @p.Name
+                    </center>
+                    <p></p>
+                    <center>
+                        <a asp-action="Edit" asp-controller="Cigar" asp-route-id="@p.Id" class="fas fa-pen fa-lg fa-border" style="color: #008000;
+                       role="button" title="Изменить"></a>
+                        <a asp-action="Delete" asp-controller="Cigar" asp-route-id="@p.Id" class="fas fa-trash-alt fa-lg fa-border" style="color: #ff0000;
+                       role="button" title="Удалить"></a>
+                    </center>
+                </td>
                 <td>@p.Country</td>
                 <td>@p.Price</td>
                 <td>@p.Rating</td>
                 <td>@p.Shape</td>
                 <td>@p.Strength</td>
-                <td>
-
-                    <a asp-action="Edit" asp-controller="Cigar" asp-route-id="@p.Id" class="btn btn-success"
-                       role="button">Изменить</a>
-                    <a asp-action="Delete" asp-controller="Cigar" asp-route-id="@p.Id" class="btn btn-danger"
-                       role="button">Удалить</a>
-                </td>
             </tr>
 
         }
     </table>
 </div>
-    <p></p>
-    <page-link page-model="Model.PageViewModel" page-action="Index"
-               page-url-name="@(Model.CigarFilterViewModel.SelectedName)"
-               page-url-format="@(Model.CigarFilterViewModel.SelectedFormat)"
-               page-url-sortorder="@(Model.SortViewModel.Current)"></page-link>
+<p></p>
+<page-link page-model="Model.PageViewModel" page-action="Index"
+           page-url-name="@(Model.CigarFilterViewModel.SelectedName)"
+           page-url-format="@(Model.CigarFilterViewModel.SelectedFormat)"
+           page-url-sortorder="@(Model.SortViewModel.Current)"></page-link>
 
 
