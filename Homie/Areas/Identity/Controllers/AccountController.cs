@@ -21,11 +21,15 @@ namespace Homie.Areas.Identity.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
         }
+
+        [Authorize(Roles = "admin")]
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
+
+        [Authorize(Roles = "admin")]
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
