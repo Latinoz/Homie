@@ -25,7 +25,7 @@ namespace Homie
     public void ConfigureServices(IServiceCollection services)
         {            
             services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseMySql(Configuration.GetConnectionString("DefaultConnection")));
+            options.UseMySql(Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version())));
            
 
             //** Удалить снятие ограничений, при Release **
