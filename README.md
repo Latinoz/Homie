@@ -1,2 +1,2 @@
 # Homie
-Homie Web App MVC
+Web App MVC
