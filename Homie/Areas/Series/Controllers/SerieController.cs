@@ -10,6 +10,7 @@ using Homie.Models;
 using SmartBreadcrumbs.Attributes;
 using System;
 using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace Homie.Areas.Series.Controllers
 {
@@ -18,14 +19,49 @@ namespace Homie.Areas.Series.Controllers
     public class SerieController : Controller
     {
         ApplicationDbContext db;
+        private readonly FileUploadSettings _fileUploadSettings;
 
         //ToDo: заглушки id 55,80 в таблице Picture
         const int notDel55 = 55;
         const int notDel80 = 80;
 
-        public SerieController(ApplicationDbContext context)
+        /// <summary>
+        /// Валидация загружаемого файла изображения
+        /// </summary>
+        /// <param name="file">Загружаемый файл</param>
+        /// <returns>Результат валидации с сообщением об ошибке</returns>
+        private (bool IsValid, string ErrorMessage) ValidateImageFile(IFormFile file)
+        {
+            if (file == null)
+                return (true, null);
+
+            // Проверка размера файла
+            if (file.Length > _fileUploadSettings.MaxFileSizeBytes)
+            {
+                return (false, $"Размер файла превышает максимально допустимый размер {_fileUploadSettings.MaxFileSizeBytes / (1024 * 1024)} MB");
+            }
+
+            // Проверка типа файла
+            if (!_fileUploadSettings.AllowedImageTypes.Contains(file.ContentType.ToLower()))
+            {
+                return (false, "Неподдерживаемый тип файла. Разрешены только: JPEG, JPG, PNG, GIF, BMP");
+            }
+
+            // Проверка расширения файла
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+            if (!allowedExtensions.Contains(extension))
+            {
+                return (false, "Неподдерживаемое расширение файла. Разрешены только: .jpg, .jpeg, .png, .gif, .bmp");
+            }
+
+            return (true, null);
+        }
+
+        public SerieController(ApplicationDbContext context, FileUploadSettings fileUploadSettings)
         {
             db = context;
+            _fileUploadSettings = fileUploadSettings;
         }
 
         [Breadcrumb(Title = "Список")]
@@ -272,6 +308,22 @@ namespace Homie.Areas.Series.Controllers
 
             if (pvm.AvatarFile != null)
             {
+                // Валидация загружаемого файла
+                var validation = ValidateImageFile(pvm.AvatarFile);
+                if (!validation.IsValid)
+                {
+                    TempData["ErrorMessage"] = validation.ErrorMessage;
+                    
+                    // Сохраняем временные данные для возврата на форму
+                    TempData["tempName"] = pvm.tempName;
+                    TempData["tempLink"] = pvm.tempLink;
+                    TempData["tempCategory"] = pvm.tempCategory;
+                    TempData["tempSeason"] = pvm.tempSeason;
+                    TempData["tempEpisode"] = pvm.tempEpisode;
+                    
+                    return RedirectToAction("CreateIntoMovies");
+                }
+
                 byte[] imageData = null;
                 // считываем переданный файл в массив байтов
                 using (var binaryReader = new BinaryReader(pvm.AvatarFile.OpenReadStream()))
@@ -423,6 +475,14 @@ namespace Homie.Areas.Series.Controllers
 
             if (pvm.AvatarFile != null)
             {
+                // Валидация загружаемого файла
+                var validation = ValidateImageFile(pvm.AvatarFile);
+                if (!validation.IsValid)
+                {
+                    TempData["ErrorMessage"] = validation.ErrorMessage;
+                    return RedirectToAction("Edit", new { id = movies.Id });
+                }
+
                 byte[] imageData = null;
                 // считываем переданный файл в массив байтов
                 using (var binaryReader = new BinaryReader(pvm.AvatarFile.OpenReadStream()))

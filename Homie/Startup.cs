@@ -10,6 +10,10 @@ using Homie.Data.Models;
 using Homie.Areas.Identity.Models;
 using SmartBreadcrumbs.Extensions;
 using System.Reflection;
+using Homie.Models;
+using Microsoft.AspNetCore.Server.IIS;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Options;
 
 namespace Homie
 {
@@ -53,7 +57,27 @@ namespace Homie
             services.AddDistributedMemoryCache();
             services.AddSession();
 
-            services.AddControllersWithViews();
+            // Регистрация настроек загрузки файлов
+            services.Configure<FileUploadSettings>(Configuration.GetSection("FileUpload"));
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<FileUploadSettings>>().Value);
+
+            services.AddControllersWithViews(options =>
+            {
+                // Увеличиваем лимит на размер запроса до 10 MB
+                options.MaxModelBindingCollectionSize = 1024;
+            });
+
+            // Настройка лимитов для загрузки файлов
+            services.Configure<IISServerOptions>(options =>
+            {
+                options.MaxRequestBodySize = 10 * 1024 * 1024; // 10 MB
+            });
+
+            services.Configure<KestrelServerOptions>(options =>
+            {
+                options.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10 MB
+            });
+
             services.AddRazorPages();
 
             services.AddBreadcrumbs(Assembly.GetExecutingAssembly(), options =>

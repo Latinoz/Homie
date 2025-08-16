@@ -4,6 +4,16 @@
     ViewBag.Title = "Добавить";
 }
 
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Ошибка!</strong> @TempData["ErrorMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
 <style>
     .text-input-width {
         width: 328px;
@@ -69,7 +79,9 @@
                 <label>Изображение: </label>
             }
 
-            <input name="AvatarFile" type="file" class="form-control" />
+            <input name="AvatarFile" type="file" class="form-control" id="avatarFile" accept="image/*" />
+            <small class="form-text text-muted">Максимальный размер файла: 5 MB. Поддерживаемые форматы: JPEG, JPG, PNG, GIF, BMP</small>
+            <div id="fileError" class="text-danger" style="display: none;"></div>
         </div>
         <div class="form-group">
             <input type="submit" value="Добавить картинку" class="btn btn-success" />
@@ -105,6 +117,48 @@
             var $rtempEpisode = $('#tempEpisode');
             var $rinputEpisodeSerie = $('#inputEpisodeSerie');
             $rtempEpisode.val($rinputEpisodeSerie.val());
+        });
+
+        // Валидация файла изображения
+        $("#avatarFile").change(function () {
+            var file = this.files[0];
+            var maxSize = 5 * 1024 * 1024; // 5 MB
+            var allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp'];
+            var allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp'];
+            
+            var errorMessage = '';
+            
+            if (file) {
+                // Проверка размера
+                if (file.size > maxSize) {
+                    errorMessage = 'Размер файла превышает 5 MB';
+                }
+                // Проверка типа
+                else if (!allowedTypes.includes(file.type.toLowerCase())) {
+                    errorMessage = 'Неподдерживаемый тип файла. Разрешены только: JPEG, JPG, PNG, GIF, BMP';
+                }
+                // Проверка расширения
+                else {
+                    var fileName = file.name.toLowerCase();
+                    var hasValidExtension = allowedExtensions.some(function(ext) {
+                        return fileName.endsWith(ext);
+                    });
+                    if (!hasValidExtension) {
+                        errorMessage = 'Неподдерживаемое расширение файла. Разрешены только: .jpg, .jpeg, .png, .gif, .bmp';
+                    }
+                }
+            }
+            
+            var $fileError = $('#fileError');
+            var $submitButton = $('input[type="submit"][value="Добавить картинку"]');
+            
+            if (errorMessage) {
+                $fileError.text(errorMessage).show();
+                $submitButton.prop('disabled', true);
+            } else {
+                $fileError.hide();
+                $submitButton.prop('disabled', false);
+            }
         });
 
     });
