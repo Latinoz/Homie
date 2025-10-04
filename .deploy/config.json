@@ -1,0 +1,14 @@
+{
+  "Server": "homie.su",
+  "Port": 31022,
+  "Username": "deploy-user",
+  "RemotePath": "/var/netcore",
+  "PublishProfile": "Release",
+  "SshKeyPath": "C:/Users/Martin/.ssh/deploy-new",
+  "ProjectPath": "Homie/Homie.csproj",
+  "ExcludePatterns": [
+    "appsettings.Development.json",
+    "*.pdb",
+    "*.xml"
+  ]
+}
