@@ -60,17 +60,23 @@ foreach ($pattern in $config.ExcludePatterns) {
     Get-ChildItem ../publish -Recurse -Include $pattern | Remove-Item -Force
 }
 
-# === ДОБАВЛЯЕМ СКРИПТЫ В PUBLISH ПЕРЕД СОЗДАНИЕМ АРХИВА (ТОЛЬКО ОДИН РАЗ) ===
+# Remove appsettings.json from publish to avoid overwriting server version
+if (Test-Path "../publish/appsettings.json") {
+    Remove-Item "../publish/appsettings.json" -Force
+    Write-Host "Removed appsettings.json from publish to prevent overwrite on server" -ForegroundColor Yellow
+}
+
+# === ADD SCRIPTS TO PUBLISH BEFORE CREATING ARCHIVE (ONLY ONCE) ===
 Write-Host "Checking if scripts are included in publish..." -ForegroundColor Green
 
-# Создаем директорию scripts в publish
+# Create scripts directory in publish
 $scriptsPublishPath = "../publish/scripts"
 if (-not (Test-Path $scriptsPublishPath)) {
     New-Item -ItemType Directory -Path $scriptsPublishPath -Force
     Write-Host "Created scripts directory in publish" -ForegroundColor Green
 }
 
-# Копируем скрипты
+# Copy scripts
 if (Test-Path "deploy.sh") {
     Copy-Item "deploy.sh" $scriptsPublishPath -Force
     Write-Host "Copied deploy.sh to publish" -ForegroundColor Green
@@ -83,11 +89,11 @@ if (Test-Path "deploy.ps1") {
     Write-Host "Copied deploy.ps1 to publish" -ForegroundColor Green
 }
 
-# Проверка что скрипты скопированы
+# Check that scripts are copied
 if (Test-Path "$scriptsPublishPath/deploy.sh") {
     Write-Host "Deploy scripts are ready for archiving" -ForegroundColor Green
     
-    # Проверка формата deploy.sh
+    # Check deploy.sh format
     Write-Host "Checking deploy.sh format..." -ForegroundColor Green
     $firstLine = Get-Content "$scriptsPublishPath/deploy.sh" -First 1
     if ($firstLine -eq "#!/bin/bash") {
@@ -97,12 +103,12 @@ if (Test-Path "$scriptsPublishPath/deploy.sh") {
         Write-Host "First line: $firstLine" -ForegroundColor Gray
     }
     
-    # Проверим права на файл
+    # Check file size
     $file = Get-Item "$scriptsPublishPath/deploy.sh"
     Write-Host "deploy.sh size: $($file.Length) bytes" -ForegroundColor Green
 } else {
     Write-Host "Creating basic deploy.sh..." -ForegroundColor Yellow
-    # Создаем базовый deploy.sh
+    # Create basic deploy.sh
     $deployShContent = @'
 #!/bin/bash
 
@@ -157,7 +163,7 @@ Write-Host "Creating archive: $archiveName" -ForegroundColor Green
 Push-Location ..
 
 try {
-    # Проверяем что папка publish существует
+    # Check that publish folder exists
     if (-not (Test-Path "./publish")) {
         Write-Error "Publish directory not found!"
         exit 1
@@ -166,7 +172,7 @@ try {
     Write-Host "Publish directory content:" -ForegroundColor Yellow
     Get-ChildItem "./publish" | Select-Object Name, Length | Format-Table -AutoSize
     
-    # Проверка архива перед созданием
+    # Check for scripts in publish directory
     Write-Host "Checking for scripts in publish directory..." -ForegroundColor Green
     if (Test-Path "./publish/scripts/deploy.sh") {
         Write-Host "✓ deploy.sh found in publish directory" -ForegroundColor Green
@@ -179,11 +185,11 @@ try {
         7z a -ttar -so . "./publish" | 7z a -si -tgzip "./scripts/$archiveName"
     } else {
         Write-Host "Using tar for archiving..." -ForegroundColor Green
-        # Используем правильные пути для tar
+        # Use correct paths for tar
         tar -czf "./scripts/$archiveName" -C "./publish" .
     }
     
-    # Проверяем что архив создан
+    # Check that archive is created
     if (-not (Test-Path "./scripts/$archiveName")) {
         Write-Error "Archive creation failed!"
         exit 1
@@ -191,7 +197,7 @@ try {
     
     Write-Host "Archive created successfully: $((Get-Item "./scripts/$archiveName").Length / 1MB) MB" -ForegroundColor Green
     
-    # Проверка содержимого архива
+    # Check archive content
     Write-Host "Checking archive content..." -ForegroundColor Green
     try {
         $archiveContent = tar -tzf "./scripts/$archiveName" | Select-String "scripts/" | Select-Object -First 10
@@ -200,7 +206,7 @@ try {
             $archiveContent | ForEach-Object { Write-Host "  $($_.Line)" -ForegroundColor Gray }
         } else {
             Write-Host "Warning: No scripts found in archive" -ForegroundColor Yellow
-            # Покажем что вообще есть в архиве
+            # Show first 20 files in archive
             Write-Host "First 20 files in archive:" -ForegroundColor Yellow
             tar -tzf "./scripts/$archiveName" | Select-Object -First 20 | ForEach-Object { Write-Host "  $_" -ForegroundColor Gray }
         }
@@ -212,8 +218,6 @@ try {
 finally {
     Pop-Location
 }
-
-# === УДАЛЯЕМ ДУБЛИРОВАННЫЙ КОД ОТСЮДА ДО КОНЦА ФАЙЛА ===
 
 # Check if archive was created
 if (-not (Test-Path $archiveName)) {
@@ -228,12 +232,12 @@ Invoke-SCP -LocalPath $archiveName -RemotePath "/tmp/$archiveName" -KeyPath $con
 # Run deploy on server
 Write-Host "Running deploy on server..." -ForegroundColor Green
 
-# Команда 1: Надежная очистка с сохранением appsettings.json
+# Command 1: Reliable cleanup while preserving appsettings.json
 $extractCommand = "cd /tmp && echo '=== Starting deployment ===' && if [ -d '/var/netcore' ]; then echo 'Backing up appsettings.json...' && if [ -f '/var/netcore/appsettings.json' ]; then cp /var/netcore/appsettings.json /tmp/appsettings.backup && echo 'Backup created'; else echo 'No appsettings.json to backup'; fi && echo 'Cleaning directory...' && find /var/netcore -mindepth 1 \! -name 'appsettings.json' -exec rm -rf {} \; 2>/dev/null || true && echo 'Restoring appsettings.json...' && if [ -f '/tmp/appsettings.backup' ]; then mv /tmp/appsettings.backup /var/netcore/appsettings.json && echo 'appsettings.json restored'; fi; else echo 'Creating directory...' && mkdir -p /var/netcore; fi && echo 'Extracting archive...' && tar -xzf deploy-$timestamp.tar.gz -C /var/netcore && rm deploy-$timestamp.tar.gz && echo 'Extraction completed'"
 
 Invoke-SSHCommand -Command $extractCommand -KeyPath $config.SshKeyPath -Server $config.Server -Port $config.Port -Username $config.Username
 
-# Команда 1.5: Проверка распакованных скриптов
+# Command 1.5: Check extracted scripts
 $checkScriptsCommand = "echo '=== Checking for deploy scripts ===' && " +
                        "if [ -f '/var/netcore/scripts/deploy.sh' ]; then " +
                        "echo 'Deploy script found in archive' && " +
@@ -244,12 +248,12 @@ $checkScriptsCommand = "echo '=== Checking for deploy scripts ===' && " +
 
 Invoke-SSHCommand -Command $checkScriptsCommand -KeyPath $config.SshKeyPath -Server $config.Server -Port $config.Port -Username $config.Username                       
 
-# Команда 2: Установка прав
+# Command 2: Set permissions
 $permissionsCommand = "echo 'Setting permissions...' && chown -R www-data:www-data /var/netcore 2>/dev/null || echo 'chown failed, continuing...' && chmod -R 755 /var/netcore && find /var/netcore -type f -name '*.dll' -exec chmod 644 {} \; 2>/dev/null || true && find /var/netcore -type f -name '*.json' -exec chmod 644 {} \; 2>/dev/null || true && find /var/netcore -type f -name '*.exe' -exec chmod 755 {} \; 2>/dev/null || true && echo 'Permissions set'"
 
 Invoke-SSHCommand -Command $permissionsCommand -KeyPath $config.SshKeyPath -Server $config.Server -Port $config.Port -Username $config.Username
 
-# Команда 3: Запуск деплоя
+# Command 3: Run deploy
 $deployCommand = "if [ -f '/var/netcore/scripts/deploy.sh' ]; then " +
                  "echo 'Running deploy script from archive...' && " +
                  "sed -i 's/\\r\$//' /var/netcore/scripts/deploy.sh && " +
@@ -269,7 +273,7 @@ $deployCommand = "if [ -f '/var/netcore/scripts/deploy.sh' ]; then " +
 
 Invoke-SSHCommand -Command $deployCommand -KeyPath $config.SshKeyPath -Server $config.Server -Port $config.Port -Username $config.Username
 
-# Команда 4: Проверка деплоя
+# Command 4: Deployment verification
 $verifyCommand = "echo '=== Deployment verification ===' && " +
                  "echo 'Main application files:' && " +
                  "find /var/netcore -maxdepth 1 -name '*.dll' -o -name '*.exe' | head -10 && " +
