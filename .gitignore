@@ -424,3 +424,4 @@ FodyWeavers.xsd
 
 # Hide appsettings Development
 /Homie/appsettings.Development.json
+.DS_Store
