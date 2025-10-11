@@ -1,0 +1,8 @@
+{
+  "SshKeyPath": "/Users/martin/ssh/deploy-new",
+  "Server": "homie.su",
+  "Port": "31022",
+  "Username": "deploy-user",
+  "ProjectPath": "Homie/Homie.csproj",
+  "ExcludePatterns": ["*.pdb", "*.xml", "appsettings.Development.json"]
+}
