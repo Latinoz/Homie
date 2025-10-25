@@ -11,6 +11,12 @@ using SmartBreadcrumbs.Attributes;
 using System;
 using System.IO;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.PixelFormats;
+using System.Security.Cryptography;
 
 namespace Homie.Areas.Series.Controllers
 {
@@ -18,8 +24,9 @@ namespace Homie.Areas.Series.Controllers
     [Authorize(Roles = "admin,user")]
     public class SerieController : Controller
     {
-        ApplicationDbContext db;
-        private readonly FileUploadSettings _fileUploadSettings;
+    ApplicationDbContext db;
+    private readonly FileUploadSettings _fileUploadSettings;
+    private readonly IMemoryCache _cache;
 
         //ToDo: заглушки id 55,80 в таблице Picture
         const int notDel55 = 55;
@@ -58,10 +65,106 @@ namespace Homie.Areas.Series.Controllers
             return (true, null);
         }
 
-        public SerieController(ApplicationDbContext context, FileUploadSettings fileUploadSettings)
+        public SerieController(ApplicationDbContext context, FileUploadSettings fileUploadSettings, IMemoryCache cache)
         {
             db = context;
             _fileUploadSettings = fileUploadSettings;
+            _cache = cache;
+        }
+
+    /// <summary>
+    /// Возвращает байты изображения (аватар) для фильма в виде результата File.
+    /// Это позволяет браузеру запрашивать изображения отдельно (параллельно, с возможностью кэширования и отложенной загрузки),
+    /// вместо встраивания больших base64-строк непосредственно в HTML страницы.
+    /// </summary>
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> Avatar(int id, int? width = null, int? height = null)
+        {
+            // Выбираем только столбец Avatar для указанного фильма
+            var avatar = await db.MoviesEF
+                .Where(m => m.Id == id)
+                .Select(m => m.Avatar)
+                .FirstOrDefaultAsync();
+
+            if (avatar == null || avatar.Length == 0)
+            {
+                return NotFound();
+            }
+
+            byte[] resultBytes;
+
+            // Определим формат исходного изображения (если возможно) — нужен для корректного Content-Type
+            var detectedFormat = SixLabors.ImageSharp.Image.DetectFormat(avatar);
+            var detectedMime = detectedFormat?.DefaultMimeType ?? "image/jpeg";
+
+            if (width.HasValue || height.HasValue)
+            {
+                // Генерируем thumbnail и кэшируем его в IMemoryCache
+                var w = width ?? 0;
+                var h = height ?? 0;
+                var cacheKey = $"avatar:{id}:{w}x{h}";
+
+                if (!_cache.TryGetValue(cacheKey, out byte[] cachedBytes))
+                {
+                    // Загружаем изображение и ресайзим
+                    using var imgSharp = SixLabors.ImageSharp.Image.Load<SixLabors.ImageSharp.PixelFormats.Rgba32>(avatar);
+
+                    var resizeOptions = new SixLabors.ImageSharp.Processing.ResizeOptions
+                    {
+                        Mode = SixLabors.ImageSharp.Processing.ResizeMode.Max,
+                        Size = new SixLabors.ImageSharp.Size(w > 0 ? w : imgSharp.Width, h > 0 ? h : imgSharp.Height)
+                    };
+
+                    imgSharp.Mutate(x => x.Resize(resizeOptions));
+
+                    using var ms = new MemoryStream();
+
+                    // Если исходный формат поддерживает альфу (PNG, GIF, WebP), сохраняем как PNG чтобы не терять прозрачность,
+                    // иначе используем JPEG для меньшего размера.
+                    var fmtName = detectedFormat?.Name?.ToLowerInvariant() ?? string.Empty;
+                    if (fmtName.Contains("png") || fmtName.Contains("gif") || fmtName.Contains("webp"))
+                    {
+                        var encoderPng = new SixLabors.ImageSharp.Formats.Png.PngEncoder();
+                        imgSharp.Save(ms, encoderPng);
+                        detectedMime = "image/png";
+                    }
+                    else
+                    {
+                        var encoder = new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder { Quality = 80 };
+                        imgSharp.Save(ms, encoder);
+                        detectedMime = "image/jpeg";
+                    }
+
+                    cachedBytes = ms.ToArray();
+
+                    // Кешируем на некоторое время
+                    _cache.Set(cacheKey, cachedBytes, new MemoryCacheEntryOptions
+                    {
+                        SlidingExpiration = TimeSpan.FromHours(6)
+                    });
+                }
+
+                resultBytes = cachedBytes;
+            }
+            else
+            {
+                // Возвращаем оригинал
+                resultBytes = avatar;
+            }
+
+            // ETag по SHA-256 содержимого
+            var etag = Convert.ToBase64String(SHA256.HashData(resultBytes));
+            var requestEtag = Request.Headers["If-None-Match"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(requestEtag) && requestEtag == etag)
+            {
+                return StatusCode(304);
+            }
+
+            Response.Headers["ETag"] = etag;
+            Response.Headers["Cache-Control"] = "public, max-age=86400"; // кэшировать 1 день
+
+            return File(resultBytes, detectedMime);
         }
 
         [Breadcrumb(Title = "Список")]
@@ -100,7 +203,21 @@ namespace Homie.Areas.Series.Controllers
 
             // пагинация
             var count = await movies.CountAsync();
-            var items = await movies.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            var items = await movies
+                .Select(m => new Homie.Areas.Series.Models.MovieListDto {
+                    Id = m.Id,
+                    Name = m.Name,
+                    Link = m.Link,
+                    Category = m.Category,
+                    Season = m.Season,
+                    Episode = m.Episode,
+                    HoldPlay = m.HoldPlay,
+                    Archive = m.Archive,
+                    Watching = m.Watching,
+                    UserUid = m.UserUid,
+                    ImgBT = m.ImgBT
+                })
+                .Skip((page - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
 
             IndexViewModel viewModel = new IndexViewModel
             {
@@ -130,7 +247,21 @@ namespace Homie.Areas.Series.Controllers
             }
 
             var count = await movies.CountAsync();
-            var items = await movies.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            var items = await movies
+                .Select(m => new Homie.Areas.Series.Models.MovieListDto {
+                    Id = m.Id,
+                    Name = m.Name,
+                    Link = m.Link,
+                    Category = m.Category,
+                    Season = m.Season,
+                    Episode = m.Episode,
+                    HoldPlay = m.HoldPlay,
+                    Archive = m.Archive,
+                    Watching = m.Watching,
+                    UserUid = m.UserUid,
+                    ImgBT = m.ImgBT
+                })
+                .Skip((page - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
 
             PageViewModel pageViewModel = new PageViewModel(count, page, pageSize);
             IndexViewModel viewModel = new IndexViewModel
@@ -177,7 +308,21 @@ namespace Homie.Areas.Series.Controllers
 
             // пагинация
             var count = await movies.CountAsync();
-            var items = await movies.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            var items = await movies
+                .Select(m => new Homie.Areas.Series.Models.MovieListDto {
+                    Id = m.Id,
+                    Name = m.Name,
+                    Link = m.Link,
+                    Category = m.Category,
+                    Season = m.Season,
+                    Episode = m.Episode,
+                    HoldPlay = m.HoldPlay,
+                    Archive = m.Archive,
+                    Watching = m.Watching,
+                    UserUid = m.UserUid,
+                    ImgBT = m.ImgBT
+                })
+                .Skip((page - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
 
             IndexViewModel viewModel = new IndexViewModel
             {
@@ -246,7 +391,7 @@ namespace Homie.Areas.Series.Controllers
                 movie.Avatar = img.Avatar;
 
                 //Удаление картинки из Picture, так как картинка помещается в таблицу Picture временно
-                Image imgtemp = db.Picture.Where(o => o._uid == Guid.Parse(movie.ImgBT)).FirstOrDefault();
+                Homie.Models.Image imgtemp = db.Picture.Where(o => o._uid == Guid.Parse(movie.ImgBT)).FirstOrDefault();
 
                 //Проверка, что не удалится картинка заглушка
                 if (imgtemp.Id != notDel80 | imgtemp.Id != notDel55)
@@ -283,7 +428,7 @@ namespace Homie.Areas.Series.Controllers
                 movie.Avatar = img.Avatar;
 
                 //Удаление картинки из Picture, так как картинка помещается в таблицу Picture временно
-                Image imgtemp = db.Picture.Where(o => o._uid == Guid.Parse(movie.ImgBT)).FirstOrDefault();
+                Homie.Models.Image imgtemp = db.Picture.Where(o => o._uid == Guid.Parse(movie.ImgBT)).FirstOrDefault();
 
                 //Проверка, что не удалится картинка заглушка
                 if (imgtemp.Id != notDel80 | imgtemp.Id != notDel55)
@@ -304,7 +449,7 @@ namespace Homie.Areas.Series.Controllers
         [HttpPost]
         public IActionResult CreateImgSerieIntoMovies(MovieImageModel pvm)
         {
-            Image image = new Image { _uid = Guid.NewGuid() };
+            Homie.Models.Image image = new Homie.Models.Image { _uid = Guid.NewGuid() };
 
             if (pvm.AvatarFile != null)
             {
@@ -579,7 +724,7 @@ namespace Homie.Areas.Series.Controllers
 
             MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(s => s.Id == id && s.UserUid == userId);
 
-            if (id != null && movie != null)
+            if (movie != null)
             {
                 return View(movie);
             }
@@ -589,22 +734,25 @@ namespace Homie.Areas.Series.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteImgMovie(int Id)
         {
-            if (Id != null)
+            MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(s => s.Id == Id);
+
+            if (movie == null)
             {
-                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(s => s.Id == Id);
-
-                if (movie.Avatar != null)
-                {
-                    //Картинка заглушка id 80 в таблице Picture
-                    var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel80);
-                    movie.Avatar = plug.Avatar;
-
-                    db.MoviesEF.Update(movie);
-                    await db.SaveChangesAsync();
-
-                    return RedirectToAction("Edit", new { id = movie.Id });
-                }
+                return NotFound();
             }
+
+            if (movie.Avatar != null)
+            {
+                //Картинка заглушка id 80 в таблице Picture
+                var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel80);
+                movie.Avatar = plug.Avatar;
+
+                db.MoviesEF.Update(movie);
+                await db.SaveChangesAsync();
+
+                return RedirectToAction("Edit", new { id = movie.Id });
+            }
+
             return NotFound();
         }
     }

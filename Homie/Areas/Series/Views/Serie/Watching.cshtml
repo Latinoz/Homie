@@ -84,7 +84,7 @@
                     </center>
                     <p>
                         <center>
-                            <img style='width:200px; height:260px;' src="data:image/jpeg;base64,@(Convert.ToBase64String(p.Avatar))" />
+                            <img style='width:200px; height:260px;' src="@Url.Action("Avatar", "Serie", new { area = "Series", id = p.Id, width = 200, height = 260 })" loading="lazy" alt="@p.Name" />
                         </center>
                     </p>
                     <p>

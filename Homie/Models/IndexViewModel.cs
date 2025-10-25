@@ -10,7 +10,7 @@ namespace Homie.Models
 {
     public class IndexViewModel
     {
-        public IEnumerable<MoviesModel> Series { get; set; }
+        public IEnumerable<Homie.Areas.Series.Models.MovieListDto> Series { get; set; }
         public IEnumerable<CigarsModel> Cigars { get; set; }
         public IEnumerable<BTMechsModel> Mechs { get; set; }
         public IEnumerable<BTPilotsModel> Pilots { get; set; }
