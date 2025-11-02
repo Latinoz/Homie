@@ -177,7 +177,7 @@ namespace Homie.Areas.Series.Controllers
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            IQueryable<MoviesModel> movies = db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == false && a.Watching == false);
+            IQueryable<MoviesModel> movies = db.MoviesEF.Where(a => a.UserUid == userId && a.Watching == false);
 
             // сортировка
             switch (sortOrder)
@@ -207,7 +207,6 @@ namespace Homie.Areas.Series.Controllers
                     Season = m.Season,
                     Episode = m.Episode,
                     HoldPlay = m.HoldPlay,
-                    Archive = m.Archive,
                     Watching = m.Watching,
                     UserUid = m.UserUid,
                     ImgBT = m.ImgBT
@@ -233,7 +232,7 @@ namespace Homie.Areas.Series.Controllers
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            IQueryable<MoviesModel> movies = db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == false && a.Watching == true);
+            IQueryable<MoviesModel> movies = db.MoviesEF.Where(a => a.UserUid == userId && a.Watching == true);
 
             var count = await movies.CountAsync();
             var items = await movies
@@ -245,7 +244,6 @@ namespace Homie.Areas.Series.Controllers
                     Season = m.Season,
                     Episode = m.Episode,
                     HoldPlay = m.HoldPlay,
-                    Archive = m.Archive,
                     Watching = m.Watching,
                     UserUid = m.UserUid,
                     ImgBT = m.ImgBT
@@ -261,61 +259,6 @@ namespace Homie.Areas.Series.Controllers
             return View(viewModel);
         }
 
-        [Breadcrumb(Title = "Архив")]
-        [HttpGet]
-        public async Task<IActionResult> ArchMovies(int page = 1,
-            SortState sortOrder = SortState.NameAsc)
-        {
-            int pageSize = 40;   // количество элементов на странице
-
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            IQueryable<MoviesModel> movies = db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == true);
-
-            // сортировка
-            switch (sortOrder)
-            {
-                case SortState.NameDesc:
-                    movies = movies.OrderByDescending(s => s.Name);
-                    break;
-                case SortState.FormatAsc:
-                    movies = movies.OrderBy(s => s.Name);
-                    break;
-                case SortState.FormatDesc:
-                    movies = movies.OrderByDescending(s => s.Name);
-                    break;
-                default:
-                    movies = movies.OrderBy(s => s.Name);
-                    break;
-            }
-
-            // пагинация
-            var count = await movies.CountAsync();
-            var items = await movies
-                .Select(m => new Homie.Areas.Series.Models.MovieListDto {
-                    Id = m.Id,
-                    Name = m.Name,
-                    Link = m.Link,
-                    Category = m.Category,
-                    Season = m.Season,
-                    Episode = m.Episode,
-                    HoldPlay = m.HoldPlay,
-                    Archive = m.Archive,
-                    Watching = m.Watching,
-                    UserUid = m.UserUid,
-                    ImgBT = m.ImgBT
-                })
-                .Skip((page - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
-
-            IndexViewModel viewModel = new IndexViewModel
-            {
-                PageViewModel = new PageViewModel(count, page, pageSize),
-                SortViewModel = new SortViewModel(sortOrder),
-                Series = items
-            };
-
-            return View(viewModel);
-        }
 
         [Breadcrumb(Title = "Добавить")]
         [HttpGet]
@@ -477,62 +420,6 @@ namespace Homie.Areas.Series.Controllers
             return RedirectToAction("CreateIntoMovies");
         }
 
-        public async Task<IActionResult> GoToArchiveFromWatching(int? Id)
-        {
-            if (Id != null)
-            {
-                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
-                movie.Archive = true;
-                movie.Watching = false;
-
-                await db.SaveChangesAsync();
-
-                return RedirectToAction("Watching");
-            }
-            return NotFound();
-        }
-
-        public async Task<IActionResult> GoToArchiveFromIndex(int? Id)
-        {
-            if (Id != null)
-            {
-                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
-                movie.Archive = true;
-
-                await db.SaveChangesAsync();
-
-                return RedirectToAction("Index");
-            }
-            return NotFound();
-        }
-
-        public async Task<IActionResult> FromArchiveGoToIndex(int? Id)
-        {
-            if (Id != null)
-            {
-                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
-                movie.Archive = false;
-                movie.Watching = false;
-
-                await db.SaveChangesAsync();
-                return RedirectToAction("ArchMovies");
-            }
-            return NotFound();
-        }
-
-        public async Task<IActionResult> FromArchiveGoToWatching(int? Id)
-        {
-            if (Id != null)
-            {
-                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
-                movie.Archive = false;
-                movie.Watching = true;
-
-                await db.SaveChangesAsync();
-                return RedirectToAction("ArchMovies");
-            }
-            return NotFound();
-        }
 
         public async Task<IActionResult> GoToWatching(int? Id)
         {
@@ -553,7 +440,6 @@ namespace Homie.Areas.Series.Controllers
             {
                 MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
                 movie.Watching = false;
-                movie.Archive = false;
 
                 await db.SaveChangesAsync();
                 return RedirectToAction("Watching");
@@ -584,11 +470,7 @@ namespace Homie.Areas.Series.Controllers
             db.MoviesEF.Update(movie);
             await db.SaveChangesAsync();
 
-            if (movie.Archive == true && movie.Watching == false)
-            {
-                return RedirectToAction("ArchMovies", "Serie", new { area = "Series" });
-            }
-            else if (movie.Archive == false && movie.Watching == true)
+            if (movie.Watching == true)
             {
                 return RedirectToAction("Watching", "Serie", new { area = "Series" });
             }
@@ -680,17 +562,13 @@ namespace Homie.Areas.Series.Controllers
                     db.MoviesEF.Remove(movie);
                     await db.SaveChangesAsync();
 
-                    if (movie.Archive == false && movie.Watching == false)
+                    if (movie.Watching == false)
                     {
                         return RedirectToAction("Index");
                     }
-                    else if (movie.Archive == false && movie.Watching == true)
-                    {
-                        return RedirectToAction("Watching");
-                    }
                     else
                     {
-                        return RedirectToAction("ArchMovies", "Serie", new { area = "Series" });
+                        return RedirectToAction("Watching");
                     }
                 }
             }
