@@ -75,6 +75,32 @@
         }
 
     </div>
+    <p></p>
+    <div class="form-group">
+        @if (!Model.Archive && !Model.Watching)
+        {
+            <a asp-action="GoToWatching" asp-controller="Serie" asp-route-id="@Model.Id" class="fas fa-play-circle fa-lg fa-border" style="color: #0080ff;
+               role="button" title="В Просмотр"></a>
+            <a asp-action="GoToArchiveFromIndex" asp-controller="Serie" asp-route-id="@Model.Id" class="fas fa-archive fa-lg fa-border" style="color: #B197FC;
+               role="button" title="В Архив"></a>
+        }
+        else if (!Model.Archive && Model.Watching)
+        {
+            <a asp-action="GoToIndex" asp-controller="Serie" asp-route-id="@Model.Id" class="fas fa-film fa-lg fa-border" style="color: #0080ff;
+               role="button" title="В Список"></a>
+            <a asp-action="GoToArchiveFromWatching" asp-controller="Serie" asp-route-id="@Model.Id" class="fas fa-archive fa-lg fa-border" style="color: #B197FC;
+               role="button" title="В Архив"></a>
+        }
+        else if (Model.Archive)
+        {
+            <a asp-action="FromArchiveGoToWatching" asp-controller="Serie" asp-route-id="@Model.Id" class="fas fa-play-circle fa-lg fa-border" style="color: #0080ff;
+               role="button" title="В Просмотр"></a>
+            <a asp-action="FromArchiveGoToIndex" asp-controller="Serie" asp-route-id="@Model.Id" class="fas fa-film fa-lg fa-border" style="color: #0080ff;
+               role="button" title="В Список"></a>
+        }
+        <a asp-action="Delete" asp-controller="Serie" asp-route-id="@Model.Id" class="fas fa-trash-alt fa-lg fa-border" style="color: #ff0000;
+           role="button" title="Удалить"></a>
+    </div>
 </form>
 
 <form asp-action="EditImgMovie" asp-controller="Serie" asp-area="Series" method="post" enctype="multipart/form-data">
