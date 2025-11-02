@@ -17,7 +17,7 @@ namespace Homie.Areas.Series.Models
         [BindProperty, DataType(DataType.Time)] 
         public DateTime? HoldPlay { get; set; }       
         public bool Archive { get; set; }
-        public bool Watching { get; set; }
+        public bool Favorite { get; set; }
 
         [Column(TypeName = "varchar(255)")]
         public string UserUid { get; set; }

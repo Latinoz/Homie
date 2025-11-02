@@ -177,7 +177,7 @@ namespace Homie.Areas.Series.Controllers
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            IQueryable<MoviesModel> movies = db.MoviesEF.Where(a => a.UserUid == userId && a.Watching == false);
+            IQueryable<MoviesModel> movies = db.MoviesEF.Where(a => a.UserUid == userId && a.Favorite == false);
 
             // сортировка
             switch (sortOrder)
@@ -207,7 +207,7 @@ namespace Homie.Areas.Series.Controllers
                     Season = m.Season,
                     Episode = m.Episode,
                     HoldPlay = m.HoldPlay,
-                    Watching = m.Watching,
+                    Favorite = m.Favorite,
                     UserUid = m.UserUid,
                     ImgBT = m.ImgBT
                 })
@@ -223,16 +223,16 @@ namespace Homie.Areas.Series.Controllers
             return View(viewModel);
         }
 
-        [Breadcrumb(Title = "Просмотр")]
+        [Breadcrumb(Title = "Избранное")]
         [HttpGet]
-        public async Task<IActionResult> Watching(int page = 1,
+        public async Task<IActionResult> Favorite(int page = 1,
             SortState sortOrder = SortState.NameAsc)
         {
             int pageSize = 10;   // количество элементов на странице
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            IQueryable<MoviesModel> movies = db.MoviesEF.Where(a => a.UserUid == userId && a.Watching == true);
+            IQueryable<MoviesModel> movies = db.MoviesEF.Where(a => a.UserUid == userId && a.Favorite == true);
 
             var count = await movies.CountAsync();
             var items = await movies
@@ -244,7 +244,7 @@ namespace Homie.Areas.Series.Controllers
                     Season = m.Season,
                     Episode = m.Episode,
                     HoldPlay = m.HoldPlay,
-                    Watching = m.Watching,
+                    Favorite = m.Favorite,
                     UserUid = m.UserUid,
                     ImgBT = m.ImgBT
                 })
@@ -281,7 +281,7 @@ namespace Homie.Areas.Series.Controllers
 
         [Breadcrumb(Title = "Добавить")]
         [HttpGet]
-        public IActionResult CreateIntoWatching()
+        public IActionResult CreateIntoFavorite()
         {
             ViewBag.Img_ID_trns = TempData["Image_ID"];
             ViewBag.Img_UID_trns = TempData["Image_UID"];
@@ -335,12 +335,12 @@ namespace Homie.Areas.Series.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateIntoWatching(MoviesModel movie)
+        public async Task<IActionResult> CreateIntoFavorite(MoviesModel movie)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             movie.UserUid = userId;
-            movie.Watching = true;
+            movie.Favorite = true;
 
             //Картинка заглушка id 80 в таблице Picture
             var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel80);
@@ -368,7 +368,7 @@ namespace Homie.Areas.Series.Controllers
 
             db.MoviesEF.Add(movie);
             await db.SaveChangesAsync();
-            return RedirectToAction("Watching");
+            return RedirectToAction("Favorite");
         }
 
         [HttpPost]
@@ -421,12 +421,12 @@ namespace Homie.Areas.Series.Controllers
         }
 
 
-        public async Task<IActionResult> GoToWatching(int? Id)
+        public async Task<IActionResult> GoToFavorite(int? Id)
         {
             if (Id != null)
             {
                 MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
-                movie.Watching = true;
+                movie.Favorite = true;
 
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
@@ -439,10 +439,10 @@ namespace Homie.Areas.Series.Controllers
             if (Id != null)
             {
                 MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
-                movie.Watching = false;
+                movie.Favorite = false;
 
                 await db.SaveChangesAsync();
-                return RedirectToAction("Watching");
+                return RedirectToAction("Favorite");
             }
             return NotFound();
         }
@@ -470,9 +470,9 @@ namespace Homie.Areas.Series.Controllers
             db.MoviesEF.Update(movie);
             await db.SaveChangesAsync();
 
-            if (movie.Watching == true)
+            if (movie.Favorite == true)
             {
-                return RedirectToAction("Watching", "Serie", new { area = "Series" });
+                return RedirectToAction("Favorite", "Serie", new { area = "Series" });
             }
             return RedirectToAction("Index");
         }
@@ -562,13 +562,13 @@ namespace Homie.Areas.Series.Controllers
                     db.MoviesEF.Remove(movie);
                     await db.SaveChangesAsync();
 
-                    if (movie.Watching == false)
+                    if (movie.Favorite == false)
                     {
                         return RedirectToAction("Index");
                     }
                     else
                     {
-                        return RedirectToAction("Watching");
+                        return RedirectToAction("Favorite");
                     }
                 }
             }

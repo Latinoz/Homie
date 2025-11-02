@@ -50,7 +50,7 @@
         <input asp-for="HoldPlay" asp-format="{0:HH:mm:ss}" step="1" class="form-control text-input-width" id="inputHoldPlay"/>
     </div>
     <div class="form-group">
-        @Html.HiddenFor(m => m.Watching)
+        @Html.HiddenFor(m => m.Favorite)
     </div>
     <div class="form-group">
         @Html.HiddenFor(m => m.Avatar)
@@ -58,9 +58,9 @@
     <div class="form-group">
         <input type="submit" value="Изменить" class="btn btn-primary" />
 
-        @if (Model.Watching == true)
+        @if (Model.Favorite == true)
         {
-            <a asp-action="Watching" asp-controller="Serie" asp-area="Series" class="btn btn-danger" role="button">Назад</a>
+            <a asp-action="Favorite" asp-controller="Serie" asp-area="Series" class="btn btn-danger" role="button">Назад</a>
         }
         else
         {
@@ -70,10 +70,10 @@
     </div>
     <p></p>
     <div class="form-group">
-        @if (!Model.Watching)
+        @if (!Model.Favorite)
         {
-            <a asp-action="GoToWatching" asp-controller="Serie" asp-route-id="@Model.Id" class="fas fa-play-circle fa-lg fa-border" style="color: #0080ff;
-               role="button" title="В Просмотр"></a>
+            <a asp-action="GoToFavorite" asp-controller="Serie" asp-route-id="@Model.Id" class="fas fa-play-circle fa-lg fa-border" style="color: #0080ff;
+               role="button" title="В Избранное"></a>
         }
         else
         {

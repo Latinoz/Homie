@@ -1,4 +1,4 @@
-﻿@model Homie.Areas.Series.Models.MoviesModel
+@model Homie.Areas.Series.Models.MoviesModel
 
 @{
     ViewBag.Title = "Добавить";
@@ -24,7 +24,7 @@
     }
 </style>
 
-<form asp-action="CreateIntoWatching" asp-controller="Serie">
+<form asp-action="CreateIntoFavorite" asp-controller="Serie">
     <div class="form-group">
         <label asp-for="Name" class="control-label">Название</label>
         <input type="text" asp-for="Name" value="@ViewBag.tempNameSerie" class="form-control text-input-width" id="inputNameSerie" />
@@ -163,3 +163,4 @@
 
     });
 </script>
+

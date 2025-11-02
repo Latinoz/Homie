@@ -1,9 +1,9 @@
-﻿@using Homie.Models
+@using Homie.Models
 @model IndexViewModel
 
 @{
     ViewBag.Title = "Список сериалов";
-    ViewBag.HeaderTitle = "Сериалы - [Просмотр]";
+    ViewBag.HeaderTitle = "Сериалы - [Избранное]";
 }
 
 <style>
@@ -38,7 +38,7 @@
     }
 </style>
 
-<a asp-action="CreateIntoWatching" asp-controller="Serie" asp-area="Series"
+<a asp-action="CreateIntoFavorite" asp-controller="Serie" asp-area="Series"
    class="btn btn-primary"
    role="button">Добавить</a>
 <p></p>
@@ -197,7 +197,7 @@
 
 @if (Model.PageViewModel.HasPreviousPage)
 {
-    <a asp-action="Index"
+    <a asp-action="Favorite"
        asp-route-page="@(Model.PageViewModel.PageNumber - 1)"
        class="btn btn-outline-dark">
         <i class="glyphicon glyphicon-chevron-left"></i>
@@ -206,7 +206,7 @@
 }
 @if (Model.PageViewModel.HasNextPage)
 {
-    <a asp-action="Index"
+    <a asp-action="Favorite"
        asp-route-page="@(Model.PageViewModel.PageNumber + 1)"
        class="btn btn-outline-dark">
         Вперед
