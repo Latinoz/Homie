@@ -17,7 +17,6 @@ namespace Homie.Models
         public IEnumerable<Image> Images { get; set; }
         public PageViewModel PageViewModel { get; set; }
         public CigarFilterViewModel CigarFilterViewModel { get; set; }
-        public MovieFilterViewModel MovieFilterViewModel { get; set; }
         public SortViewModel SortViewModel { get; set; }
     }
 }

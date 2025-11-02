@@ -170,20 +170,14 @@ namespace Homie.Areas.Series.Controllers
 
         [Breadcrumb(Title = "Список")]
         [HttpGet]
-        public async Task<IActionResult> Index(string name, int page = 1,
+        public async Task<IActionResult> Index(int page = 1,
             SortState sortOrder = SortState.NameAsc)
         {
             int pageSize = 10;   // количество элементов на странице
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            //фильтрация
             IQueryable<MoviesModel> movies = db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == false && a.Watching == false);
-
-            if (!String.IsNullOrEmpty(name))
-            {
-                movies = movies.Where(p => p.Name.Contains(name));
-            }
 
             // сортировка
             switch (sortOrder)
@@ -224,7 +218,6 @@ namespace Homie.Areas.Series.Controllers
             {
                 PageViewModel = new PageViewModel(count, page, pageSize),
                 SortViewModel = new SortViewModel(sortOrder),
-                MovieFilterViewModel = new MovieFilterViewModel(name),
                 Series = items
             };
 
@@ -233,7 +226,7 @@ namespace Homie.Areas.Series.Controllers
 
         [Breadcrumb(Title = "Просмотр")]
         [HttpGet]
-        public async Task<IActionResult> Watching(string name, int page = 1,
+        public async Task<IActionResult> Watching(int page = 1,
             SortState sortOrder = SortState.NameAsc)
         {
             int pageSize = 10;   // количество элементов на странице
@@ -241,11 +234,6 @@ namespace Homie.Areas.Series.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             IQueryable<MoviesModel> movies = db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == false && a.Watching == true);
-
-            if (!String.IsNullOrEmpty(name))
-            {
-                movies = movies.Where(p => p.Name.Contains(name));
-            }
 
             var count = await movies.CountAsync();
             var items = await movies
@@ -268,7 +256,6 @@ namespace Homie.Areas.Series.Controllers
             IndexViewModel viewModel = new IndexViewModel
             {
                 PageViewModel = pageViewModel,
-                MovieFilterViewModel = new MovieFilterViewModel(name),
                 Series = items
             };
             return View(viewModel);
@@ -276,7 +263,7 @@ namespace Homie.Areas.Series.Controllers
 
         [Breadcrumb(Title = "Архив")]
         [HttpGet]
-        public async Task<IActionResult> ArchMovies(string name, int page = 1,
+        public async Task<IActionResult> ArchMovies(int page = 1,
             SortState sortOrder = SortState.NameAsc)
         {
             int pageSize = 40;   // количество элементов на странице
@@ -284,11 +271,6 @@ namespace Homie.Areas.Series.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             IQueryable<MoviesModel> movies = db.MoviesEF.Where(a => a.UserUid == userId && a.Archive == true);
-
-            if (!String.IsNullOrEmpty(name))
-            {
-                movies = movies.Where(p => p.Name.Contains(name));
-            }
 
             // сортировка
             switch (sortOrder)
@@ -329,7 +311,6 @@ namespace Homie.Areas.Series.Controllers
             {
                 PageViewModel = new PageViewModel(count, page, pageSize),
                 SortViewModel = new SortViewModel(sortOrder),
-                MovieFilterViewModel = new MovieFilterViewModel(name),
                 Series = items
             };
 

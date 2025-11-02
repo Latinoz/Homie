@@ -4,6 +4,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <UserSecretsId>ed851661-c90a-491b-a2b2-73113bfb9203</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <CopyRetryCount>15</CopyRetryCount>
+    <CopyRetryDelayMilliseconds>3000</CopyRetryDelayMilliseconds>
   </PropertyGroup>
 
   <ItemGroup>
