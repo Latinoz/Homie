@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Homie.Areas.Series.Models;
@@ -754,6 +755,35 @@ namespace Homie.Areas.Series.Controllers
             }
 
             return NotFound();
+        }
+
+        /// <summary>
+        /// API endpoint для автодополнения поиска сериалов
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> SearchMovies(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term))
+            {
+                return Json(new List<object>());
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // Поиск по названию сериала
+            var movies = await db.MoviesEF
+                .Where(m => m.UserUid == userId && m.Name.Contains(term))
+                .OrderBy(m => m.Name)
+                .Take(20) // Ограничиваем количество результатов
+                .Select(m => new
+                {
+                    id = m.Id,
+                    label = m.Name,
+                    value = m.Name
+                })
+                .ToListAsync();
+
+            return Json(movies);
         }
     }
 }

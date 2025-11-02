@@ -51,6 +51,90 @@
 </form>
 <p></p>
 
+<div class="form-inline" style="position: relative;">
+    <label>Поиск: </label>
+    <div style="position: relative;">
+        <input type="text" id="movieSearch" class="form-control" placeholder="Введите название сериала..." style="width: 300px;" />
+        <div id="searchResults" style="position: absolute; z-index: 1000; background: white; border: 1px solid #ccc; max-height: 300px; overflow-y: auto; display: none; width: 300px; top: 100%; left: 0; margin-top: 2px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"></div>
+    </div>
+</div>
+<p></p>
+
+<script>
+    $(document).ready(function() {
+            var searchInput = $('#movieSearch');
+            var searchResults = $('#searchResults');
+            var timeout = null;
+
+            searchInput.on('input', function() {
+                var term = $(this).val().trim();
+
+                // Очищаем предыдущий таймаут
+                if (timeout) {
+                    clearTimeout(timeout);
+                }
+
+                if (term.length < 2) {
+                    searchResults.hide().empty();
+                    return;
+                }
+
+                // Задержка перед отправкой запроса (debounce)
+                timeout = setTimeout(function() {
+                    $.ajax({
+                        url: '@Url.Action("SearchMovies", "Serie", new { area = "Series" })',
+                        type: 'GET',
+                        data: { term: term },
+                        success: function(data) {
+                            searchResults.empty();
+                            if (data && data.length > 0) {
+                                $.each(data, function(index, item) {
+                                    var div = $('<div>').addClass('search-result-item')
+                                        .css({
+                                            'padding': '8px',
+                                            'cursor': 'pointer',
+                                            'border-bottom': '1px solid #eee'
+                                        })
+                                        .hover(
+                                            function() { $(this).css('background-color', '#f0f0f0'); },
+                                            function() { $(this).css('background-color', ''); }
+                                        )
+                                        .text(item.label)
+                                        .data('id', item.id)
+                                        .on('click', function() {
+                                            var movieId = $(this).data('id');
+                                            window.location.href = '@Url.Action("Edit", "Serie", new { area = "Series" })?id=' + movieId;
+                                        });
+                                    searchResults.append(div);
+                                });
+                                searchResults.show();
+                            } else {
+                                searchResults.hide();
+                            }
+                        },
+                        error: function() {
+                            searchResults.hide();
+                        }
+                    });
+                }, 300); // Задержка 300мс
+            });
+
+            // Скрываем результаты при клике вне области поиска
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#movieSearch, #searchResults').length) {
+                    searchResults.hide();
+                }
+            });
+
+            // Скрываем результаты при нажатии ESC
+            searchInput.on('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    searchResults.hide();
+                }
+            });
+        });
+</script>
+
 <div class="scroll-x">
     <table class="table table-bordered table-striped table-sm">
         <tr>
