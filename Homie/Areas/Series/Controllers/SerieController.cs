@@ -467,8 +467,46 @@ namespace Homie.Areas.Series.Controllers
 
             movie.UserUid = userId;
 
+            // Проверка флага удаления изображения, пришедшего из формы
+            var deleteFlag = Request.Form["DeleteImage"].FirstOrDefault();
+            var isDelete = !string.IsNullOrEmpty(deleteFlag) && deleteFlag.ToLower() == "true";
+            if (isDelete)
+            {
+                // Картинка-заглушка id 80 в таблице Picture
+                var plug = await db.Picture.FirstOrDefaultAsync(s => s.Id == notDel80);
+                if (plug != null)
+                {
+                    movie.Avatar = plug.Avatar;
+                }
+                else
+                {
+                    movie.Avatar = null;
+                }
+            }
+
             db.MoviesEF.Update(movie);
             await db.SaveChangesAsync();
+
+            // Если была операция удаления изображения — очистим кэш для миниатюр этой записи
+            if (isDelete)
+            {
+                try
+                {
+                    // Удаляем кэшированные варианты изображений, которые используются на страницах
+                    // (в Index/Favorite используются width=200,height=260)
+                    _cache.Remove($"avatar:{movie.Id}:200x260");
+                    // дополнительные размеры, которые могут использоваться в других местах
+                    _cache.Remove($"avatar:{movie.Id}:180x240");
+                    _cache.Remove($"avatar:{movie.Id}:100x130");
+                }
+                catch
+                {
+                    // игнорируем ошибки кэша
+                }
+
+                // Перенаправляем обратно в Edit чтобы показать обновлённую заглушку
+                return RedirectToAction("Edit", new { id = movie.Id });
+            }
 
             if (movie.Favorite == true)
             {

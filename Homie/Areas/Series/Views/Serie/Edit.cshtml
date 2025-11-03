@@ -24,7 +24,7 @@
     }
 </style>
 
-<form asp-action="Edit" asp-controller="Serie" asp-route-id="@Model.Id">
+<form asp-action="Edit" asp-controller="Serie" asp-route-id="@Model.Id" id="editForm" method="post">
     <div class="form-group">
         <label asp-for="Name" class="control-label">Название</label>
         <input type="text" asp-for="Name" class="form-control text-input-width" id="inputName"/>
@@ -55,6 +55,8 @@
     <div class="form-group">
         @Html.HiddenFor(m => m.Avatar)
     </div>
+    @* Флаг для удаления картинки: при установке в true и сабмите основной формы контроллер удалит/заменит Avatar *@
+    <input type="hidden" id="DeleteImage" name="DeleteImage" value="false" />
     <div class="form-group">
         <input type="submit" value="Изменить" class="btn btn-primary" />
 
@@ -114,15 +116,32 @@
         <input type="submit" value="Изменить картинку" class="btn btn-success" />
     </div>
 </form>
-
-<form asp-controller="Serie" asp-action="DeleteImgMovie" asp-route-id="@Model.Id" method="post">
-
-    <div class="form-group">
-        <input type="submit" class="btn btn-danger" value="Удалить картинку" />
-    </div>
-
-</form>
+<!-- Замена отдельной формы удаления картинки на кнопку, которая установит флаг и отправит основную форму Edit -->
+<div class="form-group">
+    <button type="button" id="btnDeleteImage" class="btn btn-danger">Удалить картинку</button>
+</div>
 <br>
+
+<!-- Модальное окно подтверждения удаления изображения -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Подтвердите удаление</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить изображение? Это действие можно отменить, загрузив новое изображение.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="button" id="confirmDeleteYes" class="btn btn-danger">Удалить</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     $(document).ready(function () {
@@ -200,6 +219,18 @@
                 $fileError.hide();
                 $submitButton.prop('disabled', false);
             }
+        });
+        // Показать модальное окно подтверждения при клике на кнопку удаления
+        $('#btnDeleteImage').click(function () {
+            $('#confirmDeleteModal').modal('show');
+        });
+
+        // Пользователь подтвердил удаление в модалке
+        $('#confirmDeleteYes').click(function () {
+            // Устанавливаем флаг и сабмитим основную форму
+            $('#DeleteImage').val('true');
+            $('#confirmDeleteModal').modal('hide');
+            $('#editForm').submit();
         });
 
     });
