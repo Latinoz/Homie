@@ -11,6 +11,10 @@ if (-not (Test-Path $ConfigFile)) {
 
 $config = Get-Content $ConfigFile -Raw | ConvertFrom-Json
 
+# Resolve service name (default to Homie.service if not provided)
+$serviceName = if ($config.PSObject.Properties.Name -contains 'ServiceName' -and $config.ServiceName) { $config.ServiceName } else { 'Homie.service' }
+Write-Host "Using service name: $serviceName" -ForegroundColor Green
+
 # Check key
 if (-not (Test-Path $config.SshKeyPath)) {
     Write-Error "SSH key not found: $($config.SshKeyPath)"
@@ -89,6 +93,43 @@ if (Test-Path "deploy.ps1") {
     Write-Host "Copied deploy.ps1 to publish" -ForegroundColor Green
 }
 
+# Ensure service name in deploy.sh matches configuration
+if (Test-Path "$scriptsPublishPath/deploy.sh") {
+    $raw = Get-Content "$scriptsPublishPath/deploy.sh" -Raw
+    $lines = $raw -split "`r?`n"
+    $replaced = $false
+    for ($i = 0; $i -lt $lines.Length; $i++) {
+        if ($lines[$i] -match '^\s*SERVICE_NAME=') {
+            $lines[$i] = 'SERVICE_NAME="' + $serviceName + '"'
+            $replaced = $true
+            break
+        }
+    }
+    if (-not $replaced) {
+        # Insert after APP_DIR if present, else after shebang, else at top
+        $insertIdx = 0
+        for ($j = 0; $j -lt $lines.Length; $j++) {
+            if ($lines[$j] -match '^\s*APP_DIR=') { $insertIdx = $j + 1; break }
+            if ($lines[$j] -match '^#!') { $insertIdx = [Math]::Max($insertIdx, $j + 1) }
+        }
+        $newLine = 'SERVICE_NAME="' + $serviceName + '"'
+        if ($insertIdx -le 0) {
+            $lines = @($newLine) + $lines
+        } elseif ($insertIdx -ge $lines.Length) {
+            $lines = $lines + @($newLine)
+        } else {
+            $before = @()
+            if ($insertIdx -gt 0) { $before = $lines[0..($insertIdx-1)] }
+            $after = @()
+            if ($insertIdx -lt $lines.Length) { $after = $lines[$insertIdx..($lines.Length-1)] }
+            $lines = $before + @($newLine) + $after
+        }
+    }
+    $out = ($lines -join "`n")
+    Set-Content -Path "$scriptsPublishPath/deploy.sh" -Value $out -NoNewline
+    Write-Host "SERVICE_NAME in deploy.sh set to: $serviceName" -ForegroundColor Green
+}
+
 # Check that scripts are copied
 if (Test-Path "$scriptsPublishPath/deploy.sh") {
     Write-Host "Deploy scripts are ready for archiving" -ForegroundColor Green
@@ -152,6 +193,8 @@ echo "Deployment completed successfully!"
 '@
     Set-Content -Path "$scriptsPublishPath/deploy.sh" -Value $deployShContent
     Write-Host "Basic deploy.sh created" -ForegroundColor Green
+    # Align service name in generated script
+    (Get-Content "$scriptsPublishPath/deploy.sh" -Raw) -replace 'SERVICE_NAME="[^"]+"', ('SERVICE_NAME="' + $serviceName + '"') | Set-Content "$scriptsPublishPath/deploy.sh"
 }
 
 # Create archive
@@ -233,7 +276,7 @@ Invoke-SCP -LocalPath $archiveName -RemotePath "/tmp/$archiveName" -KeyPath $con
 Write-Host "Running deploy on server..." -ForegroundColor Green
 
 # Command 1: Reliable cleanup while preserving appsettings.json
-$extractCommand = "cd /tmp && echo '=== Starting deployment ===' && if [ -d '/var/netcore' ]; then echo 'Backing up appsettings.json...' && if [ -f '/var/netcore/appsettings.json' ]; then cp /var/netcore/appsettings.json /tmp/appsettings.backup && echo 'Backup created'; else echo 'No appsettings.json to backup'; fi && echo 'Cleaning directory...' && find /var/netcore -mindepth 1 \! -name 'appsettings.json' -exec rm -rf {} \; 2>/dev/null || true && echo 'Restoring appsettings.json...' && if [ -f '/tmp/appsettings.backup' ]; then mv /tmp/appsettings.backup /var/netcore/appsettings.json && echo 'appsettings.json restored'; fi; else echo 'Creating directory...' && mkdir -p /var/netcore; fi && echo 'Extracting archive...' && tar -xzf deploy-$timestamp.tar.gz -C /var/netcore && rm deploy-$timestamp.tar.gz && echo 'Extraction completed'"
+$extractCommand = "cd /tmp && echo '=== Starting deployment ===' && if [ -d '/var/netcore' ]; then echo 'Backing up appsettings.json...' && if [ -f '/var/netcore/appsettings.json' ]; then sudo cp /var/netcore/appsettings.json /tmp/appsettings.backup && echo 'Backup created'; else echo 'No appsettings.json to backup'; fi && echo 'Cleaning directory...' && sudo find /var/netcore -mindepth 1 \! -name 'appsettings.json' -exec rm -rf {} \; 2>/dev/null || true && echo 'Restoring appsettings.json...' && if [ -f '/tmp/appsettings.backup' ]; then sudo mv /tmp/appsettings.backup /var/netcore/appsettings.json && echo 'appsettings.json restored'; fi; else echo 'Creating directory...' && sudo mkdir -p /var/netcore; fi && echo 'Extracting archive...' && sudo tar -xzf deploy-$timestamp.tar.gz -C /var/netcore && rm deploy-$timestamp.tar.gz && echo 'Extraction completed'"
 
 Invoke-SSHCommand -Command $extractCommand -KeyPath $config.SshKeyPath -Server $config.Server -Port $config.Port -Username $config.Username
 
@@ -249,26 +292,26 @@ $checkScriptsCommand = "echo '=== Checking for deploy scripts ===' && " +
 Invoke-SSHCommand -Command $checkScriptsCommand -KeyPath $config.SshKeyPath -Server $config.Server -Port $config.Port -Username $config.Username                       
 
 # Command 2: Set permissions
-$permissionsCommand = "echo 'Setting permissions...' && chown -R www-data:www-data /var/netcore 2>/dev/null || echo 'chown failed, continuing...' && chmod -R 755 /var/netcore && find /var/netcore -type f -name '*.dll' -exec chmod 644 {} \; 2>/dev/null || true && find /var/netcore -type f -name '*.json' -exec chmod 644 {} \; 2>/dev/null || true && find /var/netcore -type f -name '*.exe' -exec chmod 755 {} \; 2>/dev/null || true && echo 'Permissions set'"
+$permissionsCommand = "echo 'Setting permissions...' && sudo chown -R www-data:www-data /var/netcore 2>/dev/null || echo 'chown failed, continuing...' && sudo chmod -R 755 /var/netcore && sudo find /var/netcore -type f -name '*.dll' -exec chmod 644 {} \; 2>/dev/null || true && sudo find /var/netcore -type f -name '*.json' -exec chmod 644 {} \; 2>/dev/null || true && sudo find /var/netcore -type f -name '*.exe' -exec chmod 755 {} \; 2>/dev/null || true && echo 'Permissions set'"
 
 Invoke-SSHCommand -Command $permissionsCommand -KeyPath $config.SshKeyPath -Server $config.Server -Port $config.Port -Username $config.Username
 
 # Command 3: Run deploy
 $deployCommand = "if [ -f '/var/netcore/scripts/deploy.sh' ]; then " +
                  "echo 'Running deploy script from archive...' && " +
-                 "sed -i 's/\\r\$//' /var/netcore/scripts/deploy.sh && " +
-                 "chmod +x /var/netcore/scripts/deploy.sh && " +
-                 "/var/netcore/scripts/deploy.sh; " +
+                 "sudo sed -i 's/\\r\$//' /var/netcore/scripts/deploy.sh && " +
+                 "sudo chmod +x /var/netcore/scripts/deploy.sh && " +
+                 "sudo /var/netcore/scripts/deploy.sh; " +
                  "else " +
                  "echo 'Deploy script not found, performing basic restart...' && " +
-                 "systemctl --user stop Homie.service 2>/dev/null || true && " +
+                 "systemctl --user stop $serviceName 2>/dev/null || true && " +
                  "sleep 2 && " +
-                 "systemctl --user start Homie.service 2>/dev/null || echo 'User service start failed, trying system...' && " +
-                 "sudo systemctl stop Homie.service 2>/dev/null || true && " +
-                 "sudo systemctl start Homie.service 2>/dev/null || echo 'System service start failed' && " +
+                 "systemctl --user start $serviceName 2>/dev/null || echo 'User service start failed, trying system...' && " +
+                 "sudo systemctl stop $serviceName 2>/dev/null || true && " +
+                 "sudo systemctl start $serviceName 2>/dev/null || echo 'System service start failed' && " +
                  "sleep 3 && " +
                  "echo 'Basic restart completed' && " +
-                 "systemctl --user status Homie.service --no-pager -l 2>/dev/null || sudo systemctl status Homie.service --no-pager -l; " +
+                 "systemctl --user status $serviceName --no-pager -l 2>/dev/null || sudo systemctl status $serviceName --no-pager -l; " +
                  "fi"
 
 Invoke-SSHCommand -Command $deployCommand -KeyPath $config.SshKeyPath -Server $config.Server -Port $config.Port -Username $config.Username

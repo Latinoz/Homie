@@ -2,6 +2,7 @@
   "Server": "homie.su",
   "Port": 31022,
   "Username": "deploy-user",
+  "ServiceName": "Homie.service",
   "RemotePath": "/var/netcore",
   "PublishProfile": "Release",
   "SshKeyPath": "C:/Users/Martin/.ssh/deploy-new",
