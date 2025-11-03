@@ -276,7 +276,7 @@ Invoke-SCP -LocalPath $archiveName -RemotePath "/tmp/$archiveName" -KeyPath $con
 Write-Host "Running deploy on server..." -ForegroundColor Green
 
 # Command 1: Reliable cleanup while preserving appsettings.json
-$extractCommand = "cd /tmp && echo '=== Starting deployment ===' && if [ -d '/var/netcore' ]; then echo 'Backing up appsettings.json...' && if [ -f '/var/netcore/appsettings.json' ]; then sudo cp /var/netcore/appsettings.json /tmp/appsettings.backup && echo 'Backup created'; else echo 'No appsettings.json to backup'; fi && echo 'Cleaning directory...' && sudo find /var/netcore -mindepth 1 \! -name 'appsettings.json' -exec rm -rf {} \; 2>/dev/null || true && echo 'Restoring appsettings.json...' && if [ -f '/tmp/appsettings.backup' ]; then sudo mv /tmp/appsettings.backup /var/netcore/appsettings.json && echo 'appsettings.json restored'; fi; else echo 'Creating directory...' && sudo mkdir -p /var/netcore; fi && echo 'Extracting archive...' && sudo tar -xzf deploy-$timestamp.tar.gz -C /var/netcore && rm deploy-$timestamp.tar.gz && echo 'Extraction completed'"
+$extractCommand = "cd /tmp && echo '=== Starting deployment ===' && if [ -d '/var/netcore' ]; then echo 'Backing up appsettings.json...' && if [ -f '/var/netcore/appsettings.json' ]; then sudo cp /var/netcore/appsettings.json /tmp/appsettings.backup && echo 'Backup created'; else echo 'No appsettings.json to backup'; fi && echo 'Cleaning directory...' && sudo find /var/netcore -mindepth 1 \! -name 'appsettings.json' -exec rm -rf {} \; 2>/dev/null || true && echo 'Restoring appsettings.json...' && if [ -f '/tmp/appsettings.backup' ]; then sudo mv /tmp/appsettings.backup /var/netcore/appsettings.json && echo 'appsettings.json restored'; fi; else echo 'Creating directory...' && sudo mkdir -p /var/netcore; fi && echo 'Extracting archive...' && sudo tar -xzf deploy-$timestamp.tar.gz -C /var/netcore && rm -f deploy-$timestamp.tar.gz && echo 'Extraction completed'"
 
 Invoke-SSHCommand -Command $extractCommand -KeyPath $config.SshKeyPath -Server $config.Server -Port $config.Port -Username $config.Username
 
@@ -327,6 +327,16 @@ $verifyCommand = "echo '=== Deployment verification ===' && " +
                  "echo 'Deployment completed!'"
 
 Invoke-SSHCommand -Command $verifyCommand -KeyPath $config.SshKeyPath -Server $config.Server -Port $config.Port -Username $config.Username
+
+# Cleanup archives only if verification succeeded
+$cleanupOnSuccessCommand = "echo '=== Post-deploy cleanup ===' && " +
+                          "if [ -f '/var/netcore/Homie.dll' ]; then " +
+                          "  if systemctl is-active --quiet $serviceName 2>/dev/null || sudo systemctl is-active --quiet $serviceName 2>/dev/null; then " +
+                          "    echo 'Verified OK, removing deploy archives from /tmp' && rm -f /tmp/deploy-*.tar.gz 2>/dev/null || sudo -n rm -f /tmp/deploy-*.tar.gz 2>/dev/null || true; " +
+                          "  else echo 'Service inactive, keeping archives in /tmp'; fi; " +
+                          "else echo 'Homie.dll not found, keeping archives in /tmp'; fi"
+
+Invoke-SSHCommand -Command $cleanupOnSuccessCommand -KeyPath $config.SshKeyPath -Server $config.Server -Port $config.Port -Username $config.Username
 
 # Cleanup
 Write-Host "Cleaning up..." -ForegroundColor Green
