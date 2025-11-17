@@ -299,9 +299,9 @@ Invoke-SSHCommand -Command $permissionsCommand -KeyPath $config.SshKeyPath -Serv
 # Command 3: Run deploy
 $deployCommand = "if [ -f '/var/netcore/scripts/deploy.sh' ]; then " +
                  "echo 'Running deploy script from archive...' && " +
-                 "sudo sed -i 's/\\r\$//' /var/netcore/scripts/deploy.sh && " +
-                 "sudo chmod +x /var/netcore/scripts/deploy.sh && " +
-                 "sudo /var/netcore/scripts/deploy.sh; " +
+                 "sed -i 's/\\r\$//' /var/netcore/scripts/deploy.sh 2>/dev/null || sudo sed -i 's/\\r\$//' /var/netcore/scripts/deploy.sh && " +
+                 "chmod +x /var/netcore/scripts/deploy.sh 2>/dev/null || sudo chmod +x /var/netcore/scripts/deploy.sh && " +
+                 "/var/netcore/scripts/deploy.sh; " +
                  "else " +
                  "echo 'Deploy script not found, performing basic restart...' && " +
                  "systemctl --user stop $serviceName 2>/dev/null || true && " +
@@ -327,6 +327,12 @@ $verifyCommand = "echo '=== Deployment verification ===' && " +
                  "echo 'Deployment completed!'"
 
 Invoke-SSHCommand -Command $verifyCommand -KeyPath $config.SshKeyPath -Server $config.Server -Port $config.Port -Username $config.Username
+
+# Check service logs if there are issues
+$logsCommand = "echo '=== Service logs (last 50 lines) ===' && " +
+              "journalctl -u $serviceName -n 50 --no-pager 2>/dev/null || sudo journalctl -u $serviceName -n 50 --no-pager 2>/dev/null || echo 'Cannot access logs'"
+
+Invoke-SSHCommand -Command $logsCommand -KeyPath $config.SshKeyPath -Server $config.Server -Port $config.Port -Username $config.Username
 
 # Cleanup archives only if verification succeeded
 $cleanupOnSuccessCommand = "echo '=== Post-deploy cleanup ===' && " +
