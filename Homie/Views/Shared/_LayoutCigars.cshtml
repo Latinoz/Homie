@@ -24,6 +24,10 @@
         </a>       
 
         <a method="post" asp-area="Identity" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white"><i class="fas fa-sign-in-alt fa-lg"></i>&nbsp; Выход</a>
+        
+        <div style="position: absolute; bottom: 30px; width: 100%; text-align: center; color: white; font-size: 0.9em;">
+            ver. @System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(3)
+        </div>
     </div>
 
     <!-- Page Content -->
