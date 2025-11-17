@@ -39,9 +39,6 @@ sudo chmod -R 755 "$APP_DIR" 2>/dev/null || chmod -R 755 "$APP_DIR" 2>/dev/null 
 find "$APP_DIR" -type f -name "*.dll" -exec chmod 644 {} \; 2>/dev/null || true
 find "$APP_DIR" -type f -name "*.json" -exec chmod 644 {} \; 2>/dev/null || true
 
-# Note: Database migrations should be applied manually if needed
-# Auto-migrations have been disabled to prevent deployment issues
-
 # Start service (try system first since it's usually a system service, then user mode)
 echo "Starting service..."
 sudo systemctl start "$SERVICE_NAME" 2>/dev/null || systemctl --user start "$SERVICE_NAME" 2>/dev/null || echo "Failed to start service"
