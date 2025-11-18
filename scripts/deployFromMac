@@ -3,19 +3,28 @@
 # === DEPLOY SCRIPT FOR MACOS ===
 # Usage: ./deployFromMac [Release|Debug] [../.deploy/config.json]
 
-set -e
+set -euo pipefail
 
 ENVIRONMENT="${1:-Release}"
 CONFIG_FILE="${2:-../.deploy/config.mac.json}"
 
+# Logging functions
+log() {
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
+}
+
+error() {
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: $*" >&2
+}
+
 if ! [ -f "$CONFIG_FILE" ]; then
-  echo "Config file not found: $CONFIG_FILE" >&2
+  error "Config file not found: $CONFIG_FILE"
   exit 1
 fi
 
 # Requires jq for JSON parsing
 if ! command -v jq >/dev/null; then
-  echo "jq is required but not installed. Install with 'brew install jq'" >&2
+  error "jq is required but not installed. Install with 'brew install jq'"
   exit 1
 fi
 
@@ -25,72 +34,202 @@ SERVER=$(jq -r .Server "$CONFIG_FILE")
 PORT=$(jq -r .Port "$CONFIG_FILE")
 USERNAME=$(jq -r .Username "$CONFIG_FILE")
 PROJECT_PATH="../$(jq -r .ProjectPath "$CONFIG_FILE")"
+SERVICE_NAME=$(jq -r '.ServiceName // "Homie.service"' "$CONFIG_FILE")
 EXCLUDE_PATTERNS=$(jq -r '.ExcludePatterns[]?' "$CONFIG_FILE")
 
+log "Using service name: $SERVICE_NAME"
+
 if ! [ -f "$SSH_KEY" ]; then
-  echo "SSH key not found: $SSH_KEY" >&2
+  error "SSH key not found: $SSH_KEY"
   exit 1
 fi
 
 if ! [ -f "$PROJECT_PATH" ]; then
-  echo "Project file not found: $PROJECT_PATH" >&2
+  error "Project file not found: $PROJECT_PATH"
   echo "Available project files:" >&2
   find .. -name '*.csproj' >&2
   exit 1
 fi
 
-echo "Building project..."
-dotnet publish "$PROJECT_PATH" -c "$ENVIRONMENT" -r linux-x64 --self-contained false -o ../publish --nologo
+# Test SSH connection
+log "Testing SSH connection..."
+if ! ssh -p "$PORT" -i "$SSH_KEY" -o StrictHostKeyChecking=no -o ConnectTimeout=10 "$USERNAME@$SERVER" "echo 'Connection OK'" >/dev/null 2>&1; then
+  error "Cannot connect to server $SERVER:$PORT"
+  exit 1
+fi
+log "✓ SSH connection successful"
 
-if ! [ -d "../publish" ]; then
-  echo "Publish failed - publish directory not created" >&2
+# Increment version in csproj
+log "Incrementing version..."
+if [ -f "$PROJECT_PATH" ]; then
+  if grep -q '<Version>' "$PROJECT_PATH"; then
+    CURRENT_VERSION=$(grep -oE '<Version>[^<]+</Version>' "$PROJECT_PATH" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo "")
+    if [ -n "$CURRENT_VERSION" ]; then
+      IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+      NEW_PATCH=$((PATCH + 1))
+      NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
+      
+      # Update version in csproj (macOS compatible)
+      sed -i '' "s|<Version>$CURRENT_VERSION</Version>|<Version>$NEW_VERSION</Version>|" "$PROJECT_PATH"
+      
+      log "Version updated: $CURRENT_VERSION → $NEW_VERSION"
+    else
+      log "Warning: Could not parse version from csproj"
+    fi
+  else
+    log "Warning: Could not find <Version> tag in csproj"
+  fi
+else
+  log "Warning: Project file not found for version update"
+fi
+
+# Check for pending migrations
+log "Checking for pending migrations..."
+PROJECT_DIR=$(dirname "$PROJECT_PATH")
+if command -v dotnet-ef >/dev/null 2>&1; then
+  cd "$PROJECT_DIR"
+  MIGRATIONS_OUTPUT=$(dotnet ef migrations list 2>&1 || true)
+  if echo "$MIGRATIONS_OUTPUT" | grep -q "Pending"; then
+    log "⚠️  WARNING: Found pending migration(s)!"
+    log "⚠️  Pending migrations detected in the project."
+    log "⚠️  Please apply migrations manually on the server after deployment:"
+    log "    ssh to server and run: cd /var/netcore && dotnet ef database update"
+  else
+    log "✓ No pending migrations found"
+  fi
+  cd - >/dev/null
+else
+  log "⚠️  dotnet-ef not installed, skipping migration check"
+  log "    Install with: dotnet tool install --global dotnet-ef"
+fi
+
+log "Building project..."
+if ! dotnet publish "$PROJECT_PATH" -c "$ENVIRONMENT" -r linux-x64 --self-contained false -o ../publish --nologo; then
+  error "Build failed!"
   exit 1
 fi
 
-echo "Cleaning files..."
+if ! [ -d "../publish" ]; then
+  error "Publish failed - publish directory not created"
+  exit 1
+fi
+
+# Check for main DLL
+if ! [ -f "../publish/Homie.dll" ]; then
+  error "Build succeeded but Homie.dll not found in publish directory!"
+  exit 1
+fi
+log "✓ Build completed successfully"
+
+log "Cleaning files..."
 for pattern in $EXCLUDE_PATTERNS; do
-  find ../publish -name "$pattern" -exec rm -rf {} +
+  find ../publish -name "$pattern" -exec rm -rf {} + 2>/dev/null || true
 done
 
 if [ -f "../publish/appsettings.json" ]; then
   rm -f ../publish/appsettings.json
-  echo "Removed appsettings.json from publish to prevent overwrite on server"
+  log "Removed appsettings.json from publish to prevent overwrite on server"
 fi
 
 # Copy deploy scripts
 mkdir -p ../publish/scripts
-cp -f "$(dirname "$0")/deploy.sh" ../publish/scripts/ 2>/dev/null || echo "Warning: deploy.sh not found"
+if [ -f "$(dirname "$0")/deploy.sh" ]; then
+  cp -f "$(dirname "$0")/deploy.sh" ../publish/scripts/
+  log "Copied deploy.sh to publish"
+  
+  # Update SERVICE_NAME in deploy.sh to match config
+  if grep -q "^[[:space:]]*SERVICE_NAME=" "../publish/scripts/deploy.sh"; then
+    sed -i '' "s|^[[:space:]]*SERVICE_NAME=.*|SERVICE_NAME=\"$SERVICE_NAME\"|" ../publish/scripts/deploy.sh
+    log "SERVICE_NAME in deploy.sh set to: $SERVICE_NAME"
+  else
+    log "Warning: Could not find SERVICE_NAME in deploy.sh"
+  fi
+else
+  log "Warning: deploy.sh not found, creating basic version"
+  # Create basic deploy.sh
+  cat > ../publish/scripts/deploy.sh << 'EOF'
+#!/bin/bash
+
+APP_DIR="/var/netcore"
+SERVICE_NAME="Homie.service"
+
+echo "Starting deployment..."
+
+# Stop service
+echo "Stopping service..."
+sudo systemctl stop $SERVICE_NAME 2>/dev/null || true
+
+# Wait a bit
+sleep 3
+
+# Set permissions
+echo "Setting permissions..."
+sudo chown -R www-data:www-data $APP_DIR 2>/dev/null || echo "chown skipped"
+sudo chmod -R 755 $APP_DIR 2>/dev/null || echo "chmod skipped"
+
+# Start service
+echo "Starting service..."
+sudo systemctl start $SERVICE_NAME
+
+# Check status
+sleep 5
+echo "Service status:"
+sudo systemctl status $SERVICE_NAME --no-pager -l
+
+echo "Deployment completed successfully!"
+EOF
+  sed -i '' "s|SERVICE_NAME=\"Homie.service\"|SERVICE_NAME=\"$SERVICE_NAME\"|" ../publish/scripts/deploy.sh
+  log "Created basic deploy.sh with SERVICE_NAME=$SERVICE_NAME"
+fi
+
 cp -f "$(dirname "$0")/deploy.ps1" ../publish/scripts/ 2>/dev/null || true
 
 # Create archive
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
 ARCHIVE_NAME="deploy-$TIMESTAMP.tar.gz"
-echo "Creating archive: $ARCHIVE_NAME"
-tar --exclude='._*' -czf "./$ARCHIVE_NAME" -C ../publish .
+log "Creating archive: $ARCHIVE_NAME"
+tar --exclude='._*' --no-xattrs -czf "./$ARCHIVE_NAME" -C ../publish .
+
+# Verify archive contains deploy script
+log "Verifying archive content..."
+if tar -tzf "./$ARCHIVE_NAME" | grep -q "scripts/deploy.sh"; then
+  log "✓ deploy.sh found in archive"
+else
+  log "⚠️  WARNING: deploy.sh not found in archive!"
+fi
 
 if ! [ -f "./$ARCHIVE_NAME" ]; then
-  echo "Archive creation failed!" >&2
+  error "Archive creation failed!"
   exit 1
 fi
 
-echo "Copying to server..."
-scp -P "$PORT" -i "$SSH_KEY" -o StrictHostKeyChecking=no "$ARCHIVE_NAME" "$USERNAME@$SERVER:/tmp/$ARCHIVE_NAME"
+log "Copying to server..."
+if ! scp -P "$PORT" -i "$SSH_KEY" -o StrictHostKeyChecking=no "$ARCHIVE_NAME" "$USERNAME@$SERVER:/tmp/$ARCHIVE_NAME"; then
+  error "Failed to copy archive to server"
+  exit 1
+fi
+log "✓ Archive copied successfully"
 
 # Remote deploy commands
-EXTRACT_CMD="cd /tmp && echo '=== Starting deployment ===' && if [ -d '/var/netcore' ]; then echo 'Backing up appsettings.json...' && if [ -f '/var/netcore/appsettings.json' ]; then cp /var/netcore/appsettings.json /tmp/appsettings.backup && echo 'Backup created'; else echo 'No appsettings.json to backup'; fi && echo 'Cleaning directory...' && find /var/netcore -mindepth 1 ! -name 'appsettings.json' -exec rm -rf {} \\; 2>/dev/null || true && echo 'Restoring appsettings.json...' && if [ -f '/tmp/appsettings.backup' ]; then mv /tmp/appsettings.backup /var/netcore/appsettings.json && echo 'appsettings.json restored'; fi; else echo 'Creating directory...' && mkdir -p /var/netcore; fi && echo 'Extracting archive...' && tar -xzf $ARCHIVE_NAME -C /var/netcore && find /var/netcore -name '._*' -delete && rm $ARCHIVE_NAME && echo 'Extraction completed'"
+EXTRACT_CMD="cd /tmp && echo '=== Starting deployment ===' && if [ -d '/var/netcore' ]; then echo 'Backing up appsettings.json...' && if [ -f '/var/netcore/appsettings.json' ]; then sudo cp /var/netcore/appsettings.json /tmp/appsettings.backup && echo 'Backup created'; else echo 'No appsettings.json to backup'; fi && echo 'Cleaning directory...' && sudo find /var/netcore -mindepth 1 ! -name 'appsettings.json' -delete 2>/dev/null || true; else echo 'Creating directory...' && sudo mkdir -p /var/netcore; fi && echo 'Extracting archive...' && sudo tar -xzf $ARCHIVE_NAME -C /var/netcore && sudo find /var/netcore -name '._*' -delete && rm $ARCHIVE_NAME && echo 'Restoring appsettings.json...' && if [ -f '/tmp/appsettings.backup' ]; then sudo mv /tmp/appsettings.backup /var/netcore/appsettings.json && echo 'appsettings.json restored'; fi && echo 'Extraction completed'"
 
-PERMISSIONS_CMD="echo 'Setting permissions...' && chown -R www-data:www-data /var/netcore 2>/dev/null || echo 'chown failed, continuing...' && chmod -R 755 /var/netcore && find /var/netcore -type f -name '*.dll' -exec chmod 644 {} \; 2>/dev/null || true && find /var/netcore -type f -name '*.json' -exec chmod 644 {} \; 2>/dev/null || true && find /var/netcore -type f -name '*.exe' -exec chmod 755 {} \; 2>/dev/null || true && echo 'Permissions set'"
+PERMISSIONS_CMD="echo 'Setting permissions...' && sudo chown -R www-data:www-data /var/netcore 2>/dev/null || echo 'chown failed, continuing...' && sudo chmod -R 755 /var/netcore && sudo find /var/netcore -type f -name '*.dll' -exec chmod 644 {} \; 2>/dev/null || true && sudo find /var/netcore -type f -name '*.json' -exec chmod 644 {} \; 2>/dev/null || true && sudo find /var/netcore -type f -name '*.exe' -exec chmod 755 {} \; 2>/dev/null || true && echo 'Permissions set'"
 
-DEPLOY_CMD="if [ -f '/var/netcore/scripts/deploy.sh' ]; then echo 'Running deploy script from archive...' && sed -i 's/\r$//' /var/netcore/scripts/deploy.sh && chmod +x /var/netcore/scripts/deploy.sh && /var/netcore/scripts/deploy.sh; else echo 'Deploy script not found, performing basic restart...' && systemctl --user stop Homie.service 2>/dev/null || true && sleep 2 && systemctl --user start Homie.service 2>/dev/null || echo 'User service start failed, trying system...' && sudo systemctl stop Homie.service 2>/dev/null || true && sudo systemctl start Homie.service 2>/dev/null || echo 'System service start failed' && sleep 3 && echo 'Basic restart completed' && systemctl --user status Homie.service --no-pager -l 2>/dev/null || sudo systemctl status Homie.service --no-pager -l; fi"
+DEPLOY_CMD="if [ -f '/var/netcore/scripts/deploy.sh' ]; then echo 'Running deploy script from archive...' && sed -i 's/\r$//' /var/netcore/scripts/deploy.sh 2>/dev/null || sudo sed -i 's/\r$//' /var/netcore/scripts/deploy.sh && chmod +x /var/netcore/scripts/deploy.sh 2>/dev/null || sudo chmod +x /var/netcore/scripts/deploy.sh && /var/netcore/scripts/deploy.sh 2>/dev/null || sudo /var/netcore/scripts/deploy.sh; else echo 'Deploy script not found, performing basic restart...' && systemctl --user stop $SERVICE_NAME 2>/dev/null || true && sleep 2 && systemctl --user start $SERVICE_NAME 2>/dev/null || echo 'User service start failed, trying system...' && sudo systemctl stop $SERVICE_NAME 2>/dev/null || true && sudo systemctl start $SERVICE_NAME 2>/dev/null || echo 'System service start failed' && sleep 3 && echo 'Basic restart completed' && systemctl --user status $SERVICE_NAME --no-pager -l 2>/dev/null || sudo systemctl status $SERVICE_NAME --no-pager -l; fi"
 
-VERIFY_CMD="echo '=== Deployment verification ===' && echo 'Main application files:' && find /var/netcore -maxdepth 1 -name '*.dll' -o -name '*.exe' | head -10 && echo 'Scripts directory:' && ls -la /var/netcore/scripts/ 2>/dev/null || echo 'No scripts directory' && echo 'appsettings.json:' && ls -la /var/netcore/appsettings.json && echo 'Deployment completed!'"
+VERIFY_CMD="echo '=== Deployment verification ===' && echo 'Service status:' && sudo systemctl status $SERVICE_NAME --no-pager -l 2>/dev/null | head -20 || systemctl --user status $SERVICE_NAME --no-pager -l 2>/dev/null | head -20 || echo 'Cannot get service status' && echo '' && echo 'Recent logs (last 15 lines):' && sudo journalctl -u $SERVICE_NAME -n 15 --no-pager 2>/dev/null || echo 'Cannot access logs' && echo '' && echo 'Main application files:' && sudo ls -lh /var/netcore/*.dll 2>/dev/null | head -5 && echo '' && echo 'Scripts directory:' && sudo ls -la /var/netcore/scripts/ 2>/dev/null || echo 'No scripts directory' && echo '' && echo 'appsettings.json:' && sudo ls -la /var/netcore/appsettings.json 2>/dev/null || echo 'No appsettings.json' && echo '' && echo 'Deployment completed!'"
 
+log "Executing remote deployment commands..."
 for CMD in "$EXTRACT_CMD" "$PERMISSIONS_CMD" "$DEPLOY_CMD" "$VERIFY_CMD"; do
-  ssh -p "$PORT" -i "$SSH_KEY" -o StrictHostKeyChecking=no "$USERNAME@$SERVER" "$CMD"
+  if ! ssh -p "$PORT" -i "$SSH_KEY" -o StrictHostKeyChecking=no "$USERNAME@$SERVER" "$CMD"; then
+    error "Remote command failed"
+    exit 1
+  fi
 done
 
 # Cleanup
+log "Cleaning up local files..."
 rm -f "$ARCHIVE_NAME"
 rm -rf ../publish
 
-echo "Deploy completed successfully!"
+log "✓ Deploy completed successfully!"
