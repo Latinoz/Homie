@@ -229,7 +229,20 @@ done
 
 # Cleanup
 log "Cleaning up local files..."
-rm -f "$ARCHIVE_NAME"
+rm -f "./$ARCHIVE_NAME"
 rm -rf ../publish
+
+# Remove all old deploy archives (except the one we just used, which is already deleted)
+log "Removing old deploy archives..."
+CURRENT_DIR="$(dirname "$0")"
+OLD_ARCHIVES=$(find "$CURRENT_DIR" -maxdepth 1 -name "deploy-*.tar.gz" -type f 2>/dev/null)
+if [ -n "$OLD_ARCHIVES" ]; then
+  OLD_COUNT=$(echo "$OLD_ARCHIVES" | wc -l | tr -d ' ')
+  log "Found $OLD_COUNT old archive(s), removing..."
+  find "$CURRENT_DIR" -maxdepth 1 -name "deploy-*.tar.gz" -type f -delete 2>/dev/null || true
+  log "✓ Old archives cleaned up"
+else
+  log "✓ No old archives to clean up"
+fi
 
 log "✓ Deploy completed successfully!"
