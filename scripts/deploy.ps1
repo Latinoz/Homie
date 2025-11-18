@@ -15,6 +15,30 @@ $config = Get-Content $ConfigFile -Raw | ConvertFrom-Json
 $serviceName = if ($config.PSObject.Properties.Name -contains 'ServiceName' -and $config.ServiceName) { $config.ServiceName } else { 'Homie.service' }
 Write-Host "Using service name: $serviceName" -ForegroundColor Green
 
+# Increment version in csproj
+Write-Host "Incrementing version..." -ForegroundColor Green
+$csprojPath = "../$($config.ProjectPath)"
+if (Test-Path $csprojPath) {
+    $csprojContent = Get-Content $csprojPath -Raw
+    if ($csprojContent -match '<Version>(\d+)\.(\d+)\.(\d+)</Version>') {
+        $major = [int]$matches[1]
+        $minor = [int]$matches[2]
+        $patch = [int]$matches[3]
+        $newPatch = $patch + 1
+        $oldVersion = "$major.$minor.$patch"
+        $newVersion = "$major.$minor.$newPatch"
+        
+        $csprojContent = $csprojContent -replace "<Version>$major\.$minor\.$patch</Version>", "<Version>$newVersion</Version>"
+        Set-Content -Path $csprojPath -Value $csprojContent -NoNewline
+        
+        Write-Host "Version updated: $oldVersion → $newVersion" -ForegroundColor Cyan
+    } else {
+        Write-Host "Warning: Could not find <Version> tag in csproj" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "Warning: Project file not found for version update" -ForegroundColor Yellow
+}
+
 # Check key
 if (-not (Test-Path $config.SshKeyPath)) {
     Write-Error "SSH key not found: $($config.SshKeyPath)"
@@ -51,6 +75,33 @@ if (-not (Test-Path $projectPath)) {
 }
 
 dotnet publish $projectPath -c $Environment -r linux-x64 --self-contained false -o ../publish --nologo
+
+# Check for pending migrations
+Write-Host "Checking for pending migrations..." -ForegroundColor Green
+$projectDir = Split-Path -Parent $projectPath
+Push-Location $projectDir
+try {
+    $migrationsOutput = dotnet ef migrations list 2>&1 | Out-String
+    if ($migrationsOutput -match "Pending") {
+        Write-Host "⚠️  WARNING: Found pending migration(s)!" -ForegroundColor Yellow
+        Write-Host "⚠️  Pending migrations detected in the project." -ForegroundColor Yellow
+        Write-Host "⚠️  Please apply migrations manually on the server after deployment:" -ForegroundColor Yellow
+        Write-Host "    ssh to server and run: cd /var/netcore && dotnet ef database update" -ForegroundColor Cyan
+        
+        # Show pending migrations
+        $pendingMigrations = $migrationsOutput -split "`n" | Where-Object { $_ -match "^\s+\d+_" -and $_ -notmatch "\(Applied\)" }
+        if ($pendingMigrations) {
+            Write-Host "Pending migrations:" -ForegroundColor Yellow
+            $pendingMigrations | ForEach-Object { Write-Host "  $_" -ForegroundColor Gray }
+        }
+    } else {
+        Write-Host "✓ No pending migrations found" -ForegroundColor Green
+    }
+} catch {
+    Write-Host "Note: Could not check migrations (EF Core tools may not be installed)" -ForegroundColor Gray
+} finally {
+    Pop-Location
+}
 
 # Check if publish succeeded
 if (-not (Test-Path "../publish")) {
@@ -299,9 +350,9 @@ Invoke-SSHCommand -Command $permissionsCommand -KeyPath $config.SshKeyPath -Serv
 # Command 3: Run deploy
 $deployCommand = "if [ -f '/var/netcore/scripts/deploy.sh' ]; then " +
                  "echo 'Running deploy script from archive...' && " +
-                 "sudo sed -i 's/\\r\$//' /var/netcore/scripts/deploy.sh && " +
-                 "sudo chmod +x /var/netcore/scripts/deploy.sh && " +
-                 "sudo /var/netcore/scripts/deploy.sh; " +
+                 "sed -i 's/\\r\$//' /var/netcore/scripts/deploy.sh 2>/dev/null || sudo sed -i 's/\\r\$//' /var/netcore/scripts/deploy.sh && " +
+                 "chmod +x /var/netcore/scripts/deploy.sh 2>/dev/null || sudo chmod +x /var/netcore/scripts/deploy.sh && " +
+                 "/var/netcore/scripts/deploy.sh; " +
                  "else " +
                  "echo 'Deploy script not found, performing basic restart...' && " +
                  "systemctl --user stop $serviceName 2>/dev/null || true && " +
@@ -327,6 +378,12 @@ $verifyCommand = "echo '=== Deployment verification ===' && " +
                  "echo 'Deployment completed!'"
 
 Invoke-SSHCommand -Command $verifyCommand -KeyPath $config.SshKeyPath -Server $config.Server -Port $config.Port -Username $config.Username
+
+# Check service logs if there are issues
+$logsCommand = "echo '=== Service logs (last 50 lines) ===' && " +
+              "journalctl -u $serviceName -n 50 --no-pager 2>/dev/null || sudo journalctl -u $serviceName -n 50 --no-pager 2>/dev/null || echo 'Cannot access logs'"
+
+Invoke-SSHCommand -Command $logsCommand -KeyPath $config.SshKeyPath -Server $config.Server -Port $config.Port -Username $config.Username
 
 # Cleanup archives only if verification succeeded
 $cleanupOnSuccessCommand = "echo '=== Post-deploy cleanup ===' && " +
