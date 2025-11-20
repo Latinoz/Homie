@@ -10,6 +10,7 @@ using System.Security.Claims;
 using Homie.Models;
 using SmartBreadcrumbs.Attributes;
 using System;
+using Homie.Controllers;
 using System.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
@@ -168,7 +169,7 @@ namespace Homie.Areas.Series.Controllers
             return File(resultBytes, detectedMime);
         }
 
-        [Breadcrumb(Title = "Список")]
+        [Breadcrumb(Title = "Список", FromController = typeof(HomeController), AreaName = "Series")]
         [HttpGet]
         public async Task<IActionResult> Index(int page = 1,
             SortState sortOrder = SortState.NameAsc)
@@ -223,7 +224,7 @@ namespace Homie.Areas.Series.Controllers
             return View(viewModel);
         }
 
-        [Breadcrumb(Title = "Избранное")]
+        [Breadcrumb(Title = "Избранное", FromAction = "Index", FromController = typeof(SerieController), AreaName = "Series")]
         [HttpGet]
         public async Task<IActionResult> Favorite(int page = 1,
             SortState sortOrder = SortState.NameAsc)
@@ -260,7 +261,7 @@ namespace Homie.Areas.Series.Controllers
         }
 
 
-        [Breadcrumb(Title = "Добавить")]
+        [Breadcrumb(Title = "Добавить", FromAction = "Index", FromController = typeof(SerieController), AreaName = "Series")]
         [HttpGet]
         public IActionResult CreateIntoMovies()
         {
@@ -279,7 +280,7 @@ namespace Homie.Areas.Series.Controllers
             return View();
         }
 
-        [Breadcrumb(Title = "Добавить")]
+        [Breadcrumb(Title = "Добавить", FromAction = "Favorite", FromController = typeof(SerieController), AreaName = "Series")]
         [HttpGet]
         public IActionResult CreateIntoFavorite()
         {
@@ -447,7 +448,7 @@ namespace Homie.Areas.Series.Controllers
             return NotFound();
         }
 
-        [Breadcrumb(Title = "Изменить")]
+        [Breadcrumb(Title = "Изменить", FromAction = "Index", FromController = typeof(SerieController), AreaName = "Series")]
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -593,7 +594,7 @@ namespace Homie.Areas.Series.Controllers
             return RedirectToAction("Edit", new { id = movies.Id });
         }
 
-        [Breadcrumb(Title = "Удалить")]
+        [Breadcrumb(Title = "Удалить", FromAction = "Index", FromController = typeof(SerieController), AreaName = "Series")]
         [HttpGet]
         [ActionName("Delete")]
         public async Task<IActionResult> ConfirmDelete(int? id)
@@ -631,7 +632,7 @@ namespace Homie.Areas.Series.Controllers
             return NotFound();
         }
 
-        [Breadcrumb(Title = "Удалить")]
+        [Breadcrumb(Title = "Удалить", FromAction = "Index", FromController = typeof(SerieController), AreaName = "Series")]
         [HttpGet]
         [ActionName("DeleteImgMovie")]
         public async Task<IActionResult> ConfirmDeleteImgMovie(int id)
