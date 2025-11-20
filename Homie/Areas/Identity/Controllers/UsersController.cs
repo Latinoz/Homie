@@ -145,5 +145,37 @@ namespace Homie.Areas.Identity.Controllers
             }
             return View(model);
         }
+
+        /// <summary>
+        /// SECURITY: Разблокировка аккаунта администратором
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> UnlockAccount(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return NotFound();
+            }
+
+            User user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Сброс счетчика неудачных попыток входа и разблокировка
+            var result = await _userManager.SetLockoutEndDateAsync(user, null);
+            if (result.Succeeded)
+            {
+                await _userManager.ResetAccessFailedCountAsync(user);
+                TempData["SuccessMessage"] = $"Аккаунт {user.Email} успешно разблокирован.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = $"Ошибка при разблокировке аккаунта {user.Email}.";
+            }
+
+            return RedirectToAction("Index");
+        }
     }
 }

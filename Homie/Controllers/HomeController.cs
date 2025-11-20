@@ -10,6 +10,8 @@ using Homie.Models;
 using Homie.Areas.Battletech.Models;
 using System;
 using SmartBreadcrumbs.Attributes;
+using Homie.Helpers;
+using System.Security.Claims;
 
 namespace Homie.Controllers
 {
@@ -44,16 +46,31 @@ namespace Homie.Controllers
         {
             if (uploadedFile != null)
             {
-                // путь к папке Files
-                string path = "/Files/" + uploadedFile.FileName;
-                // сохраняем файл в папку Files в каталоге wwwroot
-                using (var fileStream = new FileStream(_appEnvironment.WebRootPath + path, FileMode.Create))
+                // SECURITY: Валидация загружаемого файла
+                if (!FileUploadHelper.ValidateFile(uploadedFile, out string errorMessage))
+                {
+                    ModelState.AddModelError("", errorMessage);
+                    return View("Fileup", db.Files.ToList());
+                }
+
+                // SECURITY: Генерация безопасного имени файла для защиты от path traversal
+                string safeFileName = FileUploadHelper.GenerateSafeFileName(uploadedFile.FileName);
+                string path = "/Files/" + safeFileName;
+                
+                // Сохраняем файл в папку Files в каталоге wwwroot
+                string fullPath = Path.Combine(_appEnvironment.WebRootPath, "Files", safeFileName);
+                
+                // Создаём директорию если не существует
+                Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+                
+                using (var fileStream = new FileStream(fullPath, FileMode.Create))
                 {
                     await uploadedFile.CopyToAsync(fileStream);
                 }
+                
                 FileModel file = new FileModel { Name = uploadedFile.FileName, Path = path };
                 db.Files.Add(file);
-                db.SaveChanges();
+                await db.SaveChangesAsync();
             }
 
             return RedirectToAction("Fileup");
@@ -68,6 +85,16 @@ namespace Homie.Controllers
         [HttpPost]
         public IActionResult Create(ImageViewModel pvm)
         {
+            if (pvm.AvatarFile != null)
+            {
+                // SECURITY: Валидация загружаемого изображения
+                if (!FileUploadHelper.ValidateImageFile(pvm.AvatarFile, out string errorMessage))
+                {
+                    ModelState.AddModelError("", errorMessage);
+                    return View("FileupImage", db.Picture.ToList());
+                }
+            }
+
             Image image = new Image { NameImg = pvm.NameImgVM };
             if (pvm.AvatarFile != null)
             {

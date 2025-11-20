@@ -32,14 +32,20 @@ namespace Homie
             options.UseMySql(Configuration.GetConnectionString("DefaultConnection"), new MySqlServerVersion(new Version())));
            
 
-            //** Удалить снятие ограничений, при Release **
+            // SECURITY: Усиленная политика паролей для защиты от brute-force атак
             services.AddIdentity<User, IdentityRole>(opts =>
             {
-                opts.Password.RequiredLength = 5;   // минимальная длина
-                opts.Password.RequireNonAlphanumeric = false;   // требуются ли не алфавитно-цифровые символы
-                opts.Password.RequireLowercase = false; // требуются ли символы в нижнем регистре
-                opts.Password.RequireUppercase = false; // требуются ли символы в верхнем регистре
-                opts.Password.RequireDigit = false; // требуются ли цифры
+                // Требования к паролю
+                opts.Password.RequiredLength = 12;   // минимальная длина 12 символов
+                opts.Password.RequireNonAlphanumeric = true;   // требуются специальные символы (!@#$%^&*)
+                opts.Password.RequireLowercase = true; // требуются символы в нижнем регистре
+                opts.Password.RequireUppercase = true; // требуются символы в верхнем регистре
+                opts.Password.RequireDigit = true; // требуются цифры
+                
+                // Защита от brute-force атак: блокировка аккаунта после неудачных попыток
+                opts.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15); // блокировка на 15 минут
+                opts.Lockout.MaxFailedAccessAttempts = 5; // максимум 5 неудачных попыток
+                opts.Lockout.AllowedForNewUsers = true; // включить для новых пользователей
             })
                .AddEntityFrameworkStores<ApplicationDbContext>();
 
@@ -65,6 +71,9 @@ namespace Homie
             {
                 // Увеличиваем лимит на размер запроса до 10 MB
                 options.MaxModelBindingCollectionSize = 1024;
+                
+                // Глобальная защита от CSRF-атак для всех POST/PUT/DELETE операций
+                options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute());
             });
 
             // Настройка лимитов для загрузки файлов
@@ -107,6 +116,45 @@ namespace Homie
             app.UseHttpsRedirection();
             app.UseStatusCodePages();
             app.UseStaticFiles();
+
+            // SECURITY: Добавление заголовков безопасности для защиты от различных атак
+            app.Use(async (context, next) =>
+            {
+                // Защита от MIME-sniffing атак
+                context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+                
+                // Защита от clickjacking атак (запрет встраивания в iframe)
+                context.Response.Headers.Add("X-Frame-Options", "SAMEORIGIN");
+                
+                // Включение встроенной защиты браузера от XSS
+                context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
+                
+                // Content Security Policy для защиты от XSS и injection атак
+                // 'unsafe-inline' и 'unsafe-eval' разрешены для совместимости с jQuery и inline скриптами
+                // В продакшене рекомендуется использовать nonce или hash для inline скриптов
+                context.Response.Headers.Add("Content-Security-Policy", 
+                    "default-src 'self'; " +
+                    "script-src 'self' 'unsafe-inline' 'unsafe-eval' " +
+                        "https://ajax.googleapis.com https://cdnjs.cloudflare.com https://stackpath.bootstrapcdn.com " +
+                        "https://ff.kis.v2.scr.kaspersky-labs.com https://cdn.jsdelivr.net https://ajax.aspnetcdn.com; " +
+                    "style-src 'self' 'unsafe-inline' " +
+                        "https://cdnjs.cloudflare.com https://www.w3schools.com " +
+                        "https://cdn.jsdelivr.net https://fonts.googleapis.com; " +
+                    "font-src 'self' data: " +
+                        "https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com " +
+                        "https://fonts.gstatic.com https://cdn.jsdelivr.net; " +
+                    "img-src 'self' data: https:; " +
+                    "connect-src 'self'");
+                
+                // Контроль передачи Referer заголовка
+                context.Response.Headers.Add("Referrer-Policy", "strict-origin-when-cross-origin");
+                
+                // Отключение потенциально опасных возможностей браузера
+                context.Response.Headers.Add("Permissions-Policy", 
+                    "geolocation=(), microphone=(), camera=()");
+                
+                await next();
+            });
 
             app.UseRouting();
 

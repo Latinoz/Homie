@@ -426,11 +426,15 @@ namespace Homie.Areas.Series.Controllers
         {
             if (Id != null)
             {
-                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
-                movie.Favorite = true;
-
-                await db.SaveChangesAsync();
-                return RedirectToAction("Index");
+                // SECURITY: Проверка владения ресурсом для предотвращения IDOR-атак
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id && p.UserUid == userId);
+                if (movie != null)
+                {
+                    movie.Favorite = true;
+                    await db.SaveChangesAsync();
+                    return RedirectToAction("Index");
+                }
             }
             return NotFound();
         }
@@ -439,11 +443,15 @@ namespace Homie.Areas.Series.Controllers
         {
             if (Id != null)
             {
-                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
-                movie.Favorite = false;
-
-                await db.SaveChangesAsync();
-                return RedirectToAction("Favorite");
+                // SECURITY: Проверка владения ресурсом для предотвращения IDOR-атак
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id && p.UserUid == userId);
+                if (movie != null)
+                {
+                    movie.Favorite = false;
+                    await db.SaveChangesAsync();
+                    return RedirectToAction("Favorite");
+                }
             }
             return NotFound();
         }
@@ -454,7 +462,9 @@ namespace Homie.Areas.Series.Controllers
         {
             if (id != null)
             {
-                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == id);
+                // SECURITY: Проверка владения ресурсом для предотвращения IDOR-атак
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == id && p.UserUid == userId);
                 if (movie != null)
                     return View(movie);
             }
@@ -613,7 +623,9 @@ namespace Homie.Areas.Series.Controllers
         {
             if (Id != null)
             {
-                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id);
+                // SECURITY: Проверка владения ресурсом для предотвращения IDOR-атак
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                MoviesModel movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == Id && p.UserUid == userId);
                 if (movie != null)
                 {
                     db.MoviesEF.Remove(movie);
