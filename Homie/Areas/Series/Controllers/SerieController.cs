@@ -52,15 +52,15 @@ namespace Homie.Areas.Series.Controllers
             // Проверка типа файла
             if (!_fileUploadSettings.AllowedImageTypes.Contains(file.ContentType.ToLower()))
             {
-                return (false, "Неподдерживаемый тип файла. Разрешены только: JPEG, JPG, PNG, GIF, BMP");
+                return (false, "Неподдерживаемый тип файла. Разрешены только: JPEG, JPG, PNG, GIF, BMP, WEBP");
             }
 
             // Проверка расширения файла
             var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp" };
             if (!allowedExtensions.Contains(extension))
             {
-                return (false, "Неподдерживаемое расширение файла. Разрешены только: .jpg, .jpeg, .png, .gif, .bmp");
+                return (false, "Неподдерживаемое расширение файла. Разрешены только: .jpg, .jpeg, .png, .gif, .bmp, .webp");
             }
 
             return (true, null);
@@ -572,6 +572,24 @@ namespace Homie.Areas.Series.Controllers
             db.MoviesEF.Update(movies);
             await db.SaveChangesAsync();
 
+            // Если была загружена новая картинка — очистим кэш для миниатюр этой записи
+            if (pvm.AvatarFile != null)
+            {
+                try
+                {
+                    // Удаляем кэшированные варианты изображений, которые используются на страницах
+                    // (в Index/Favorite используются width=200,height=260)
+                    _cache.Remove($"avatar:{movies.Id}:200x260");
+                    // дополнительные размеры, которые могут использоваться в других местах
+                    _cache.Remove($"avatar:{movies.Id}:180x240");
+                    _cache.Remove($"avatar:{movies.Id}:100x130");
+                }
+                catch
+                {
+                    // игнорируем ошибки кэша
+                }
+            }
+
             return RedirectToAction("Edit", new { id = movies.Id });
         }
 
@@ -647,6 +665,18 @@ namespace Homie.Areas.Series.Controllers
 
                 db.MoviesEF.Update(movie);
                 await db.SaveChangesAsync();
+
+                // Очистим кэш для миниатюр этой записи
+                try
+                {
+                    _cache.Remove($"avatar:{movie.Id}:200x260");
+                    _cache.Remove($"avatar:{movie.Id}:180x240");
+                    _cache.Remove($"avatar:{movie.Id}:100x130");
+                }
+                catch
+                {
+                    // игнорируем ошибки кэша
+                }
 
                 return RedirectToAction("Edit", new { id = movie.Id });
             }
