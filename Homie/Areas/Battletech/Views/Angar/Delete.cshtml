@@ -1,0 +1,27 @@
+﻿@model Homie.Areas.Battletech.Models.BTMechsModel
+
+@{
+    ViewBag.Title = "Удалить";
+
+}
+<div>
+    <dl class="dl-horizontal">
+        <dt>Название:</dt>
+        <p></p>
+        <dd>
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+    </dl>
+    <p></p>
+    <div>
+        <form asp-controller="Angar" asp-action="Delete" asp-route-id="@Model.MechUid" method="post">
+            <div class="form-group">
+                <input type="submit" class="btn btn-danger" value="Удалить" />
+                <a asp-action="Index" asp-controller="Angar" asp-area="Battletech"
+                   class="btn btn-primary"
+                   role="button">Назад</a>
+            </div>
+        </form>
+    </div>
+</div>
+

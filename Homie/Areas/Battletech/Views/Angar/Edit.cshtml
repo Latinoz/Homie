@@ -1,0 +1,120 @@
+﻿@model Homie.Areas.Battletech.Models.BTMechsModel
+
+@{
+    ViewBag.Title = "Изменение";
+
+}
+
+<style>
+    .text-input-width {
+        width: 328px;
+    }
+
+    .number-input-width {
+        width: 80px;
+    }
+</style>
+
+<form asp-action="Edit" asp-controller="Angar" asp-route-id="@Model.Id">
+    <div class="form-group">
+        <label asp-for="Name" class="control-label">Название</label>
+        <input type="text" asp-for="Name" class="form-control text-input-width" id="inputName"/>
+    </div>
+    <div class="form-group">
+        <label asp-for="Tonnage" class="control-label">Вес (тонн)</label>
+        <input type="text" asp-for="Tonnage" class="form-control text-input-width" id="inputTonnage"/>
+    </div>
+    <div class="form-group">
+        <label asp-for="Bv" class="control-label">BV</label>
+        <input type="text" asp-for="Bv" class="form-control text-input-width" id="inputBV"/>
+    </div>
+    <div class="form-group">
+        <label asp-for="TypeMech" class="control-label">Тип</label>
+        <select asp-for="TypeMech" asp-items="@ViewBag.TypeMechsForEdit" class="form-control text-input-width" id="select">
+        </select>
+    </div>
+    <div class="form-group">
+        <input type="hidden" asp-for="Avatar" />
+        <input type="hidden" asp-for="MechUid" />
+        <input type="hidden" asp-for="BTPilotsModelId" />
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Изменить" class="btn btn-primary" />
+        <a asp-action="Index" asp-controller="Angar" asp-area="Battletech"
+           class="btn btn-danger"
+           role="button">Назад</a>
+    </div>
+</form>
+
+<form asp-action="EditImgMech" asp-controller="Angar" asp-area="Battletech" method="post" enctype="multipart/form-data">
+    <fieldset style="width:328px">
+
+        <div class="form-group">
+            <label>Изображение:</label>
+            <fieldset>
+                <img style='width:180px; height:160px;' src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.Avatar))" />
+            </fieldset>
+            <br />
+
+            <input name="AvatarFile" type="file" class="form-control" />
+            <input name="tempIdMech" type="hidden" value="@Model.Id" />
+            <input name="tempName" type="hidden" id="tempName" />
+            <input name="tempTonnage" type="hidden" id="tempTonnage" />
+            <input name="tempBV" type="hidden" id="tempBV" />
+            <input name="tempTypeMech" type="hidden" id="tempTypeMech" />            
+        </div>
+
+    </fieldset>
+    <br>
+
+        <div class="form-group">
+            <input type="submit" value="Изменить картинку" class="btn btn-success" />
+        </div>
+</form>
+
+<form asp-controller="Angar" asp-action="DeleteImgMech" asp-route-id="@Model.MechUid" method="post">
+    
+        <div class="form-group">
+            <input type="submit" class="btn btn-danger" value="Удалить картинку" />
+        </div>
+    
+</form>
+<br>
+
+<script>
+    $(document).ready(function () {
+
+        $("#inputName").change(function () {
+            var $rtempName = $('#tempName');
+            var $rinputName = $('#inputName');
+            $rtempName.val($rinputName.val());
+
+        });
+        $("#inputTonnage").change(function () {
+            var $rtempTonnage = $('#tempTonnage');
+            var $rinputTonnage = $('#inputTonnage');
+            $rtempTonnage.val($rinputTonnage.val());
+        });
+        $("#inputBV").change(function () {
+            var $rtempBV = $('#tempBV');
+            var $rinputBV = $('#inputBV');
+            $rtempBV.val($rinputBV.val());
+        });
+
+    });
+
+    $(document).ready(function () {
+        const select = ('select[name=TypeMech]');
+        var input = $('#tempTypeMech');
+
+        $(select).change(function () {
+            let val = $(this).val();
+
+            $(input).val(val);
+        })
+    })
+</script>
+
+
+

@@ -1,0 +1,96 @@
+﻿@using Homie.Models
+@model IndexViewModel
+
+@addTagHelper *, Homie
+
+@{
+    ViewBag.Title = "Список выкуренных сигар";
+    ViewBag.HeaderTitle = "Сигары - [История]";
+}
+
+<style>
+    .table-striped > tbody > tr:nth-child(odd) > td,
+    .table-striped > tbody > tr:nth-child(odd) > th {
+        background-color: sandybrown;
+    }
+
+    .scroll-x {
+        overflow-x: auto;
+    }
+</style>
+
+<a asp-action="Create" asp-controller="Cigar" asp-area="Cigars"
+   class="btn btn-primary"
+   role="button">Добавить</a>
+<p></p>
+
+<form method="get">
+    <div class="form-inline">
+        <label>Название: </label>
+        <input name="name" value="@Model.CigarFilterViewModel.SelectedName" class="form-control" />
+
+        <label>Формат: </label>
+        <select name="format" asp-items="Model.CigarFilterViewModel.Formats" class="form-control"></select>
+
+        <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
+    </div>
+</form>
+<p></p>
+
+<div>
+    <label>Количество сигар: @Model.PageViewModel.CountPages</label>
+</div>
+
+<div class="scroll-x">
+    <table class="table table-bordered table-striped table-sm">
+        <tr>
+            <th>
+                <a asp-action="Index"
+                   asp-route-sortOrder="@(Model.SortViewModel.NameSort)"
+                   asp-route-name="@(Model.CigarFilterViewModel.SelectedName)"
+                   asp-route-format="@(Model.CigarFilterViewModel.SelectedFormat)">Название</a>
+
+            </th>
+            <th>Страна</th>
+            <th>Цена</th>
+            <th>Рейтинг</th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@(Model.SortViewModel.FormatSort)"
+                   asp-route-name="@(Model.CigarFilterViewModel.SelectedName)"
+                   asp-route-format="@(Model.CigarFilterViewModel.SelectedFormat)">Формат</a>
+            </th>
+            <th>Крепость</th>
+            <th></th>
+        </tr>
+        @foreach (var p in Model.Cigars)
+        {
+            <tr>
+                <td>
+                    <center>
+                        @p.Name
+                    </center>
+                    <p></p>
+                    <center>
+                        <a asp-action="Edit" asp-controller="Cigar" asp-route-id="@p.Id" class="fas fa-pen fa-lg fa-border" style="color: #008000;
+                       role="button" title="Изменить"></a>
+                        <a asp-action="Delete" asp-controller="Cigar" asp-route-id="@p.Id" class="fas fa-trash-alt fa-lg fa-border" style="color: #ff0000;
+                       role="button" title="Удалить"></a>
+                    </center>
+                </td>
+                <td>@p.Country</td>
+                <td>@p.Price</td>
+                <td>@p.Rating</td>
+                <td>@p.Shape</td>
+                <td>@p.Strength</td>
+            </tr>
+
+        }
+    </table>
+</div>
+<p></p>
+<page-link page-model="Model.PageViewModel" page-action="Index"
+           page-url-name="@(Model.CigarFilterViewModel.SelectedName)"
+           page-url-format="@(Model.CigarFilterViewModel.SelectedFormat)"
+           page-url-sortorder="@(Model.SortViewModel.Current)"></page-link>
+
+

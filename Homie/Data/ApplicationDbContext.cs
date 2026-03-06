@@ -1,13 +1,15 @@
 ﻿using Homie;
 using Homie.Areas.Series.Models;
 using Homie.Areas.Cigars.Models;
+using Homie.Areas.Battletech.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
 using Homie.Areas.Identity.Models;
+using Homie.Models;
 
-namespace Homies.Data.Models {
+namespace Homie.Data.Models {
 
     public class ApplicationDbContext : IdentityDbContext<User>
     {
@@ -18,6 +20,11 @@ namespace Homies.Data.Models {
         public DbSet<MoviesModel> MoviesEF { get; set; }
         public DbSet<CigarsModel> CigarsEF { get; set; }
         public DbSet<Format> FormatsEF { get; set; }
+        public DbSet<BTMechsModel> BtEF { get; set; }
+        public DbSet<BTPilotsModel> BtPilotEF { get; set; } 
+
+        public DbSet<FileModel> Files { get; set; }
+        public DbSet<Image> Picture { get; set; }
 
     }
     

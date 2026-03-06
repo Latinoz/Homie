@@ -31,13 +31,14 @@ namespace Homie.Areas.Cigars.Models
 
     public class Format
     {
-        public int Id { get; set; }
-        public string ShapeName { get; set; }
-
-        public List<CigarsModel> CigarsModels { get; set; }
         public Format()
         {
             CigarsModels = new List<CigarsModel>();
         }
+
+        public int Id { get; set; }
+        public string ShapeName { get; set; }
+        public List<CigarsModel> CigarsModels { get; set; }
+       
     }
 }

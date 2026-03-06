@@ -1,0 +1,166 @@
+@model Homie.Areas.Series.Models.MoviesModel
+
+@{
+    ViewBag.Title = "Добавить";
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Ошибка!</strong> @TempData["ErrorMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+<style>
+    .text-input-width {
+        width: 328px;
+    }
+
+    .number-input-width {
+        width: 80px;
+    }
+</style>
+
+<form asp-action="CreateIntoFavorite" asp-controller="Serie">
+    <div class="form-group">
+        <label asp-for="Name" class="control-label">Название</label>
+        <input type="text" asp-for="Name" value="@ViewBag.tempNameSerie" class="form-control text-input-width" id="inputNameSerie" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Link" class="control-label">Ссылка</label>
+        <input type="text" asp-for="Link" value="@ViewBag.tempLinkSerie" class="form-control text-input-width" id="inputLinkSerie" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Category" class="control-label">Категория</label>
+        <input type="text" asp-for="Category" value="@ViewBag.tempCategorySerie" class="form-control text-input-width" id="inputCategorySerie" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Season" class="control-label">Сезон</label>
+        <input type="number" asp-for="Season" value="@ViewBag.tempSeasonSerie" class="form-control number-input-width" id="inputSeasonSerie" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Episode" class="control-label">Серия</label>
+        <input type="number" asp-for="Episode" value="@ViewBag.tempEpisodeSerie" class="form-control number-input-width" id="inputEpisodeSerie" />
+    </div>
+
+    <div class="form-group">
+        <input type="hidden" asp-for="ImgBT" value="@ViewBag.Img_UID_trns" class="form-control text-input-width" />
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Добавить" class="btn btn-primary" />
+        <a asp-action="Index" asp-controller="Serie" asp-area="Series"
+           class="btn btn-primary"
+           role="button">Назад</a>
+    </div>
+</form>
+
+<form asp-action="CreateImgSerieIntoMovies" asp-controller="Serie" asp-area="Series" method="post" enctype="multipart/form-data">
+    <fieldset style="width:328px">
+
+        <div class="form-group">
+            <input name="tempName" type="hidden" id="tempName" />
+            <input name="tempLink" type="hidden" id="tempLink" />
+            <input name="tempCategory" type="hidden" id="tempCategory" />
+            <input name="tempSeason" type="hidden" id="tempSeason" />
+            <input name="tempEpisode" type="hidden" id="tempEpisode" />
+        </div>
+
+        <div class="form-group">
+            @if (ViewBag.temp_PicAdd != null)
+            {
+                <label>Изображение: Добавлено</label>
+            }
+            else
+            {
+                <label>Изображение: </label>
+            }
+
+            <input name="AvatarFile" type="file" class="form-control" id="avatarFile" accept="image/*" />
+            <small class="form-text text-muted">Максимальный размер файла: 5 MB. Поддерживаемые форматы: JPEG, JPG, PNG, GIF, BMP, WEBP</small>
+            <div id="fileError" class="text-danger" style="display: none;"></div>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Добавить картинку" class="btn btn-success" />
+        </div>
+    </fieldset>
+</form>
+
+<script>
+    $(document).ready(function () {
+
+        $("#inputNameSerie").change(function () {
+            var $rtempName = $('#tempName');
+            var $rinputNameSerie = $('#inputNameSerie');
+            $rtempName.val($rinputNameSerie.val());
+
+        });
+        $("#inputLinkSerie").change(function () {
+            var $rtempLink = $('#tempLink');
+            var $rinputLinkSerie = $('#inputLinkSerie');
+            $rtempLink.val($rinputLinkSerie.val());
+        });
+        $("#inputCategorySerie").change(function () {
+            var $rtempCategory = $('#tempCategory');
+            var $rinputCategorySerie = $('#inputCategorySerie');
+            $rtempCategory.val($rinputCategorySerie.val());
+        });
+        $("#inputSeasonSerie").change(function () {
+            var $rtempSeason = $('#tempSeason');
+            var $rinputSeasonSerie = $('#inputSeasonSerie');
+            $rtempSeason.val($rinputSeasonSerie.val());
+        });
+        $("#inputEpisodeSerie").change(function () {
+            var $rtempEpisode = $('#tempEpisode');
+            var $rinputEpisodeSerie = $('#inputEpisodeSerie');
+            $rtempEpisode.val($rinputEpisodeSerie.val());
+        });
+
+        // Валидация файла изображения
+        $("#avatarFile").change(function () {
+            var file = this.files[0];
+            var maxSize = 5 * 1024 * 1024; // 5 MB
+            var allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
+            var allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
+            
+            var errorMessage = '';
+            
+            if (file) {
+                // Проверка размера
+                if (file.size > maxSize) {
+                    errorMessage = 'Размер файла превышает 5 MB';
+                }
+                // Проверка типа
+                else if (!allowedTypes.includes(file.type.toLowerCase())) {
+                    errorMessage = 'Неподдерживаемый тип файла. Разрешены только: JPEG, JPG, PNG, GIF, BMP, WEBP';
+                }
+                // Проверка расширения
+                else {
+                    var fileName = file.name.toLowerCase();
+                    var hasValidExtension = allowedExtensions.some(function(ext) {
+                        return fileName.endsWith(ext);
+                    });
+                    if (!hasValidExtension) {
+                        errorMessage = 'Неподдерживаемое расширение файла. Разрешены только: .jpg, .jpeg, .png, .gif, .bmp, .webp';
+                    }
+                }
+            }
+            
+            var $fileError = $('#fileError');
+            var $submitButton = $('input[type="submit"][value="Добавить картинку"]');
+            
+            if (errorMessage) {
+                $fileError.text(errorMessage).show();
+                $submitButton.prop('disabled', true);
+            } else {
+                $fileError.hide();
+                $submitButton.prop('disabled', false);
+            }
+        });
+
+    });
+</script>
+

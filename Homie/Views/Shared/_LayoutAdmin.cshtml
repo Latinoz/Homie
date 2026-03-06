@@ -5,8 +5,9 @@
     <title>@ViewBag.Title</title>
 
     <link rel="stylesheet" asp-href-include="lib/bootstrap/dist/css/*.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/fontawesome.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" />
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>																						
     <script src="~/js/a076d05399.js"></script>
 </head>
 
@@ -15,6 +16,9 @@
     <div class="w3-sidebar w3-bar-block w3-collapse w3-card w3-animate-left w3-indigo" style="width:200px;" id="mySidebar">
         <button class="w3-bar-item w3-button w3-large w3-hide-large w3-hover-white" onclick="w3_close()">&times;</button>
 
+		<center><h1>HOMIE</h1></center>
+        <hr>
+        
         <a asp-area="" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
             <i class="fa fa-fw fa-lg fa-home"></i>&nbsp; Домой
         </a>
@@ -23,18 +27,35 @@
             <i class="fa fa-film fa-fw fa-lg"></i>&nbsp; Сериалы <i class="fa fa-caret-down"></i>
         </button>
         <div id="seriesAcc" class="w3-hide w3-light-gray w3-card">
-            <a asp-area="Series" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
-                <i class="fa fa-video fa-fw" aria-hidden="true"></i>&nbsp; Просмотр
+            <a asp-area="Series" asp-controller="Serie" asp-action="Favorite" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fa fa-tv fa-fw" aria-hidden="true"></i>&nbsp; Избранное
             </a>
 
-            <a asp-area="Series" asp-controller="Home" asp-action="ArchMovies" class="w3-bar-item w3-button w3-hover-white">
-                <i class="fa fa-fast-backward fa-fw" aria-hidden="true"></i>&nbsp; Архив
+            <a asp-area="Series" asp-controller="Serie" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fa fa-list-alt fa-fw" aria-hidden="true"></i>&nbsp; Список
             </a>
         </div>
 
         <a asp-area="Cigars" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
             <i class="fas fa-joint fa-lg"></i>&nbsp; Сигары
         </a>
+
+        <button class="w3-button w3-block w3-left-align w3-hover-white" onclick="myAccBattletechFunc()">
+            <i class="fas fa-dice fa-fw fa-lg"></i>&nbsp; БТ <i class="fa fa-caret-down"></i>
+        </button>
+        <div id="BattletechAcc" class="w3-hide w3-light-gray w3-card">
+            <a asp-area="Battletech" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fas fa-robot fa-fw" aria-hidden="true"></i>&nbsp; Ангар
+            </a>
+
+            <a asp-area="Battletech" asp-controller="Pilots" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fa fa-user-astronaut fa-fw" aria-hidden="true"></i>&nbsp; Пилоты
+            </a>
+
+            <a asp-area="Battletech" asp-controller="Company" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fa fa-cat fa-fw" aria-hidden="true"></i>&nbsp; Компания
+            </a>
+        </div>
 
         <button class="w3-button w3-block w3-left-align w3-hover-white" onclick="myAccAdminFunc()">
             <i class="fa fa-users-cog fa-fw fa-lg"></i>&nbsp; Админ <i class="fa fa-caret-down"></i>
@@ -50,6 +71,10 @@
         </div>
 
         <a method="post" asp-area="Identity" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white"><i class="fas fa-sign-in-alt fa-lg"></i>&nbsp; Выход</a>
+        
+        <div style="position: absolute; bottom: 30px; width: 100%; text-align: center; color: white; font-size: 0.9em;">
+            ver. @System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(3)
+        </div>
     </div>
 
     <!-- Page Content -->
@@ -71,6 +96,18 @@
 
             function myAccSeriesFunc() {
                 var x = document.getElementById("seriesAcc");
+                if (x.className.indexOf("w3-show") == -1) {
+                    x.className += " w3-show";
+                    x.previousElementSibling.className += " w3-white";
+                } else {
+                    x.className = x.className.replace(" w3-show", "");
+                    x.previousElementSibling.className =
+                        x.previousElementSibling.className.replace(" w3-white", "");
+                }
+            }
+
+            function myAccBattletechFunc() {
+                var x = document.getElementById("BattletechAcc");
                 if (x.className.indexOf("w3-show") == -1) {
                     x.className += " w3-show";
                     x.previousElementSibling.className += " w3-white";

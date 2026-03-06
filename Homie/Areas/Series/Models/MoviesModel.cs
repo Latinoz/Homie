@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Homie.Areas.Series.Models
 {
@@ -14,11 +13,19 @@ namespace Homie.Areas.Series.Models
         public string Category { get; set; }
         public int Season { get; set; }
         public int Episode { get; set; }
-        public string HoldPlay { get; set; }       
-        public bool Archive { get; set; }
         
+        [BindProperty, DataType(DataType.Time)] 
+        public DateTime? HoldPlay { get; set; }       
+        public bool Archive { get; set; }
+        public bool Favorite { get; set; }
+
         [Column(TypeName = "varchar(255)")]
-        public string UserUid { get; set; }        
+        public string UserUid { get; set; }
+
+        [Column(TypeName = "varchar(255)")]
+        public string ImgBT { get; set; }
+
+        public byte[] Avatar { get; set; }
 
     }
 }

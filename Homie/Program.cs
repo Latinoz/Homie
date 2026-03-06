@@ -1,55 +1,213 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Homie.Areas.Identity.Models;
-using Microsoft.AspNetCore;
+using System.Reflection;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Server.IIS;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using Homie.Areas.Identity.Models;
+using Homie.Data.Models;
+using Homie.Models;
+using SmartBreadcrumbs.Extensions;
 
 namespace Homie
 {
     public class Program
     {
-        //public static async Task Main(string[] args)
-        //{
-            //var host = CreateWebHostBuilder(args).Build();
-
-            //using (var scope = host.Services.CreateScope())
-            //{
-            //    var services = scope.ServiceProvider;
-            //    try
-            //    {
-            //        var userManager = services.GetRequiredService<UserManager<User>>();
-            //        var rolesManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-            //        await RoleInitializer.InitializeAsync(userManager, rolesManager);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        var logger = services.GetRequiredService<ILogger<Program>>();
-            //        logger.LogError(ex, "An error occurred while seeding the database.");
-            //    }
-            //}
-
-            //host.Run();
-
-            
-        //}
-
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
-        }
+            var builder = WebApplication.CreateBuilder(args);
+            
+            // Настройка Kestrel для корректного запуска
+            builder.WebHost.UseKestrel();
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .UseDefaultServiceProvider(options =>
-                    options.ValidateScopes = false);
-                
+            // ============================================================
+            // КОНФИГУРАЦИЯ СЕРВИСОВ (ConfigureServices)
+            // ============================================================
+
+            // Подключение к базе данных MariaDB
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseMySql(
+                    builder.Configuration.GetConnectionString("DefaultConnection"),
+                    new MySqlServerVersion(new Version())
+                )
+            );
+
+            // SECURITY: Усиленная политика паролей и защита от brute-force атак
+            builder.Services.AddIdentity<User, IdentityRole>(opts =>
+            {
+                // Требования к паролю
+                opts.Password.RequiredLength = 12;                  // минимальная длина 12 символов
+                opts.Password.RequireNonAlphanumeric = true;        // требуются специальные символы (!@#$%^&*)
+                opts.Password.RequireLowercase = true;              // требуются символы в нижнем регистре
+                opts.Password.RequireUppercase = true;              // требуются символы в верхнем регистре
+                opts.Password.RequireDigit = true;                  // требуются цифры
+
+                // Защита от brute-force атак: блокировка аккаунта после неудачных попыток
+                opts.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15); // блокировка на 15 минут
+                opts.Lockout.MaxFailedAccessAttempts = 5;                        // максимум 5 неудачных попыток
+                opts.Lockout.AllowedForNewUsers = true;                          // включить для новых пользователей
+            })
+            .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            // Настройка cookie аутентификации
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromDays(2);
+                options.LoginPath = "/Identity/Account/Login";
+                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+                options.SlidingExpiration = true;
+            });
+
+            // Кэширование и сессии
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession();
+
+            // Регистрация настроек загрузки файлов
+            builder.Services.Configure<FileUploadSettings>(builder.Configuration.GetSection("FileUpload"));
+            builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<FileUploadSettings>>().Value);
+
+            // Контроллеры и Views с настройками безопасности
+            builder.Services.AddControllersWithViews(options =>
+            {
+                // Увеличиваем лимит на размер запроса до 10 MB
+                options.MaxModelBindingCollectionSize = 1024;
+
+                // SECURITY: Глобальная защита от CSRF-атак для всех POST/PUT/DELETE операций
+                options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute());
+            });
+
+            // Настройка лимитов для загрузки файлов
+            builder.Services.Configure<IISServerOptions>(options =>
+            {
+                options.MaxRequestBodySize = 10 * 1024 * 1024; // 10 MB
+            });
+
+            builder.Services.Configure<KestrelServerOptions>(options =>
+            {
+                options.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10 MB
+            });
+
+            // Razor Pages
+            builder.Services.AddRazorPages();
+
+            // SmartBreadcrumbs для навигации
+            builder.Services.AddBreadcrumbs(Assembly.GetExecutingAssembly(), options =>
+            {
+                options.TagName = "nav";
+                options.TagClasses = "";
+                options.OlClasses = "breadcrumb";
+                options.LiClasses = "breadcrumb-item";
+                options.ActiveLiClasses = "breadcrumb-item active";
+            });
+
+            // ============================================================
+            // ПОСТРОЕНИЕ ПРИЛОЖЕНИЯ
+            // ============================================================
+            var app = builder.Build();
+
+            // ============================================================
+            // КОНФИГУРАЦИЯ MIDDLEWARE (Configure)
+            // ============================================================
+
+            // Обработка ошибок
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+                // HSTS для защищённых соединений (30 дней)
+                app.UseHsts();
+            }
+
+            // Перенаправление на HTTPS
+            app.UseHttpsRedirection();
+            
+            // Отображение страниц статусов (404, 500 и т.д.)
+            app.UseStatusCodePages();
+            
+            // Статические файлы (CSS, JS, изображения)
+            app.UseStaticFiles();
+
+            // SECURITY: Добавление заголовков безопасности для защиты от различных атак
+            app.Use(async (context, next) =>
+            {
+                // Защита от MIME-sniffing атак
+                context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+
+                // Защита от clickjacking атак (запрет встраивания в iframe)
+                context.Response.Headers["X-Frame-Options"] = "SAMEORIGIN";
+
+                // Включение встроенной защиты браузера от XSS
+                context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
+
+                // Content Security Policy для защиты от XSS и injection атак
+                // 'unsafe-inline' и 'unsafe-eval' разрешены для совместимости с jQuery и inline скриптами
+                // В продакшене рекомендуется использовать nonce или hash для inline скриптов
+                context.Response.Headers["Content-Security-Policy"] =
+                    "default-src 'self'; " +
+                    "script-src 'self' 'unsafe-inline' 'unsafe-eval' " +
+                        "https://ajax.googleapis.com https://cdnjs.cloudflare.com https://stackpath.bootstrapcdn.com " +
+                        "https://ff.kis.v2.scr.kaspersky-labs.com https://cdn.jsdelivr.net https://ajax.aspnetcdn.com; " +
+                    "style-src 'self' 'unsafe-inline' " +
+                        "https://cdnjs.cloudflare.com https://www.w3schools.com " +
+                        "https://cdn.jsdelivr.net https://fonts.googleapis.com; " +
+                    "font-src 'self' data: " +
+                        "https://cdnjs.cloudflare.com https://maxcdn.bootstrapcdn.com " +
+                        "https://fonts.gstatic.com https://cdn.jsdelivr.net; " +
+                    "img-src 'self' data: https:; " +
+                    "connect-src 'self'";
+
+                // Контроль передачи Referer заголовка
+                context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+
+                // Отключение потенциально опасных возможностей браузера
+                context.Response.Headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()";
+
+                await next();
+            });
+
+            // Маршрутизация
+            app.UseRouting();
+
+            // Аутентификация и авторизация
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            // Сессии
+            app.UseSession();
+
+            // Настройка endpoints (маршрутов)
+            app.MapRazorPages();
+            app.MapControllerRoute(
+                name: "areas",
+                pattern: "{area:exists}/{controller=Home}/{action=Index}"
+            );
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}"
+            );
+
+            // Вывод информации о запуске для VS Code serverReadyAction
+            app.Lifetime.ApplicationStarted.Register(() =>
+            {
+                var addresses = app.Urls;
+                foreach (var address in addresses)
+                {
+                    Console.WriteLine($"Now listening on: {address}");
+                }
+            });
+
+            // Запуск приложения
+            app.Run();
+        }
     }
 }

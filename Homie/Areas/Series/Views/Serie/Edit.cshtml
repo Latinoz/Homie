@@ -1,0 +1,240 @@
+﻿@model Homie.Areas.Series.Models.MoviesModel
+
+@{
+    ViewBag.Title = "Изменение";    
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Ошибка!</strong> @TempData["ErrorMessage"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+<style>
+    .text-input-width {
+        width: 328px;
+    }
+
+    .number-input-width{
+        width: 80px;
+    }
+</style>
+
+<form asp-action="Edit" asp-controller="Serie" asp-route-id="@Model.Id" id="editForm" method="post">
+    <div class="form-group">
+        <label asp-for="Name" class="control-label">Название</label>
+        <input type="text" asp-for="Name" class="form-control text-input-width" id="inputName"/>
+    </div>
+    <div class="form-group">
+        <label asp-for="Link" class="control-label">Ссылка</label>
+        <input type="text" asp-for="Link" class="form-control text-input-width" id="inputLink"/>
+    </div>
+    <div class="form-group">
+        <label asp-for="Category" class="control-label">Категория</label>
+        <input type="text" asp-for="Category" class="form-control text-input-width" id="inputCategory"/>
+    </div>
+    <div class="form-group">
+        <label asp-for="Season" class="control-label">Сезон</label>
+        <input type="number" asp-for="Season" class="form-control number-input-width" id="inputSeason"/>
+    </div>
+    <div class="form-group">
+        <label asp-for="Episode" class="control-label">Серия</label>
+        <input type="number" asp-for="Episode" class="form-control number-input-width" id="inputEpisode"/>
+    </div>
+    <div class="form-group">
+        <label asp-for="HoldPlay" class="control-label">Время</label>
+        <input asp-for="HoldPlay" asp-format="{0:HH:mm:ss}" step="1" class="form-control text-input-width" id="inputHoldPlay"/>
+    </div>
+    <div class="form-group">
+        @Html.HiddenFor(m => m.Favorite)
+    </div>
+    <div class="form-group">
+        @Html.HiddenFor(m => m.Avatar)
+    </div>
+    @* Флаг для удаления картинки: при установке в true и сабмите основной формы контроллер удалит/заменит Avatar *@
+    <input type="hidden" id="DeleteImage" name="DeleteImage" value="false" />
+    <div class="form-group">
+        <input type="submit" value="Изменить" class="btn btn-primary" />
+
+        @if (Model.Favorite == true)
+        {
+            <a asp-action="Favorite" asp-controller="Serie" asp-area="Series" class="btn btn-danger" role="button">Назад</a>
+        }
+        else
+        {
+            <a asp-action="Index" asp-controller="Serie" asp-area="Series" class="btn btn-danger" role="button">Назад</a>
+        }
+
+    </div>
+    <p></p>
+    <div class="form-group">
+        @if (!Model.Favorite)
+        {
+            <a asp-action="GoToFavorite" asp-controller="Serie" asp-route-id="@Model.Id" class="fas fa-play-circle fa-lg fa-border" style="color: #0080ff;
+               role="button" title="В Избранное"></a>
+        }
+        else
+        {
+            <a asp-action="GoToIndex" asp-controller="Serie" asp-route-id="@Model.Id" class="fas fa-film fa-lg fa-border" style="color: #0080ff;
+               role="button" title="В Список"></a>
+        }
+        <a asp-action="Delete" asp-controller="Serie" asp-route-id="@Model.Id" class="fas fa-trash-alt fa-lg fa-border" style="color: #ff0000;
+           role="button" title="Удалить"></a>
+    </div>
+</form>
+
+<form asp-action="EditImgMovie" asp-controller="Serie" asp-area="Series" method="post" enctype="multipart/form-data">
+    <fieldset style="width:328px">
+
+        <div class="form-group">
+            <label>Изображение:</label>
+            <fieldset>
+                <img style='width:180px; height:240px;' src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.Avatar))" />
+            </fieldset>
+            <br />
+
+            <input name="AvatarFile" type="file" class="form-control" id="avatarFile" accept="image/*" />
+            <small class="form-text text-muted">Максимальный размер файла: 5 MB. Поддерживаемые форматы: JPEG, JPG, PNG, GIF, BMP, WEBP</small>
+            <div id="fileError" class="text-danger" style="display: none;"></div>
+            <input name="tempIdMovie" type="hidden" value="@Model.Id" />
+            <input name="tempName" type="hidden" id="tempName" />
+            <input name="tempLink" type="hidden" id="tempLink" />
+            <input name="tempCategory" type="hidden" id="tempCategory" />
+            <input name="tempSeason" type="hidden" id="tempSeason" />
+            <input name="tempEpisode" type="hidden" id="tempEpisode" />
+            <input name="tempHoldPlay" type="hidden" id="tempHoldPlay" />
+        </div>
+
+    </fieldset>
+    <br>
+
+    <div class="form-group">
+        <input type="submit" value="Изменить картинку" class="btn btn-success" />
+    </div>
+</form>
+<!-- Замена отдельной формы удаления картинки на кнопку, которая установит флаг и отправит основную форму Edit -->
+<div class="form-group">
+    <button type="button" id="btnDeleteImage" class="btn btn-danger">Удалить картинку</button>
+</div>
+<br>
+
+<!-- Модальное окно подтверждения удаления изображения -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Подтвердите удаление</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить изображение? Это действие можно отменить, загрузив новое изображение.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                <button type="button" id="confirmDeleteYes" class="btn btn-danger">Удалить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        $("#inputName").change(function () {
+            var $rtempName = $('#tempName');
+            var $rinputName = $('#inputName');
+            $rtempName.val($rinputName.val());
+
+        });
+        $("#inputLink").change(function () {
+            var $rtempLink = $('#tempLink');
+            var $rinputLink = $('#inputLink');
+            $rtempLink.val($rinputLink.val());
+        });
+        $("#inputCategory").change(function () {
+            var $rtempCategory = $('#tempCategory');
+            var $rinputCategory = $('#inputCategory');
+            $rtempCategory.val($rinputCategory.val());
+        });
+        $("#inputSeason").change(function () {
+            var $rtempSeason = $('#tempSeason');
+            var $rinputSeason = $('#inputSeason');
+            $rtempSeason.val($rinputSeason.val());
+
+        });
+        $("#inputEpisode").change(function () {
+            var $rtempEpisode = $('#tempEpisode');
+            var $rinputEpisode = $('#inputEpisode');
+            $rtempEpisode.val($rinputEpisode.val());
+        });
+        $("#inputHoldPlay").change(function () {
+            var $rtempHoldPlay = $('#tempHoldPlay');
+            var $rinputHoldPlay = $('#inputHoldPlay');
+            $rtempHoldPlay.val($rinputHoldPlay.val());
+        });
+
+        // Валидация файла изображения
+        $("#avatarFile").change(function () {
+            var file = this.files[0];
+            var maxSize = 5 * 1024 * 1024; // 5 MB
+            var allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
+            var allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
+            
+            var errorMessage = '';
+            
+            if (file) {
+                // Проверка размера
+                if (file.size > maxSize) {
+                    errorMessage = 'Размер файла превышает 5 MB';
+                }
+                // Проверка типа
+                else if (!allowedTypes.includes(file.type.toLowerCase())) {
+                    errorMessage = 'Неподдерживаемый тип файла. Разрешены только: JPEG, JPG, PNG, GIF, BMP, WEBP';
+                }
+                // Проверка расширения
+                else {
+                    var fileName = file.name.toLowerCase();
+                    var hasValidExtension = allowedExtensions.some(function(ext) {
+                        return fileName.endsWith(ext);
+                    });
+                    if (!hasValidExtension) {
+                        errorMessage = 'Неподдерживаемое расширение файла. Разрешены только: .jpg, .jpeg, .png, .gif, .bmp, .webp';
+                    }
+                }
+            }
+            
+            var $fileError = $('#fileError');
+            var $submitButton = $('input[type="submit"][value="Изменить картинку"]');
+            
+            if (errorMessage) {
+                $fileError.text(errorMessage).show();
+                $submitButton.prop('disabled', true);
+            } else {
+                $fileError.hide();
+                $submitButton.prop('disabled', false);
+            }
+        });
+        // Показать модальное окно подтверждения при клике на кнопку удаления
+        $('#btnDeleteImage').click(function () {
+            $('#confirmDeleteModal').modal('show');
+        });
+
+        // Пользователь подтвердил удаление в модалке
+        $('#confirmDeleteYes').click(function () {
+            // Устанавливаем флаг и сабмитим основную форму
+            $('#DeleteImage').val('true');
+            $('#confirmDeleteModal').modal('hide');
+            $('#editForm').submit();
+        });
+
+    });
+</script>
+
+    
+

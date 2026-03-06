@@ -21,11 +21,15 @@ namespace Homie.Areas.Identity.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
         }
+
+        [Authorize(Roles = "admin")]
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
+
+        [Authorize(Roles = "admin")]
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
@@ -64,8 +68,9 @@ namespace Homie.Areas.Identity.Controllers
         {
             if (ModelState.IsValid)
             {
+                // SECURITY: lockoutOnFailure = true для защиты от brute-force атак
                 var result =
-                    await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
+                    await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
                 if (result.Succeeded)
                 {
                     // проверяем, принадлежит ли URL приложению
@@ -78,6 +83,11 @@ namespace Homie.Areas.Identity.Controllers
                         return RedirectToAction("Index", "Home");
                         
                     }
+                }
+                else if (result.IsLockedOut)
+                {
+                    // SECURITY: Информируем пользователя о блокировке аккаунта
+                    ModelState.AddModelError("", "Аккаунт заблокирован из-за множественных неудачных попыток входа. Попробуйте позже.");
                 }
                 else
                 {
