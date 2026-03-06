@@ -29,7 +29,7 @@ namespace Homie.Areas.Finances.Controllers
             _calcService = calcService;
         }
 
-        [Breadcrumb("Криптовалюта", FromAction = "Index", FromController = typeof(DashboardController))]
+        [Breadcrumb("Криптовалюта", FromAction = "Index", FromController = typeof(DashboardController), AreaName = "Finances")]
         public async Task<IActionResult> Index(string name, int page = 1,
             FinanceSortState sortOrder = FinanceSortState.NameAsc)
         {

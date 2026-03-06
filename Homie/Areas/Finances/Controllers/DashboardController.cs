@@ -22,7 +22,7 @@ namespace Homie.Areas.Finances.Controllers
             _priceOrchestrator = priceOrchestrator;
         }
 
-        [Breadcrumb("Финансы", FromAction = "Index", FromController = typeof(HomeController))]
+        [Breadcrumb("Финансы", FromAction = "Index", FromController = typeof(HomeController), AreaName = "Finances")]
         public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

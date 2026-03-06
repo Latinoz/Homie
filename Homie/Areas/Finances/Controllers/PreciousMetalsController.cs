@@ -23,7 +23,7 @@ namespace Homie.Areas.Finances.Controllers
             _db = db;
         }
 
-        [Breadcrumb("Драгметаллы", FromAction = "Index", FromController = typeof(DashboardController))]
+        [Breadcrumb("Драгметаллы", FromAction = "Index", FromController = typeof(DashboardController), AreaName = "Finances")]
         public async Task<IActionResult> Index(MetalType? metal, int page = 1,
             FinanceSortState sortOrder = FinanceSortState.NameAsc)
         {

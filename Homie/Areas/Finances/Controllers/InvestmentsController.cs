@@ -29,7 +29,7 @@ namespace Homie.Areas.Finances.Controllers
             _priceOrchestrator = priceOrchestrator;
         }
 
-        [Breadcrumb("Инвестиции", FromAction = "Index", FromController = typeof(DashboardController))]
+        [Breadcrumb("Инвестиции", FromAction = "Index", FromController = typeof(DashboardController), AreaName = "Finances")]
         public async Task<IActionResult> Index(string name, InstrumentType? type, int page = 1,
             FinanceSortState sortOrder = FinanceSortState.NameAsc)
         {

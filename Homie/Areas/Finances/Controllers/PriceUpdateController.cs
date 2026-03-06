@@ -25,7 +25,7 @@ namespace Homie.Areas.Finances.Controllers
             _orchestrator = orchestrator;
         }
 
-        [Breadcrumb("Обновление цен", FromAction = "Index", FromController = typeof(DashboardController))]
+        [Breadcrumb("Обновление цен", FromAction = "Index", FromController = typeof(DashboardController), AreaName = "Finances")]
         public IActionResult Index()
         {
             return View();

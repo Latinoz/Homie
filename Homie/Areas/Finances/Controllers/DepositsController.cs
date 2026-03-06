@@ -26,7 +26,7 @@ namespace Homie.Areas.Finances.Controllers
             _calcService = calcService;
         }
 
-        [Breadcrumb("Депозиты", FromAction = "Index", FromController = typeof(DashboardController))]
+        [Breadcrumb("Депозиты", FromAction = "Index", FromController = typeof(DashboardController), AreaName = "Finances")]
         public async Task<IActionResult> Index(string name, int? account, int page = 1,
             FinanceSortState sortOrder = FinanceSortState.NameAsc)
         {

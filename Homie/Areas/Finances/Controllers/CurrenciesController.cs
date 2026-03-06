@@ -26,7 +26,7 @@ namespace Homie.Areas.Finances.Controllers
             _cbrService = cbrService;
         }
 
-        [Breadcrumb("Валюты и курсы", FromAction = "Index", FromController = typeof(DashboardController))]
+        [Breadcrumb("Валюты и курсы", FromAction = "Index", FromController = typeof(DashboardController), AreaName = "Finances")]
         public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

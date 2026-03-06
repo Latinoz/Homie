@@ -23,7 +23,7 @@ namespace Homie.Areas.Finances.Controllers
             _db = db;
         }
 
-        [Breadcrumb("Инфляция", FromAction = "Index", FromController = typeof(DashboardController))]
+        [Breadcrumb("Инфляция", FromAction = "Index", FromController = typeof(DashboardController), AreaName = "Finances")]
         public async Task<IActionResult> Index(int? year, int page = 1)
         {
             int pageSize = 24;
