@@ -1,0 +1,49 @@
+@model InflationListViewModel
+
+@addTagHelper *, Homie
+
+@{
+    ViewBag.Title = "Инфляция";
+}
+
+<a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Новая запись</a>
+<p></p>
+
+<form method="get" class="form-inline">
+    <label>Год: </label>
+    <input type="number" name="year" value="@Model.YearFilter" class="form-control ml-1 mr-2" style="width:100px;" />
+    <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
+</form>
+<p></p>
+
+<div><label>Всего: @Model.PageViewModel.CountPages</label></div>
+
+<table class="table table-bordered table-striped table-sm">
+    <thead>
+        <tr>
+            <th>Год</th>
+            <th>Месяц</th>
+            <th>ИПЦ, %</th>
+            <th>Накопленная за год, %</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var i in Model.Records)
+        {
+            <tr>
+                <td>@i.Year</td>
+                <td>@i.Month</td>
+                <td>@i.CpiPercent.ToString("N2")</td>
+                <td>@(i.AccumulatedYearPercent?.ToString("N2") ?? "—")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@i.Id" class="fas fa-pen" style="color:green;"></a>
+                    <a asp-action="Delete" asp-route-id="@i.Id" class="fas fa-trash-alt" style="color:red;"></a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<page-link page-model="Model.PageViewModel" page-action="Index"
+           page-url-year="@Model.YearFilter"></page-link>

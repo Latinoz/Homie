@@ -1,0 +1,88 @@
+@model OperationListViewModel
+
+@addTagHelper *, Homie
+
+@{
+    ViewBag.Title = "Журнал операций";
+}
+
+<style>
+    .scroll-x { overflow-x: auto; }
+    .table-striped>tbody>tr:nth-child(odd)>td { background-color: #f5f5f5; }
+</style>
+
+<a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Новая операция</a>
+<p></p>
+
+<form method="get" class="form-inline">
+    <label>Категория: </label>
+    <select name="category" class="form-control ml-1 mr-2">
+        <option value="">Все</option>
+        @foreach (OperationCategory c in Enum.GetValues(typeof(OperationCategory)))
+        {
+            <option value="@c" selected="@(Model.CategoryFilter == c)">@c</option>
+        }
+    </select>
+    <label>Счёт: </label>
+    <select name="account" class="form-control ml-1 mr-2">
+        <option value="">Все</option>
+        @foreach (var a in (List<AccountModel>)ViewBag.Accounts)
+        {
+            <option value="@a.Id" selected="@(Model.AccountFilter == a.Id)">@a.Name</option>
+        }
+    </select>
+    <label>С: </label>
+    <input type="date" name="dateFrom" value="@Model.DateFrom?.ToString("yyyy-MM-dd")" class="form-control ml-1 mr-2" />
+    <label>По: </label>
+    <input type="date" name="dateTo" value="@Model.DateTo?.ToString("yyyy-MM-dd")" class="form-control ml-1 mr-2" />
+    <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
+</form>
+<p></p>
+
+<div><label>Всего: @Model.PageViewModel.CountPages</label></div>
+
+<div class="scroll-x">
+    <table class="table table-bordered table-striped table-sm">
+        <thead>
+            <tr>
+                <th><a asp-action="Index" asp-route-sortOrder="@(Model.CurrentSort == FinanceSortState.DateAsc ? FinanceSortState.DateDesc : FinanceSortState.DateAsc)">Дата</a></th>
+                <th><a asp-action="Index" asp-route-sortOrder="@(Model.CurrentSort == FinanceSortState.TypeAsc ? FinanceSortState.TypeDesc : FinanceSortState.TypeAsc)">Тип операции</a></th>
+                <th>Счёт</th>
+                <th>Инструмент</th>
+                <th>Кол-во</th>
+                <th>Цена</th>
+                <th><a asp-action="Index" asp-route-sortOrder="@(Model.CurrentSort == FinanceSortState.AmountAsc ? FinanceSortState.AmountDesc : FinanceSortState.AmountAsc)">Сумма ₽</a></th>
+                <th>Валюта</th>
+                <th>Комментарий</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var o in Model.Operations)
+            {
+                <tr>
+                    <td>@o.Date.ToString("dd.MM.yyyy")</td>
+                    <td>@o.OperationType?.Name</td>
+                    <td>@o.Account?.Name</td>
+                    <td>@o.Instrument?.Code</td>
+                    <td>@(o.Quantity?.ToString("N4"))</td>
+                    <td>@(o.Price?.ToString("N2"))</td>
+                    <td>@o.AmountInRub.ToString("N2")</td>
+                    <td>@o.Currency?.Code</td>
+                    <td>@o.Notes</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@o.Id" class="fas fa-pen" style="color:green;"></a>
+                        <a asp-action="Delete" asp-route-id="@o.Id" class="fas fa-trash-alt" style="color:red;"></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<page-link page-model="Model.PageViewModel" page-action="Index"
+           page-url-category="@Model.CategoryFilter"
+           page-url-account="@Model.AccountFilter"
+           page-url-datefrom="@Model.DateFrom?.ToString("yyyy-MM-dd")"
+           page-url-dateto="@Model.DateTo?.ToString("yyyy-MM-dd")"
+           page-url-sortorder="@Model.CurrentSort"></page-link>

@@ -1,0 +1,57 @@
+@model PreciousMetalModel
+
+@{
+    ViewBag.Title = "Редактирование — драгметаллы";
+}
+
+<style>
+    .text-input-width { width: 400px; }
+    .number-input-width { width: 150px; }
+</style>
+
+<h4>Редактировать — @Model.Name</h4>
+<hr>
+
+<form asp-action="Edit" asp-route-id="@Model.Id">
+    <input type="hidden" asp-for="Id" />
+    <div class="form-group">
+        <label asp-for="Name" class="control-label">Название</label>
+        <input asp-for="Name" class="form-control text-input-width" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Metal" class="control-label">Металл</label>
+        <select asp-for="Metal" asp-items="Html.GetEnumSelectList<MetalType>()" class="form-control text-input-width"></select>
+    </div>
+    <div class="form-group">
+        <label asp-for="WeightGrams" class="control-label">Вес единицы, грамм</label>
+        <input asp-for="WeightGrams" type="number" step="0.01" class="form-control number-input-width" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Quantity" class="control-label">Количество</label>
+        <input asp-for="Quantity" type="number" class="form-control number-input-width" />
+    </div>
+    <div class="form-group">
+        <label asp-for="PurchasePrice" class="control-label">Цена покупки за грамм ₽</label>
+        <input asp-for="PurchasePrice" type="number" step="0.01" class="form-control number-input-width" />
+    </div>
+    <div class="form-group">
+        <label asp-for="CurrentPricePerGram" class="control-label">Текущая цена за грамм ₽</label>
+        <input asp-for="CurrentPricePerGram" type="number" step="0.01" class="form-control number-input-width" />
+        <div class="form-check mt-1">
+            <input type="checkbox" name="manualPriceOverride" value="true" class="form-check-input" id="manualOverride" />
+            <label class="form-check-label" for="manualOverride">Ручная корректировка цены</label>
+        </div>
+    </div>
+    <div class="form-group">
+        <label asp-for="PurchaseDate" class="control-label">Дата покупки</label>
+        <input asp-for="PurchaseDate" type="date" class="form-control number-input-width" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Notes" class="control-label">Комментарий</label>
+        <textarea asp-for="Notes" class="form-control text-input-width" rows="2"></textarea>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Сохранить" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-danger">Назад</a>
+    </div>
+</form>

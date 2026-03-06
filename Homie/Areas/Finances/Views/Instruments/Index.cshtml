@@ -1,0 +1,74 @@
+@model InstrumentListViewModel
+
+@addTagHelper *, Homie
+
+@{
+    ViewBag.Title = "Инструменты";
+}
+
+<style>
+    .scroll-x { overflow-x: auto; }
+    .table-striped>tbody>tr:nth-child(odd)>td { background-color: #f5f5f5; }
+</style>
+
+<a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Новый инструмент</a>
+<p></p>
+
+<form method="get" class="form-inline">
+    <label>Название/Тикер: </label>
+    <input name="name" value="@Model.NameFilter" class="form-control ml-1 mr-2" />
+    <label>Тип: </label>
+    <select name="type" class="form-control ml-1 mr-2">
+        <option value="">Все</option>
+        @foreach (InstrumentType t in Enum.GetValues(typeof(InstrumentType)))
+        {
+            <option value="@t" selected="@(Model.TypeFilter == t)">@t</option>
+        }
+    </select>
+    <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
+</form>
+<p></p>
+
+<div><label>Всего: @Model.PageViewModel.CountPages</label></div>
+
+<div class="scroll-x">
+    <table class="table table-bordered table-striped table-sm">
+        <thead>
+            <tr>
+                <th><a asp-action="Index" asp-route-sortOrder="@(Model.CurrentSort == FinanceSortState.NameAsc ? FinanceSortState.NameDesc : FinanceSortState.NameAsc)">Название</a></th>
+                <th>Тикер</th>
+                <th><a asp-action="Index" asp-route-sortOrder="@(Model.CurrentSort == FinanceSortState.TypeAsc ? FinanceSortState.TypeDesc : FinanceSortState.TypeAsc)">Тип</a></th>
+                <th>Биржа</th>
+                <th>Валюта</th>
+                <th>Послед. цена</th>
+                <th>Дата цены</th>
+                <th>Источник</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var i in Model.Instruments)
+            {
+                <tr>
+                    <td>@i.Name</td>
+                    <td>@i.Code</td>
+                    <td>@i.Type</td>
+                    <td>@i.Exchange</td>
+                    <td>@i.Currency?.Code</td>
+                    <td>@(i.LastPrice?.ToString("N2") ?? "—")</td>
+                    <td>@(i.LastPriceDate?.ToString("dd.MM.yyyy") ?? "—")</td>
+                    <td>@i.LastPriceSource</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@i.Id" class="fas fa-pen" style="color:green;"></a>
+                        <a asp-action="Delete" asp-route-id="@i.Id" class="fas fa-trash-alt" style="color:red;"></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<page-link page-model="Model.PageViewModel" page-action="Index"
+           page-url-name="@Model.NameFilter"
+           page-url-type="@Model.TypeFilter"
+           page-url-sortorder="@Model.CurrentSort"></page-link>

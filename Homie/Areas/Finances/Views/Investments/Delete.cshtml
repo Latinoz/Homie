@@ -1,0 +1,20 @@
+@model InvestmentPositionModel
+
+@{
+    ViewBag.Title = "Удаление позиции";
+}
+
+<h4>Удалить инвестиционную позицию?</h4>
+<hr>
+
+<dl class="dl-horizontal">
+    <dt>Инструмент:</dt><dd>@Model.Instrument?.Name (@Model.Instrument?.Code)</dd>
+    <dt>Счёт:</dt><dd>@Model.Account?.Name</dd>
+    <dt>Кол-во:</dt><dd>@Model.Quantity</dd>
+    <dt>Стоимость:</dt><dd>@((Model.Quantity * Model.CurrentPrice).ToString("N2"))</dd>
+</dl>
+
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    <input type="submit" class="btn btn-danger" value="Удалить" />
+    <a asp-action="Index" class="btn btn-secondary">Назад</a>
+</form>

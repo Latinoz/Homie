@@ -1,0 +1,87 @@
+@model InvestmentListViewModel
+
+@addTagHelper *, Homie
+
+@{
+    ViewBag.Title = "Инвестиционный портфель";
+}
+
+<style>
+    .scroll-x { overflow-x: auto; }
+    .table-striped>tbody>tr:nth-child(odd)>td { background-color: #f0fff0; }
+    .positive { color: green; }
+    .negative { color: red; }
+</style>
+
+@if (TempData["PriceUpdateMsg"] != null)
+{
+    <div class="w3-panel w3-pale-green w3-border"><p>@TempData["PriceUpdateMsg"]</p></div>
+}
+
+<a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Новая позиция</a>
+<p></p>
+
+<form method="get" class="form-inline">
+    <label>Тикер/Название: </label>
+    <input name="name" value="@Model.NameFilter" class="form-control ml-1 mr-2" />
+    <label>Тип: </label>
+    <select name="type" class="form-control ml-1 mr-2">
+        <option value="">Все</option>
+        <option value="Stock" selected="@(Model.TypeFilter == InstrumentType.Stock)">Акции</option>
+        <option value="Bond" selected="@(Model.TypeFilter == InstrumentType.Bond)">Облигации</option>
+        <option value="ETF" selected="@(Model.TypeFilter == InstrumentType.ETF)">ETF</option>
+    </select>
+    <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
+</form>
+<p></p>
+
+<div><label>Всего позиций: @Model.PageViewModel.CountPages</label></div>
+
+<div class="scroll-x">
+    <table class="table table-bordered table-striped table-sm">
+        <thead>
+            <tr>
+                <th><a asp-action="Index" asp-route-sortOrder="@(Model.CurrentSort == FinanceSortState.NameAsc ? FinanceSortState.NameDesc : FinanceSortState.NameAsc)">Инструмент</a></th>
+                <th>Тикер</th>
+                <th>Кол-во</th>
+                <th>Ср. цена</th>
+                <th>Тек. цена</th>
+                <th><a asp-action="Index" asp-route-sortOrder="@(Model.CurrentSort == FinanceSortState.AmountAsc ? FinanceSortState.AmountDesc : FinanceSortState.AmountAsc)">Стоимость</a></th>
+                <th>Доход. %</th>
+                <th>Счёт</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in Model.Positions)
+            {
+                var totalValue = p.Quantity * p.CurrentPrice;
+                var totalCost = p.Quantity * p.AvgPurchasePrice;
+                var returnPct = totalCost != 0 ? (totalValue - totalCost) / totalCost * 100 : 0;
+                <tr>
+                    <td><a asp-action="Details" asp-route-id="@p.Id">@p.Instrument?.Name</a></td>
+                    <td>@p.Instrument?.Code</td>
+                    <td>@p.Quantity</td>
+                    <td>@p.AvgPurchasePrice.ToString("N2")</td>
+                    <td>@p.CurrentPrice.ToString("N2")</td>
+                    <td>@totalValue.ToString("N2")</td>
+                    <td class="@(returnPct >= 0 ? "positive" : "negative")">@returnPct.ToString("N1")%</td>
+                    <td>@p.Account?.Name</td>
+                    <td>
+                        <form asp-action="UpdatePrice" method="post" style="display:inline;">
+                            <input type="hidden" name="instrumentId" value="@p.InstrumentId" />
+                            <button type="submit" class="btn btn-sm btn-outline-info" title="Обновить цену"><i class="fas fa-sync-alt"></i></button>
+                        </form>
+                        <a asp-action="Edit" asp-route-id="@p.Id" class="fas fa-pen" style="color:green;"></a>
+                        <a asp-action="Delete" asp-route-id="@p.Id" class="fas fa-trash-alt" style="color:red;"></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<page-link page-model="Model.PageViewModel" page-action="Index"
+           page-url-name="@Model.NameFilter"
+           page-url-type="@Model.TypeFilter"
+           page-url-sortorder="@Model.CurrentSort"></page-link>

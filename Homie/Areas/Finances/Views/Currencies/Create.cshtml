@@ -1,0 +1,31 @@
+@model CurrencyModel
+
+@{
+    ViewBag.Title = "Новая валюта";
+}
+
+<style>
+    .text-input-width { width: 300px; }
+</style>
+
+<h4>Добавить валюту</h4>
+<hr>
+
+<form asp-action="Create">
+    <div class="form-group">
+        <label asp-for="Code" class="control-label">Код (RUB, USD, EUR и т.д.)</label>
+        <input asp-for="Code" class="form-control text-input-width" maxlength="10" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Name" class="control-label">Название</label>
+        <input asp-for="Name" class="form-control text-input-width" />
+    </div>
+    <div class="form-group form-check">
+        <input asp-for="IsBase" class="form-check-input" />
+        <label asp-for="IsBase" class="form-check-label">Базовая валюта (RUB)</label>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Добавить" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Назад</a>
+    </div>
+</form>

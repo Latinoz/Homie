@@ -17,7 +17,7 @@ namespace Homie.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -206,6 +206,635 @@ namespace Homie.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("FormatsEF");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.AccountModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AccountType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("BankName")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<int>("CurrencyId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("UserUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CurrencyId");
+
+                    b.HasIndex("UserUid");
+
+                    b.ToTable("FinanceAccounts");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.CryptoAssetModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AccountId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("AvgPurchasePrice")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<string>("CoinGeckoId")
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<int>("CurrencyId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("CurrentPrice")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<int>("InstrumentId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsAutoUpdateEnabled")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime?>("LastManualOverrideDate")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,8)");
+
+                    b.Property<string>("Ticker")
+                        .IsRequired()
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("UserUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("WalletAddress")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("CurrencyId");
+
+                    b.HasIndex("InstrumentId");
+
+                    b.HasIndex("UserUid");
+
+                    b.ToTable("CryptoAssets");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.CurrencyModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CbrCode")
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("varchar(10)");
+
+                    b.Property<bool>("IsBase")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("UserUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserUid");
+
+                    b.ToTable("Currencies");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.DepositModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("CurrencyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime");
+
+                    b.Property<decimal>("InterestRate")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<bool>("IsCapitalization")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<DateTime>("OpenDate")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("UserUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("CurrencyId");
+
+                    b.HasIndex("UserUid");
+
+                    b.ToTable("Deposits");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.ExchangeRateModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CurrencyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime");
+
+                    b.Property<decimal>("Rate")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<int>("Source")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserUid");
+
+                    b.HasIndex("CurrencyId", "Date", "UserUid")
+                        .IsUnique();
+
+                    b.ToTable("ExchangeRates");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.InflationModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal?>("AccumulatedYearPercent")
+                        .HasColumnType("decimal(8,4)");
+
+                    b.Property<decimal>("CpiPercent")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int>("Month")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("UserUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Year", "Month", "UserUid")
+                        .IsUnique();
+
+                    b.ToTable("Inflation");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.InstrumentModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Category")
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<int>("CurrencyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Exchange")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ExternalCode")
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("ISIN")
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<decimal?>("LastPrice")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<DateTime?>("LastPriceDate")
+                        .HasColumnType("datetime");
+
+                    b.Property<int?>("LastPriceSource")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CurrencyId");
+
+                    b.HasIndex("UserUid");
+
+                    b.HasIndex("Code", "UserUid");
+
+                    b.ToTable("Instruments");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.InvestmentPositionModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("AvgPurchasePrice")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal>("CurrentPrice")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<int>("InstrumentId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsAutoUpdateEnabled")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime?>("LastManualOverrideDate")
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<string>("UserUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("InstrumentId");
+
+                    b.HasIndex("UserUid");
+
+                    b.ToTable("InvestmentPositions");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.OperationModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("AmountInRub")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("Commission")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("CurrencyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime");
+
+                    b.Property<decimal>("ExchangeRateToRub")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<int?>("InstrumentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<int>("OperationTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("Price")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal?>("Quantity")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal?>("Tax")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("UserUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("CurrencyId");
+
+                    b.HasIndex("InstrumentId");
+
+                    b.HasIndex("OperationTypeId");
+
+                    b.HasIndex("UserUid");
+
+                    b.HasIndex("Date", "UserUid");
+
+                    b.ToTable("FinanceOperations");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.OperationTypeModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("UserUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserUid");
+
+                    b.ToTable("OperationTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Category = 0,
+                            Name = "Пополнение депозита"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Category = 0,
+                            Name = "Снятие с депозита"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Category = 0,
+                            Name = "Начисление процентов"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Category = 1,
+                            Name = "Покупка ценных бумаг"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Category = 1,
+                            Name = "Продажа ценных бумаг"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Category = 1,
+                            Name = "Дивиденд"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Category = 1,
+                            Name = "Купон"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Category = 1,
+                            Name = "Комиссия"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Category = 1,
+                            Name = "Налог"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Category = 2,
+                            Name = "Покупка криптовалюты"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Category = 2,
+                            Name = "Продажа криптовалюты"
+                        },
+                        new
+                        {
+                            Id = 12,
+                            Category = 3,
+                            Name = "Покупка драгметалла"
+                        },
+                        new
+                        {
+                            Id = 13,
+                            Category = 3,
+                            Name = "Продажа драгметалла"
+                        },
+                        new
+                        {
+                            Id = 14,
+                            Category = 4,
+                            Name = "Перевод"
+                        },
+                        new
+                        {
+                            Id = 15,
+                            Category = 5,
+                            Name = "Прочее"
+                        });
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.PreciousMetalModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("CurrentPricePerGram")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsAutoUpdateEnabled")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime?>("LastManualOverrideDate")
+                        .HasColumnType("datetime");
+
+                    b.Property<int>("Metal")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<DateTime?>("PurchaseDate")
+                        .HasColumnType("datetime");
+
+                    b.Property<decimal>("PurchasePrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Purity")
+                        .HasColumnType("varchar(10)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<decimal>("WeightGrams")
+                        .HasColumnType("decimal(10,3)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserUid");
+
+                    b.ToTable("PreciousMetals");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.PriceHistoryModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CurrencyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime");
+
+                    b.Property<int>("InstrumentId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,6)");
+
+                    b.Property<decimal>("PriceInRub")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Source")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CurrencyId");
+
+                    b.HasIndex("InstrumentId", "Date");
+
+                    b.HasIndex("InstrumentId", "Date", "UserUid")
+                        .IsUnique();
+
+                    b.ToTable("PriceHistory");
                 });
 
             modelBuilder.Entity("Homie.Areas.Identity.Models.User", b =>
@@ -514,6 +1143,155 @@ namespace Homie.Migrations
                     b.Navigation("Format");
                 });
 
+            modelBuilder.Entity("Homie.Areas.Finances.Models.AccountModel", b =>
+                {
+                    b.HasOne("Homie.Areas.Finances.Models.CurrencyModel", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Currency");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.CryptoAssetModel", b =>
+                {
+                    b.HasOne("Homie.Areas.Finances.Models.AccountModel", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId");
+
+                    b.HasOne("Homie.Areas.Finances.Models.CurrencyModel", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Homie.Areas.Finances.Models.InstrumentModel", "Instrument")
+                        .WithMany()
+                        .HasForeignKey("InstrumentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Currency");
+
+                    b.Navigation("Instrument");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.DepositModel", b =>
+                {
+                    b.HasOne("Homie.Areas.Finances.Models.AccountModel", "Account")
+                        .WithMany("Deposits")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Homie.Areas.Finances.Models.CurrencyModel", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Currency");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.ExchangeRateModel", b =>
+                {
+                    b.HasOne("Homie.Areas.Finances.Models.CurrencyModel", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Currency");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.InstrumentModel", b =>
+                {
+                    b.HasOne("Homie.Areas.Finances.Models.CurrencyModel", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Currency");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.InvestmentPositionModel", b =>
+                {
+                    b.HasOne("Homie.Areas.Finances.Models.AccountModel", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Homie.Areas.Finances.Models.InstrumentModel", "Instrument")
+                        .WithMany()
+                        .HasForeignKey("InstrumentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Instrument");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.OperationModel", b =>
+                {
+                    b.HasOne("Homie.Areas.Finances.Models.AccountModel", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Homie.Areas.Finances.Models.CurrencyModel", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Homie.Areas.Finances.Models.InstrumentModel", "Instrument")
+                        .WithMany()
+                        .HasForeignKey("InstrumentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Homie.Areas.Finances.Models.OperationTypeModel", "OperationType")
+                        .WithMany()
+                        .HasForeignKey("OperationTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Currency");
+
+                    b.Navigation("Instrument");
+
+                    b.Navigation("OperationType");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.PriceHistoryModel", b =>
+                {
+                    b.HasOne("Homie.Areas.Finances.Models.CurrencyModel", "Currency")
+                        .WithMany()
+                        .HasForeignKey("CurrencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Homie.Areas.Finances.Models.InstrumentModel", "Instrument")
+                        .WithMany()
+                        .HasForeignKey("InstrumentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Currency");
+
+                    b.Navigation("Instrument");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -573,6 +1351,11 @@ namespace Homie.Migrations
             modelBuilder.Entity("Homie.Areas.Cigars.Models.Format", b =>
                 {
                     b.Navigation("CigarsModels");
+                });
+
+            modelBuilder.Entity("Homie.Areas.Finances.Models.AccountModel", b =>
+                {
+                    b.Navigation("Deposits");
                 });
 #pragma warning restore 612, 618
         }

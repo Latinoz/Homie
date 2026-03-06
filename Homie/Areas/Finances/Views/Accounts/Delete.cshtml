@@ -1,0 +1,24 @@
+@model AccountModel
+
+@{
+    ViewBag.Title = "Удаление счёта";
+}
+
+<h4>Удалить счёт?</h4>
+<hr>
+
+<dl class="dl-horizontal">
+    <dt>Название:</dt>
+    <dd>@Model.Name</dd>
+    <dt>Тип:</dt>
+    <dd>@Model.AccountType</dd>
+    <dt>Банк/Брокер:</dt>
+    <dd>@Model.BankName</dd>
+    <dt>Валюта:</dt>
+    <dd>@Model.Currency?.Code</dd>
+</dl>
+
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    <input type="submit" class="btn btn-danger" value="Удалить" />
+    <a asp-action="Index" class="btn btn-secondary">Назад</a>
+</form>

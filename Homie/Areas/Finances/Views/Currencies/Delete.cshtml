@@ -1,0 +1,19 @@
+@model CurrencyModel
+
+@{
+    ViewBag.Title = "Удаление валюты";
+}
+
+<h4>Удалить валюту?</h4>
+<hr>
+
+<dl class="dl-horizontal">
+    <dt>Код:</dt><dd>@Model.Code</dd>
+    <dt>Название:</dt><dd>@Model.Name</dd>
+    <dt>Базовая:</dt><dd>@(Model.IsBase ? "Да" : "Нет")</dd>
+</dl>
+
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    <input type="submit" class="btn btn-danger" value="Удалить" />
+    <a asp-action="Index" class="btn btn-secondary">Назад</a>
+</form>

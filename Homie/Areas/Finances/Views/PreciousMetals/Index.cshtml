@@ -1,0 +1,80 @@
+@model PreciousMetalListViewModel
+
+@addTagHelper *, Homie
+
+@{
+    ViewBag.Title = "Драгоценные металлы";
+}
+
+<style>
+    .scroll-x { overflow-x: auto; }
+    .metal-summary { padding: 8px 15px; margin: 4px; border-radius: 5px; display: inline-block; }
+</style>
+
+<a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Новая позиция</a>
+<p></p>
+
+<form method="get" class="form-inline">
+    <label>Металл: </label>
+    <select name="metal" class="form-control ml-1 mr-2">
+        <option value="">Все</option>
+        @foreach (MetalType t in Enum.GetValues(typeof(MetalType)))
+        {
+            <option value="@t" selected="@(Model.MetalFilter == t)">@t</option>
+        }
+    </select>
+    <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
+</form>
+<p></p>
+
+<!-- Сводка по металлам -->
+<div>
+    <span class="metal-summary w3-pale-yellow"><strong>Золото:</strong> @Model.TotalGoldRub.ToString("N0") ₽</span>
+    <span class="metal-summary w3-light-gray"><strong>Серебро:</strong> @Model.TotalSilverRub.ToString("N0") ₽</span>
+    <span class="metal-summary w3-pale-blue"><strong>Платина:</strong> @Model.TotalPlatinumRub.ToString("N0") ₽</span>
+    <span class="metal-summary w3-pale-red"><strong>Палладий:</strong> @Model.TotalPalladiumRub.ToString("N0") ₽</span>
+</div>
+<p></p>
+
+<div><label>Всего: @Model.PageViewModel.CountPages</label></div>
+
+<div class="scroll-x">
+    <table class="table table-bordered table-striped table-sm">
+        <thead>
+            <tr>
+                <th><a asp-action="Index" asp-route-sortOrder="@(Model.CurrentSort == FinanceSortState.NameAsc ? FinanceSortState.NameDesc : FinanceSortState.NameAsc)">Название</a></th>
+                <th><a asp-action="Index" asp-route-sortOrder="@(Model.CurrentSort == FinanceSortState.TypeAsc ? FinanceSortState.TypeDesc : FinanceSortState.TypeAsc)">Металл</a></th>
+                <th>Вес, г</th>
+                <th>Кол-во</th>
+                <th>Общий вес, г</th>
+                <th>Цена/грамм</th>
+                <th>Цена покупки/г</th>
+                <th><a asp-action="Index" asp-route-sortOrder="@(Model.CurrentSort == FinanceSortState.AmountAsc ? FinanceSortState.AmountDesc : FinanceSortState.AmountAsc)">Стоимость ₽</a></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var m in Model.Metals)
+            {
+                <tr>
+                    <td>@m.Name</td>
+                    <td>@m.Metal</td>
+                    <td>@m.WeightGrams.ToString("N2")</td>
+                    <td>@m.Quantity</td>
+                    <td>@m.TotalWeightGrams.ToString("N2")</td>
+                    <td>@m.CurrentPricePerGram.ToString("N2")</td>
+                    <td>@m.PurchasePrice.ToString("N2")</td>
+                    <td>@m.TotalValueRub.ToString("N0")</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@m.Id" class="fas fa-pen" style="color:green;"></a>
+                        <a asp-action="Delete" asp-route-id="@m.Id" class="fas fa-trash-alt" style="color:red;"></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<page-link page-model="Model.PageViewModel" page-action="Index"
+           page-url-metal="@Model.MetalFilter"
+           page-url-sortorder="@Model.CurrentSort"></page-link>

@@ -1,0 +1,126 @@
+@model FinanceDashboardViewModel
+
+@{
+    ViewBag.Title = "Финансовый дашборд";
+}
+
+<style>
+    .kpi-card { padding: 15px; margin: 8px; text-align: center; border-radius: 8px; }
+    .kpi-value { font-size: 1.8em; font-weight: bold; }
+    .kpi-label { font-size: 0.9em; color: #666; }
+    .chart-container { position: relative; height: 300px; margin: 15px 0; }
+</style>
+
+@if (TempData["PriceUpdateResult"] != null)
+{
+    <div class="w3-panel w3-pale-green w3-border">
+        <p>@TempData["PriceUpdateResult"]</p>
+    </div>
+}
+
+<h3><i class="fas fa-chart-line"></i> Финансовый дашборд</h3>
+<hr>
+
+<!-- KPI Cards -->
+<div class="w3-row-padding">
+    <div class="w3-third">
+        <div class="w3-card kpi-card w3-pale-blue">
+            <div class="kpi-value">@Model.TotalDeposits.ToString("N0") ₽</div>
+            <div class="kpi-label"><i class="fas fa-piggy-bank"></i> Депозиты</div>
+        </div>
+    </div>
+    <div class="w3-third">
+        <div class="w3-card kpi-card w3-pale-green">
+            <div class="kpi-value">@Model.TotalInvestments.ToString("N0") ₽</div>
+            <div class="kpi-label"><i class="fas fa-chart-bar"></i> Инвестиции</div>
+        </div>
+    </div>
+    <div class="w3-third">
+        <div class="w3-card kpi-card w3-pale-yellow">
+            <div class="kpi-value">@Model.TotalCrypto.ToString("N0") ₽</div>
+            <div class="kpi-label"><i class="fab fa-bitcoin"></i> Крипто</div>
+        </div>
+    </div>
+</div>
+
+<div class="w3-row-padding" style="margin-top:8px;">
+    <div class="w3-third">
+        <div class="w3-card kpi-card w3-pale-red">
+            <div class="kpi-value">@Model.TotalPreciousMetals.ToString("N0") ₽</div>
+            <div class="kpi-label"><i class="fas fa-gem"></i> Драгметаллы</div>
+        </div>
+    </div>
+    <div class="w3-third">
+        <div class="w3-card kpi-card w3-light-gray">
+            <div class="kpi-value">@Model.TotalCapital.ToString("N0") ₽</div>
+            <div class="kpi-label"><i class="fas fa-wallet"></i> Общий капитал</div>
+        </div>
+    </div>
+    <div class="w3-third">
+        <div class="w3-card kpi-card w3-pale-green">
+            <div class="kpi-value">@(Model.TotalReturnPercent >= 0 ? "+" : "")@Model.TotalReturnPercent.ToString("N1")%</div>
+            <div class="kpi-label"><i class="fas fa-percentage"></i> Общая доходность</div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="w3-row-padding" style="margin-top:20px;">
+    <div class="w3-half">
+        <div class="w3-card w3-padding">
+            <h5>Структура портфеля</h5>
+            <div class="chart-container">
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="w3-half">
+        <div class="w3-card w3-padding">
+            <h5>Динамика капитала</h5>
+            <div class="chart-container">
+                <canvas id="lineChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="w3-row-padding" style="margin-top:20px;">
+    <div class="w3-col">
+        <div class="w3-card w3-padding">
+            <h5>Быстрые действия</h5>
+            <form asp-action="UpdateAllPrices" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-info"><i class="fas fa-sync-alt"></i> Обновить все цены</button>
+            </form>
+            <a asp-controller="Operations" asp-action="Create" class="btn btn-success"><i class="fas fa-plus"></i> Новая операция</a>
+            <a asp-controller="PriceUpdate" asp-action="ManualEntry" class="btn btn-warning"><i class="fas fa-edit"></i> Ввод цены вручную</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    var pieData = @Html.Raw(Model.AssetAllocationJson ?? "{}");
+    var lineData = @Html.Raw(Model.CapitalDynamicsJson ?? "{}");
+
+    if (pieData.labels) {
+        new Chart(document.getElementById('pieChart'), {
+            type: 'doughnut',
+            data: pieData,
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    if (lineData.labels) {
+        new Chart(document.getElementById('lineChart'), {
+            type: 'line',
+            data: lineData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: false } }
+            }
+        });
+    }
+</script>
+}

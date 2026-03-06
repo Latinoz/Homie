@@ -1,0 +1,62 @@
+@model PriceUpdateResultViewModel
+
+@{
+    ViewBag.Title = "Результат обновления цен";
+}
+
+<h4><i class="fas fa-check-circle"></i> Результат обновления цен</h4>
+<hr>
+
+<div class="w3-row-padding">
+    <div class="w3-third">
+        <div class="w3-card kpi-card w3-pale-green w3-padding w3-center">
+            <div style="font-size:2em; font-weight:bold;">@Model.SuccessCount</div>
+            <div>Успешно</div>
+        </div>
+    </div>
+    <div class="w3-third">
+        <div class="w3-card kpi-card w3-pale-red w3-padding w3-center">
+            <div style="font-size:2em; font-weight:bold;">@Model.ErrorCount</div>
+            <div>Ошибок</div>
+        </div>
+    </div>
+    <div class="w3-third">
+        <div class="w3-card kpi-card w3-pale-blue w3-padding w3-center">
+            <div style="font-size:2em; font-weight:bold;">@Model.SkippedCount</div>
+            <div>Пропущено</div>
+        </div>
+    </div>
+</div>
+<p></p>
+
+@if (Model.Items != null && Model.Items.Any())
+{
+    <table class="table table-bordered table-sm">
+        <thead>
+            <tr>
+                <th>Тикер</th>
+                <th>Статус</th>
+                <th>Стар. цена</th>
+                <th>Нов. цена</th>
+                <th>Источник</th>
+                <th>Ошибка</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var d in Model.Items)
+            {
+                <tr class="@(d.Success ? "" : "table-danger")">
+                    <td>@d.Ticker</td>
+                    <td>@(d.Success ? "✓" : "✗")</td>
+                    <td>@d.OldPrice?.ToString("N2")</td>
+                    <td>@d.NewPrice?.ToString("N2")</td>
+                    <td>@d.Source</td>
+                    <td>@d.ErrorMessage</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<a asp-action="Index" class="btn btn-primary">Назад</a>
+<a asp-area="Finances" asp-controller="Dashboard" asp-action="Index" class="btn btn-secondary">Дашборд</a>

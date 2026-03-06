@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    <link rel="stylesheet" asp-href-include="lib/bootstrap/dist/css/*.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" />
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/a076d05399.js"></script>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="w3-sidebar w3-bar-block w3-collapse w3-card w3-animate-left w3-dark-gray" style="width:220px;" id="mySidebar">
+        <button class="w3-bar-item w3-button w3-large w3-hide-large w3-hover-white" onclick="w3_close()">&times;</button>
+
+        <center><h1>HOMIE</h1></center>
+        <hr>
+
+        <a asp-area="" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+            <i class="fa fa-fw fa-lg fa-home"></i>&nbsp; Домой
+        </a>
+
+        <a asp-area="Finances" asp-controller="Dashboard" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+            <i class="fas fa-chart-line fa-fw fa-lg"></i>&nbsp; Дашборд
+        </a>
+
+        <button class="w3-button w3-block w3-left-align w3-hover-white" onclick="myAccSavingsFunc()">
+            <i class="fas fa-piggy-bank fa-fw fa-lg"></i>&nbsp; Сбережения <i class="fa fa-caret-down"></i>
+        </button>
+        <div id="savingsAcc" class="w3-hide w3-light-gray w3-card">
+            <a asp-area="Finances" asp-controller="Deposits" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fas fa-money-bill-wave fa-fw"></i>&nbsp; Депозиты
+            </a>
+            <a asp-area="Finances" asp-controller="Accounts" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fas fa-university fa-fw"></i>&nbsp; Счета
+            </a>
+        </div>
+
+        <button class="w3-button w3-block w3-left-align w3-hover-white" onclick="myAccInvestFunc()">
+            <i class="fas fa-chart-bar fa-fw fa-lg"></i>&nbsp; Инвестиции <i class="fa fa-caret-down"></i>
+        </button>
+        <div id="investAcc" class="w3-hide w3-light-gray w3-card">
+            <a asp-area="Finances" asp-controller="Investments" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fas fa-briefcase fa-fw"></i>&nbsp; Портфель
+            </a>
+            <a asp-area="Finances" asp-controller="Instruments" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fas fa-search-dollar fa-fw"></i>&nbsp; Инструменты
+            </a>
+        </div>
+
+        <a asp-area="Finances" asp-controller="Crypto" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+            <i class="fab fa-bitcoin fa-fw fa-lg"></i>&nbsp; Крипто
+        </a>
+
+        <a asp-area="Finances" asp-controller="PreciousMetals" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+            <i class="fas fa-gem fa-fw fa-lg"></i>&nbsp; Драгметаллы
+        </a>
+
+        <button class="w3-button w3-block w3-left-align w3-hover-white" onclick="myAccRefFunc()">
+            <i class="fas fa-cog fa-fw fa-lg"></i>&nbsp; Справочники <i class="fa fa-caret-down"></i>
+        </button>
+        <div id="refAcc" class="w3-hide w3-light-gray w3-card">
+            <a asp-area="Finances" asp-controller="Currencies" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fas fa-ruble-sign fa-fw"></i>&nbsp; Валюты
+            </a>
+            <a asp-area="Finances" asp-controller="Inflation" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fas fa-percentage fa-fw"></i>&nbsp; Инфляция
+            </a>
+            <a asp-area="Finances" asp-controller="Operations" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fas fa-exchange-alt fa-fw"></i>&nbsp; Операции
+            </a>
+            <a asp-area="Finances" asp-controller="PriceUpdate" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fas fa-sync-alt fa-fw"></i>&nbsp; Цены
+            </a>
+        </div>
+
+        <a method="post" asp-area="Identity" asp-controller="Home" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+            <i class="fas fa-sign-in-alt fa-lg"></i>&nbsp; Выход
+        </a>
+
+        <div style="position: absolute; bottom: 30px; width: 100%; text-align: center; color: white; font-size: 0.9em;">
+            ver. @System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(3)
+        </div>
+    </div>
+
+    <!-- Page Content -->
+    <div class="w3-main" style="margin-left:220px">
+
+        <div class="w3-dark-gray">
+            <button class="w3-button w3-xlarge w3-hide-large" onclick="w3_open()">&#9776;</button>
+        </div>
+        <p></p>
+
+        <div class="w3-container">
+            <breadcrumb></breadcrumb>
+            @RenderBody()
+        </div>
+
+        @RenderSection("Scripts", required: false)
+
+        <script>
+            function myAccSavingsFunc() {
+                var x = document.getElementById("savingsAcc");
+                if (x.className.indexOf("w3-show") == -1) {
+                    x.className += " w3-show";
+                    x.previousElementSibling.className += " w3-white";
+                } else {
+                    x.className = x.className.replace(" w3-show", "");
+                    x.previousElementSibling.className =
+                        x.previousElementSibling.className.replace(" w3-white", "");
+                }
+            }
+
+            function myAccInvestFunc() {
+                var x = document.getElementById("investAcc");
+                if (x.className.indexOf("w3-show") == -1) {
+                    x.className += " w3-show";
+                    x.previousElementSibling.className += " w3-white";
+                } else {
+                    x.className = x.className.replace(" w3-show", "");
+                    x.previousElementSibling.className =
+                        x.previousElementSibling.className.replace(" w3-white", "");
+                }
+            }
+
+            function myAccRefFunc() {
+                var x = document.getElementById("refAcc");
+                if (x.className.indexOf("w3-show") == -1) {
+                    x.className += " w3-show";
+                    x.previousElementSibling.className += " w3-white";
+                } else {
+                    x.className = x.className.replace(" w3-show", "");
+                    x.previousElementSibling.className =
+                        x.previousElementSibling.className.replace(" w3-white", "");
+                }
+            }
+
+            function w3_open() {
+                document.getElementById("mySidebar").style.display = "block";
+            }
+
+            function w3_close() {
+                document.getElementById("mySidebar").style.display = "none";
+            }
+        </script>
+    </div>
+</body>
+</html>

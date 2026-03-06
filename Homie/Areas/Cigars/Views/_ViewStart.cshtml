@@ -4,6 +4,11 @@
         Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
     }
 
+    else if (this.User.IsInRole("finances") || !this.User.Identity.IsAuthenticated)
+    {
+        Layout = "~/Views/Shared/_LayoutFinances.cshtml";
+    }
+
     else if (this.User.IsInRole("series") || !this.User.Identity.IsAuthenticated)
     {
         Layout = "~/Views/Shared/_LayoutSeries.cshtml";

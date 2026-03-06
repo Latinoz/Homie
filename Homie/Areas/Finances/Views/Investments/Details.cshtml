@@ -1,0 +1,70 @@
+@model InvestmentPositionModel
+
+@{
+    ViewBag.Title = "Инвестиционная позиция";
+}
+
+<style>
+    .positive { color: green; font-weight: bold; }
+    .negative { color: red; font-weight: bold; }
+    .chart-container { position: relative; height: 250px; margin: 15px 0; }
+</style>
+
+<h4><i class="fas fa-chart-bar"></i> @Model.Instrument?.Name (@Model.Instrument?.Code)</h4>
+<hr>
+
+<div class="w3-row-padding">
+    <div class="w3-half">
+        <table class="table table-sm">
+            <tr><td><strong>Тип</strong></td><td>@Model.Instrument?.Type</td></tr>
+            <tr><td><strong>Биржа</strong></td><td>@Model.Instrument?.Exchange</td></tr>
+            <tr><td><strong>Брок. счёт</strong></td><td>@Model.Account?.Name</td></tr>
+            <tr><td><strong>Кол-во</strong></td><td>@Model.Quantity</td></tr>
+            <tr><td><strong>Ср. цена</strong></td><td>@Model.AvgPurchasePrice.ToString("N2")</td></tr>
+            <tr><td><strong>Тек. цена</strong></td><td>@Model.CurrentPrice.ToString("N2")</td></tr>
+            <tr>
+                <td><strong>Стоимость</strong></td>
+                <td>@((Model.Quantity * Model.CurrentPrice).ToString("N2"))</td>
+            </tr>
+            <tr>
+                <td><strong>Стоим. в ₽</strong></td>
+                <td>@Model.ValueInRub.ToString("N2") ₽</td>
+            </tr>
+            <tr>
+                <td><strong>Доходность</strong></td>
+                <td class="@(Model.ReturnPercent >= 0 ? "positive" : "negative")">@(Model.ReturnPercent >= 0 ? "+" : "")@Model.ReturnPercent.ToString("N2")%</td>
+            </tr>
+            <tr><td><strong>Дивиденды</strong></td><td>@Model.DividendsFromJournal.ToString("N2")</td></tr>
+            <tr><td><strong>Авто-обновление</strong></td><td>@(Model.IsAutoUpdateEnabled ? "Да" : "Нет")</td></tr>
+            @if (Model.LastManualOverrideDate.HasValue)
+            {
+                <tr><td><strong>Ручная корректировка</strong></td><td>@Model.LastManualOverrideDate.Value.ToString("dd.MM.yyyy HH:mm")</td></tr>
+            }
+            <tr><td><strong>Комментарий</strong></td><td>@Model.Notes</td></tr>
+        </table>
+    </div>
+    <div class="w3-half">
+        <div class="w3-card w3-padding">
+            <h5>График цены</h5>
+            <div class="chart-container">
+                <canvas id="priceChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Редактировать</a>
+<a asp-action="Index" class="btn btn-secondary">Назад</a>
+
+@section Scripts {
+<script>
+    var chartData = @Html.Raw(ViewBag.PriceChartJson ?? "{}");
+    if (chartData.labels) {
+        new Chart(document.getElementById('priceChart'), {
+            type: 'line',
+            data: chartData,
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false } } }
+        });
+    }
+</script>
+}

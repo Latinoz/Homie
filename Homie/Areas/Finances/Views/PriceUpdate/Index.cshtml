@@ -1,0 +1,37 @@
+@{
+    ViewBag.Title = "Обновление цен";
+}
+
+@if (TempData["PriceUpdateMsg"] != null)
+{
+    <div class="w3-panel w3-pale-green w3-border"><p>@TempData["PriceUpdateMsg"]</p></div>
+}
+
+<h4><i class="fas fa-sync-alt"></i> Управление ценами</h4>
+<hr>
+
+<div class="w3-row-padding">
+    <div class="w3-third">
+        <div class="w3-card w3-padding w3-center">
+            <h5><i class="fas fa-globe"></i> Обновить все цены</h5>
+            <p>MOEX, Yahoo Finance, CoinGecko</p>
+            <form asp-action="UpdateAll" method="post">
+                <button type="submit" class="btn btn-info btn-lg"><i class="fas fa-sync-alt"></i> Обновить</button>
+            </form>
+        </div>
+    </div>
+    <div class="w3-third">
+        <div class="w3-card w3-padding w3-center">
+            <h5><i class="fas fa-edit"></i> Ручной ввод цены</h5>
+            <p>Указать цену вручную</p>
+            <a asp-action="ManualEntry" class="btn btn-warning btn-lg"><i class="fas fa-pen"></i> Ввести</a>
+        </div>
+    </div>
+    <div class="w3-third">
+        <div class="w3-card w3-padding w3-center">
+            <h5><i class="fas fa-ruble-sign"></i> Курсы ЦБ РФ</h5>
+            <p>Обновить курсы валют</p>
+            <a asp-area="Finances" asp-controller="Currencies" asp-action="Index" class="btn btn-success btn-lg"><i class="fas fa-ruble-sign"></i> Валюты</a>
+        </div>
+    </div>
+</div>

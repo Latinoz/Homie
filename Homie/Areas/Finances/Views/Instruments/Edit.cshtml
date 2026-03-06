@@ -1,0 +1,51 @@
+@model InstrumentModel
+
+@{
+    ViewBag.Title = "Редактирование инструмента";
+}
+
+<style>
+    .text-input-width { width: 400px; }
+</style>
+
+<h4>Редактировать инструмент — @Model.Name</h4>
+<hr>
+
+<form asp-action="Edit" asp-route-id="@Model.Id">
+    <input type="hidden" asp-for="Id" />
+    <div class="form-group">
+        <label asp-for="Name" class="control-label">Название</label>
+        <input asp-for="Name" class="form-control text-input-width" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Code" class="control-label">Тикер / Код</label>
+        <input asp-for="Code" class="form-control text-input-width" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Type" class="control-label">Тип</label>
+        <select asp-for="Type" asp-items="Html.GetEnumSelectList<InstrumentType>()" class="form-control text-input-width"></select>
+    </div>
+    <div class="form-group">
+        <label asp-for="Exchange" class="control-label">Биржа</label>
+        <select asp-for="Exchange" asp-items="Html.GetEnumSelectList<Exchange>()" class="form-control text-input-width"></select>
+    </div>
+    <div class="form-group">
+        <label asp-for="CurrencyId" class="control-label">Валюта</label>
+        <select asp-for="CurrencyId" asp-items="@(new SelectList(ViewBag.Currencies, "Id", "Code"))" class="form-control text-input-width"></select>
+    </div>
+    <div class="form-group">
+        <label asp-for="ExternalCode" class="control-label">Внешний код (для API)</label>
+        <input asp-for="ExternalCode" class="form-control text-input-width" />
+    </div>
+    <div class="form-group">
+        <label asp-for="ISIN" class="control-label">ISIN</label>
+        <input asp-for="ISIN" class="form-control text-input-width" />
+    </div>
+    <div class="form-group">
+        <label>Послед. цена: @(Model.LastPrice?.ToString("N2") ?? "—") от @(Model.LastPriceDate?.ToString("dd.MM.yyyy") ?? "—") (@Model.LastPriceSource)</label>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Сохранить" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-danger">Назад</a>
+    </div>
+</form>

@@ -1,0 +1,27 @@
+@model DepositModel
+
+@{
+    ViewBag.Title = "Детали депозита";
+}
+
+<h4><i class="fas fa-piggy-bank"></i> @Model.Name</h4>
+<hr>
+
+<div class="w3-row-padding">
+    <div class="w3-half">
+        <table class="table table-sm">
+            <tr><td><strong>Счёт</strong></td><td>@Model.Account?.Name</td></tr>
+            <tr><td><strong>Валюта</strong></td><td>@Model.Currency?.Code</td></tr>
+            <tr><td><strong>Начальная сумма</strong></td><td>@Model.Amount.ToString("N2")</td></tr>
+            <tr><td><strong>Баланс (журнал)</strong></td><td>@Model.BalanceFromJournal.ToString("N2")</td></tr>
+            <tr><td><strong>Ставка</strong></td><td>@Model.InterestRate.ToString("N2")%</td></tr>
+            <tr><td><strong>Капитализация</strong></td><td>@(Model.IsCapitalization ? "Да" : "Нет")</td></tr>
+            <tr><td><strong>Дата открытия</strong></td><td>@Model.OpenDate.ToString("dd.MM.yyyy")</td></tr>
+            <tr><td><strong>Дата закрытия</strong></td><td>@Model.EndDate?.ToString("dd.MM.yyyy")</td></tr>
+            <tr><td><strong>Комментарий</strong></td><td>@Model.Notes</td></tr>
+        </table>
+    </div>
+</div>
+
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Редактировать</a>
+<a asp-action="Index" class="btn btn-secondary">Назад</a>

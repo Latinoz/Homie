@@ -1,0 +1,21 @@
+@model OperationModel
+
+@{
+    ViewBag.Title = "Удаление операции";
+}
+
+<h4>Удалить операцию?</h4>
+<hr>
+
+<dl class="dl-horizontal">
+    <dt>Дата:</dt><dd>@Model.Date.ToString("dd.MM.yyyy")</dd>
+    <dt>Тип:</dt><dd>@Model.OperationType?.Name</dd>
+    <dt>Счёт:</dt><dd>@Model.Account?.Name</dd>
+    <dt>Сумма ₽:</dt><dd>@Model.AmountInRub.ToString("N2")</dd>
+    <dt>Комментарий:</dt><dd>@Model.Notes</dd>
+</dl>
+
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    <input type="submit" class="btn btn-danger" value="Удалить" />
+    <a asp-action="Index" class="btn btn-secondary">Назад</a>
+</form>

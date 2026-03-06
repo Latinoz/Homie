@@ -1,0 +1,68 @@
+@model AccountListViewModel
+
+@addTagHelper *, Homie
+
+@{
+    ViewBag.Title = "Счета";
+}
+
+<style>
+    .scroll-x { overflow-x: auto; }
+    .table-striped>tbody>tr:nth-child(odd)>td { background-color: #f0f8ff; }
+</style>
+
+<a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Добавить счёт</a>
+<p></p>
+
+<form method="get" class="form-inline">
+    <label>Название: </label>
+    <input name="name" value="@Model.NameFilter" class="form-control ml-1 mr-2" />
+    <label>Тип: </label>
+    <select name="type" class="form-control ml-1 mr-2">
+        <option value="">Все</option>
+        @foreach (AccountType t in Enum.GetValues(typeof(AccountType)))
+        {
+            <option value="@t" selected="@(Model.TypeFilter == t)">@t</option>
+        }
+    </select>
+    <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
+</form>
+<p></p>
+
+<div><label>Всего: @Model.PageViewModel.CountPages</label></div>
+
+<div class="scroll-x">
+    <table class="table table-bordered table-striped table-sm">
+        <thead>
+            <tr>
+                <th><a asp-action="Index" asp-route-sortOrder="@(Model.CurrentSort == FinanceSortState.NameAsc ? FinanceSortState.NameDesc : FinanceSortState.NameAsc)" asp-route-name="@Model.NameFilter">Название</a></th>
+                <th><a asp-action="Index" asp-route-sortOrder="@(Model.CurrentSort == FinanceSortState.TypeAsc ? FinanceSortState.TypeDesc : FinanceSortState.TypeAsc)" asp-route-name="@Model.NameFilter">Тип</a></th>
+                <th>Банк/Брокер</th>
+                <th>Валюта</th>
+                <th>Активный</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var a in Model.Accounts)
+            {
+                <tr>
+                    <td>@a.Name</td>
+                    <td>@a.AccountType</td>
+                    <td>@a.BankName</td>
+                    <td>@a.Currency?.Code</td>
+                    <td>@(a.IsActive ? "✓" : "✗")</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@a.Id" class="fas fa-pen" style="color:green;" title="Изменить"></a>
+                        <a asp-action="Delete" asp-route-id="@a.Id" class="fas fa-trash-alt" style="color:red;" title="Удалить"></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<page-link page-model="Model.PageViewModel" page-action="Index"
+           page-url-name="@Model.NameFilter"
+           page-url-type="@Model.TypeFilter"
+           page-url-sortorder="@Model.CurrentSort"></page-link>

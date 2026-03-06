@@ -1,0 +1,47 @@
+@model ManualPriceEntryViewModel
+
+@{
+    ViewBag.Title = "Ручной ввод цены";
+}
+
+<style>
+    .text-input-width { width: 400px; }
+    .number-input-width { width: 200px; }
+</style>
+
+@if (TempData["Message"] != null)
+{
+    <div class="w3-panel w3-pale-green w3-border"><p>@TempData["Message"]</p></div>
+}
+
+<h4><i class="fas fa-pen"></i> Ручной ввод цены</h4>
+<hr>
+
+<form asp-action="ManualEntry" method="post">
+    <div class="form-group">
+        <label asp-for="InstrumentId" class="control-label">Инструмент</label>
+        <select asp-for="InstrumentId" asp-items="@(new SelectList(ViewBag.Instruments, "Id", "Name"))" class="form-control text-input-width">
+            <option value="">-- Выберите --</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label asp-for="Date" class="control-label">Дата</label>
+        <input asp-for="Date" type="date" class="form-control number-input-width" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Price" class="control-label">Цена</label>
+        <input asp-for="Price" type="number" step="0.01" class="form-control number-input-width" />
+    </div>
+    <div class="form-group">
+        <label asp-for="CurrencyId" class="control-label">Валюта</label>
+        <select asp-for="CurrencyId" asp-items="@(new SelectList(ViewBag.Currencies, "Id", "Code"))" class="form-control text-input-width"></select>
+    </div>
+    <div class="form-group form-check">
+        <input asp-for="UpdateCurrentPrice" class="form-check-input" />
+        <label asp-for="UpdateCurrentPrice" class="form-check-label">Обновить текущую цену на инструменте и позициях</label>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Сохранить" class="btn btn-success" />
+        <a asp-action="Index" class="btn btn-secondary">Назад</a>
+    </div>
+</form>

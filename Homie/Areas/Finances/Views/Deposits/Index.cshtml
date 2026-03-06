@@ -1,0 +1,63 @@
+@model DepositListViewModel
+
+@addTagHelper *, Homie
+
+@{
+    ViewBag.Title = "Депозиты";
+}
+
+<style>
+    .scroll-x { overflow-x: auto; }
+    .table-striped>tbody>tr:nth-child(odd)>td { background-color: #f0f8ff; }
+</style>
+
+<a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Новый депозит</a>
+<p></p>
+
+<form method="get" class="form-inline">
+    <label>Название: </label>
+    <input name="name" value="@Model.NameFilter" class="form-control ml-1 mr-2" />
+    <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
+</form>
+<p></p>
+
+<div><label>Всего: @Model.PageViewModel.CountPages</label></div>
+
+<div class="scroll-x">
+    <table class="table table-bordered table-striped table-sm">
+        <thead>
+            <tr>
+                <th><a asp-action="Index" asp-route-sortOrder="@(Model.CurrentSort == FinanceSortState.NameAsc ? FinanceSortState.NameDesc : FinanceSortState.NameAsc)">Название</a></th>
+                <th>Счёт</th>
+                <th>Валюта</th>
+                <th><a asp-action="Index" asp-route-sortOrder="@(Model.CurrentSort == FinanceSortState.AmountAsc ? FinanceSortState.AmountDesc : FinanceSortState.AmountAsc)">Сумма</a></th>
+                <th>Ставка, %</th>
+                <th><a asp-action="Index" asp-route-sortOrder="@(Model.CurrentSort == FinanceSortState.DateAsc ? FinanceSortState.DateDesc : FinanceSortState.DateAsc)">Дата открытия</a></th>
+                <th>Дата закрытия</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var d in Model.Deposits)
+            {
+                <tr>
+                    <td><a asp-action="Details" asp-route-id="@d.Id">@d.Name</a></td>
+                    <td>@d.Account?.Name</td>
+                    <td>@d.Currency?.Code</td>
+                    <td>@d.Amount.ToString("N2")</td>
+                    <td>@d.InterestRate.ToString("N2")</td>
+                    <td>@d.OpenDate.ToString("dd.MM.yyyy")</td>
+                    <td>@d.EndDate?.ToString("dd.MM.yyyy")</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@d.Id" class="fas fa-pen" style="color:green;" title="Изменить"></a>
+                        <a asp-action="Delete" asp-route-id="@d.Id" class="fas fa-trash-alt" style="color:red;" title="Удалить"></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<page-link page-model="Model.PageViewModel" page-action="Index"
+           page-url-name="@Model.NameFilter"
+           page-url-sortorder="@Model.CurrentSort"></page-link>

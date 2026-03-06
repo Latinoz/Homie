@@ -1,0 +1,20 @@
+@model InflationModel
+
+@{
+    ViewBag.Title = "Удаление — инфляция";
+}
+
+<h4>Удалить запись?</h4>
+<hr>
+
+<dl class="dl-horizontal">
+    <dt>Год:</dt><dd>@Model.Year</dd>
+    <dt>Месяц:</dt><dd>@Model.Month</dd>
+    <dt>ИПЦ:</dt><dd>@Model.CpiPercent%</dd>
+    <dt>Накопленная:</dt><dd>@Model.AccumulatedYearPercent%</dd>
+</dl>
+
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    <input type="submit" class="btn btn-danger" value="Удалить" />
+    <a asp-action="Index" class="btn btn-secondary">Назад</a>
+</form>

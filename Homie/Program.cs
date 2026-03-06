@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Homie.Areas.Identity.Models;
+using Homie.Areas.Finances.Models;
+using Homie.Areas.Finances.Services;
 using Homie.Data.Models;
 using Homie.Models;
 using SmartBreadcrumbs.Extensions;
@@ -72,6 +74,21 @@ namespace Homie
             // Регистрация настроек загрузки файлов
             builder.Services.Configure<FileUploadSettings>(builder.Configuration.GetSection("FileUpload"));
             builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<FileUploadSettings>>().Value);
+
+            // ── Finances module ──────────────────────────────────────────
+            builder.Services.Configure<FinancesSettings>(builder.Configuration.GetSection("Finances"));
+            builder.Services.Configure<CoinGeckoSettings>(builder.Configuration.GetSection("Finances:CoinGecko"));
+            builder.Services.Configure<MoexIssSettings>(builder.Configuration.GetSection("Finances:MoexIss"));
+            builder.Services.Configure<YahooFinanceSettings>(builder.Configuration.GetSection("Finances:YahooFinance"));
+
+            builder.Services.AddHttpClient<ICbrExchangeRateService, CbrExchangeRateService>();
+            builder.Services.AddHttpClient<IMoexPriceService, MoexPriceService>();
+            builder.Services.AddHttpClient<IYahooFinancePriceService, YahooFinancePriceService>();
+            builder.Services.AddHttpClient<ICoinGeckoPriceService, CoinGeckoPriceService>();
+
+            builder.Services.AddScoped<IPriceUpdateOrchestrator, PriceUpdateOrchestrator>();
+            builder.Services.AddScoped<IFinanceCalculationService, FinanceCalculationService>();
+            builder.Services.AddHostedService<PriceUpdateHostedService>();
 
             // Контроллеры и Views с настройками безопасности
             builder.Services.AddControllersWithViews(options =>

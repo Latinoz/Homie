@@ -1,0 +1,63 @@
+@model CurrencyListViewModel
+
+@{
+    ViewBag.Title = "Валюты и курсы";
+}
+
+@if (TempData["Message"] != null)
+{
+    <div class="w3-panel w3-pale-green w3-border"><p>@TempData["Message"]</p></div>
+}
+
+<h4><i class="fas fa-ruble-sign"></i> Валюты</h4>
+<hr>
+
+<div>
+    <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Добавить валюту</a>
+    <form asp-action="UpdateRatesFromCbr" method="post" style="display:inline;">
+        <button type="submit" class="btn btn-info"><i class="fas fa-sync-alt"></i> Обновить курсы ЦБ РФ</button>
+    </form>
+</div>
+<p></p>
+
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th>Код</th>
+            <th>Название</th>
+            <th>Базовая</th>
+            <th>Текущий курс к базовой</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model.Currencies)
+        {
+            var rate = Model.LatestRates.FirstOrDefault(r => r.CurrencyId == c.Id);
+            <tr>
+                <td>@c.Code</td>
+                <td>@c.Name</td>
+                <td>@(c.IsBase ? "✓" : "")</td>
+                <td>@(rate != null ? rate.Rate.ToString("N4") : (c.IsBase ? "1.0000" : "—"))</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@c.Id" class="fas fa-pen" style="color:green;"></a>
+                    <a asp-action="Delete" asp-route-id="@c.Id" class="fas fa-trash-alt" style="color:red;"></a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Ручной ввод курса -->
+<h5>Ручной ввод курса</h5>
+<form asp-action="AddManualRate" method="post" class="form-inline">
+    <select name="currencyId" class="form-control mr-2">
+        @foreach (var c in Model.Currencies.Where(c => !c.IsBase))
+        {
+            <option value="@c.Id">@c.Code</option>
+        }
+    </select>
+    <input type="date" name="date" value="@DateTime.Today.ToString("yyyy-MM-dd")" class="form-control mr-2" />
+    <input type="number" name="rate" step="0.0001" placeholder="Курс" class="form-control mr-2" style="width:120px;" />
+    <button type="submit" class="btn btn-success">Сохранить</button>
+</form>

@@ -1,0 +1,25 @@
+@model InstrumentModel
+
+@{
+    ViewBag.Title = "Удаление инструмента";
+}
+
+<h4>Удалить инструмент?</h4>
+<hr>
+
+<dl class="dl-horizontal">
+    <dt>Название:</dt><dd>@Model.Name</dd>
+    <dt>Тикер:</dt><dd>@Model.Code</dd>
+    <dt>Тип:</dt><dd>@Model.Type</dd>
+    <dt>Биржа:</dt><dd>@Model.Exchange</dd>
+    <dt>Валюта:</dt><dd>@Model.Currency?.Code</dd>
+</dl>
+
+<div class="w3-panel w3-pale-red w3-border">
+    <p><strong>Внимание!</strong> Удаление инструмента может затронуть связанные позиции.</p>
+</div>
+
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    <input type="submit" class="btn btn-danger" value="Удалить" />
+    <a asp-action="Index" class="btn btn-secondary">Назад</a>
+</form>
