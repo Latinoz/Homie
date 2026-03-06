@@ -5,6 +5,7 @@ using System.Security.Claims;
 using Homie.Areas.Finances.Models;
 using Homie.Areas.Finances.Services;
 using SmartBreadcrumbs.Attributes;
+using Homie.Controllers;
 
 namespace Homie.Areas.Finances.Controllers
 {
@@ -21,7 +22,7 @@ namespace Homie.Areas.Finances.Controllers
             _priceOrchestrator = priceOrchestrator;
         }
 
-        [DefaultBreadcrumb("Финансы")]
+        [Breadcrumb("Финансы", FromAction = "Index", FromController = typeof(HomeController))]
         public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

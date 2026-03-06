@@ -11,6 +11,7 @@
     <!-- Popper.js и Bootstrap JS (для модальных окон и других компонентов) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="~/js/a076d05399.js"></script>
 </head>
 
@@ -81,6 +82,8 @@
             <breadcrumb></breadcrumb>
             @RenderBody()
         </div>
+
+        @RenderSection("Scripts", required: false)
 
         <script>            
             function myAccSeriesFunc() {

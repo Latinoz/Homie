@@ -62,6 +62,8 @@
             @RenderBody()
         </div>
 
+        @RenderSection("Scripts", required: false)
+
         <script>           
             function myAccBattletechFunc() {
                 var x = document.getElementById("BattletechAcc");
