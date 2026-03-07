@@ -44,9 +44,47 @@
             <i class="fas fa-joint fa-lg"></i>&nbsp; Сигары
         </a>
 
-        <a asp-area="Finances" asp-controller="Dashboard" asp-action="Index" class="w3-bar-item w3-button w3-hover-none">
-            <i class="fas fa-chart-line fa-lg"></i>&nbsp; Финансы
-        </a>
+        <button class="w3-button w3-block w3-left-align w3-hover-none" onclick="myAccFinancesFunc()">
+            <i class="fas fa-chart-line fa-fw fa-lg"></i>&nbsp; Финансы <i class="fa fa-caret-down"></i>
+        </button>
+        <div id="financesAcc" class="w3-hide w3-light-gray w3-card">
+            <a asp-area="Finances" asp-controller="Dashboard" asp-action="Index" class="w3-bar-item w3-button w3-hover-none">
+                <i class="fas fa-tachometer-alt fa-fw"></i>&nbsp; Дашборд
+            </a>
+            <a asp-area="Finances" asp-controller="Operations" asp-action="Index" class="w3-bar-item w3-button w3-hover-none">
+                <i class="fas fa-exchange-alt fa-fw"></i>&nbsp; Операции
+            </a>
+            <a asp-area="Finances" asp-controller="Deposits" asp-action="Index" class="w3-bar-item w3-button w3-hover-none">
+                <i class="fas fa-money-bill-wave fa-fw"></i>&nbsp; Депозиты
+            </a>
+            <a asp-area="Finances" asp-controller="Accounts" asp-action="Index" class="w3-bar-item w3-button w3-hover-none">
+                <i class="fas fa-university fa-fw"></i>&nbsp; Счета
+            </a>
+            <a asp-area="Finances" asp-controller="Investments" asp-action="Index" class="w3-bar-item w3-button w3-hover-none">
+                <i class="fas fa-briefcase fa-fw"></i>&nbsp; Инвестиции
+            </a>
+            <a asp-area="Finances" asp-controller="Instruments" asp-action="Index" class="w3-bar-item w3-button w3-hover-none">
+                <i class="fas fa-search-dollar fa-fw"></i>&nbsp; Инструменты
+            </a>
+            <a asp-area="Finances" asp-controller="Crypto" asp-action="Index" class="w3-bar-item w3-button w3-hover-none">
+                <i class="fab fa-bitcoin fa-fw"></i>&nbsp; Крипто
+            </a>
+            <a asp-area="Finances" asp-controller="PreciousMetals" asp-action="Index" class="w3-bar-item w3-button w3-hover-none">
+                <i class="fas fa-gem fa-fw"></i>&nbsp; Драгметаллы
+            </a>
+            <a asp-area="Finances" asp-controller="Currencies" asp-action="Index" class="w3-bar-item w3-button w3-hover-none">
+                <i class="fas fa-ruble-sign fa-fw"></i>&nbsp; Валюты
+            </a>
+            <a asp-area="Finances" asp-controller="OperationTypes" asp-action="Index" class="w3-bar-item w3-button w3-hover-none">
+                <i class="fas fa-tags fa-fw"></i>&nbsp; Типы операций
+            </a>
+            <a asp-area="Finances" asp-controller="Inflation" asp-action="Index" class="w3-bar-item w3-button w3-hover-none">
+                <i class="fas fa-percentage fa-fw"></i>&nbsp; Инфляция
+            </a>
+            <a asp-area="Finances" asp-controller="PriceUpdate" asp-action="Index" class="w3-bar-item w3-button w3-hover-none">
+                <i class="fas fa-sync-alt fa-fw"></i>&nbsp; Цены
+            </a>
+        </div>
 
         <button class="w3-button w3-block w3-left-align w3-hover-none" onclick="myAccBattletechFunc()">
             <i class="fas fa-dice fa-fw fa-lg"></i>&nbsp; БТ <i class="fa fa-caret-down"></i>
@@ -119,6 +157,18 @@
                 y.className = y.className.replace(" w3-show", "");
                 y.previousElementSibling.className =
                     y.previousElementSibling.className.replace(" w3-white", "");
+                }
+            }
+
+            function myAccFinancesFunc() {
+                var x = document.getElementById("financesAcc");
+                if (x.className.indexOf("w3-show") == -1) {
+                    x.className += " w3-show";
+                    x.previousElementSibling.className += " w3-white";
+                } else {
+                    x.className = x.className.replace(" w3-show", "");
+                    x.previousElementSibling.className =
+                        x.previousElementSibling.className.replace(" w3-white", "");
                 }
             }
 

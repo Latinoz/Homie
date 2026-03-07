@@ -1,0 +1,54 @@
+@model List<OperationTypeModel>
+
+@{
+    ViewBag.Title = "Типы операций";
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="w3-panel w3-pale-red w3-border"><p>@TempData["Error"]</p></div>
+}
+
+<h4><i class="fas fa-tags"></i> Типы операций</h4>
+<hr>
+
+<div>
+    <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Добавить тип</a>
+</div>
+<p></p>
+
+<form method="get" class="form-inline">
+    <label>Категория: </label>
+    <select name="category" class="form-control ml-1 mr-2">
+        <option value="">Все</option>
+        @foreach (OperationCategory c in Enum.GetValues(typeof(OperationCategory)))
+        {
+            <option value="@c" selected="@(ViewBag.CategoryFilter != null && (OperationCategory)ViewBag.CategoryFilter == c)">@c</option>
+        }
+    </select>
+    <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
+</form>
+<p></p>
+
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th>Название</th>
+            <th>Категория</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var t in Model)
+        {
+            <tr>
+                <td>@t.Name</td>
+                <td>@t.Category</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@t.Id" class="fas fa-pen" style="color:green;"></a>
+                    <a asp-action="Delete" asp-route-id="@t.Id" class="fas fa-trash-alt" style="color:red;"></a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
