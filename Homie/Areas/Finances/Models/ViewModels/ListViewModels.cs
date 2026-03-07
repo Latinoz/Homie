@@ -85,6 +85,13 @@ namespace Homie.Areas.Finances.Models
         public PageViewModel PageViewModel { get; set; }
     }
 
+    /// <summary>ViewModel для списка банков</summary>
+    public class BankListViewModel
+    {
+        public IEnumerable<BankModel> Banks { get; set; }
+        public PageViewModel PageViewModel { get; set; }
+    }
+
     /// <summary>ViewModel для списка инфляции</summary>
     public class InflationListViewModel
     {

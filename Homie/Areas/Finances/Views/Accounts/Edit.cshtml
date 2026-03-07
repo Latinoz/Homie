@@ -22,8 +22,14 @@
         <select asp-for="AccountType" asp-items="Html.GetEnumSelectList<AccountType>()" class="form-control text-input-width"></select>
     </div>
     <div class="form-group">
-        <label asp-for="BankName" class="control-label">Банк / Брокер</label>
-        <input asp-for="BankName" class="form-control text-input-width" />
+        <label asp-for="BankId" class="control-label">Банк / Брокер</label>
+        <select asp-for="BankId" class="form-control text-input-width">
+            <option value="">— не выбран —</option>
+            @foreach (var b in (IEnumerable<BankModel>)ViewBag.Banks)
+            {
+                <option value="@b.Id" selected="@(Model.BankId == b.Id)">@b.Name</option>
+            }
+        </select>
     </div>
     <div class="form-group">
         <label asp-for="CurrencyId" class="control-label">Валюта</label>

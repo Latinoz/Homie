@@ -32,7 +32,8 @@ namespace Homie.Areas.Finances.Controllers
 
             IQueryable<AccountModel> query = _db.FinanceAccounts
                 .Where(a => a.UserUid == userId)
-                .Include(a => a.Currency);
+                .Include(a => a.Currency)
+                .Include(a => a.Bank);
 
             if (!string.IsNullOrEmpty(name))
                 query = query.Where(a => a.Name.Contains(name));
@@ -65,9 +66,9 @@ namespace Homie.Areas.Finances.Controllers
         [Breadcrumb("Новый счёт", FromAction = "Index")]
         public IActionResult Create()
         {
-            ViewBag.Currencies = _db.Currencies
-                .Where(c => c.UserUid == User.FindFirstValue(ClaimTypes.NameIdentifier))
-                .ToList();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            ViewBag.Currencies = _db.Currencies.Where(c => c.UserUid == userId).ToList();
+            ViewBag.Banks = _db.Banks.Where(b => b.UserUid == userId).OrderBy(b => b.Name).ToList();
             return View();
         }
 
@@ -90,6 +91,7 @@ namespace Homie.Areas.Finances.Controllers
             if (account == null) return NotFound();
 
             ViewBag.Currencies = _db.Currencies.Where(c => c.UserUid == userId).ToList();
+            ViewBag.Banks = _db.Banks.Where(b => b.UserUid == userId).OrderBy(b => b.Name).ToList();
             return View(account);
         }
 
@@ -110,6 +112,7 @@ namespace Homie.Areas.Finances.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var account = await _db.FinanceAccounts
                 .Include(a => a.Currency)
+                .Include(a => a.Bank)
                 .FirstOrDefaultAsync(a => a.Id == id && a.UserUid == userId);
             if (account == null) return NotFound();
             return View(account);

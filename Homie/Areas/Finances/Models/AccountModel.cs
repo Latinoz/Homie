@@ -14,9 +14,9 @@ namespace Homie.Areas.Finances.Models
         [Display(Name = "Название")]
         public string Name { get; set; }
 
-        [Column(TypeName = "varchar(255)")]
         [Display(Name = "Банк / Брокер")]
-        public string BankName { get; set; }
+        public int? BankId { get; set; }
+        public BankModel Bank { get; set; }
 
         [Display(Name = "Тип счёта")]
         public AccountType AccountType { get; set; }

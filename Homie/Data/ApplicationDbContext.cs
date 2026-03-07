@@ -32,6 +32,7 @@ namespace Homie.Data.Models {
         public DbSet<ExchangeRateModel> ExchangeRates { get; set; }
         public DbSet<InstrumentModel> Instruments { get; set; }
         public DbSet<OperationTypeModel> OperationTypes { get; set; }
+        public DbSet<BankModel> Banks { get; set; }
         public DbSet<AccountModel> FinanceAccounts { get; set; }
         public DbSet<DepositModel> Deposits { get; set; }
         public DbSet<InvestmentPositionModel> InvestmentPositions { get; set; }
@@ -62,6 +63,9 @@ namespace Homie.Data.Models {
 
             modelBuilder.Entity<OperationTypeModel>()
                 .HasIndex(o => o.UserUid);
+
+            modelBuilder.Entity<BankModel>()
+                .HasIndex(b => b.UserUid);
 
             modelBuilder.Entity<AccountModel>()
                 .HasIndex(a => a.UserUid);
@@ -94,6 +98,12 @@ namespace Homie.Data.Models {
                 .HasIndex(ph => new { ph.InstrumentId, ph.Date });
 
             // --- Связи ---
+            modelBuilder.Entity<AccountModel>()
+                .HasOne(a => a.Bank)
+                .WithMany()
+                .HasForeignKey(a => a.BankId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             modelBuilder.Entity<DepositModel>()
                 .HasOne(d => d.Account)
                 .WithMany(a => a.Deposits)

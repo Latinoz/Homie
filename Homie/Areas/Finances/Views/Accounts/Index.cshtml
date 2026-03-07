@@ -49,7 +49,7 @@
                 <tr>
                     <td>@a.Name</td>
                     <td>@a.AccountType</td>
-                    <td>@a.BankName</td>
+                    <td>@a.Bank?.Name</td>
                     <td>@a.Currency?.Code</td>
                     <td>@(a.IsActive ? "✓" : "✗")</td>
                     <td>
