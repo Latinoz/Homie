@@ -96,7 +96,12 @@ namespace Homie.Areas.Finances.Services
             vm.AssetAllocationJson = JsonSerializer.Serialize(new
             {
                 labels = allocationLabels,
-                values = allocationValues
+                datasets = new[] {
+                    new {
+                        data = allocationValues,
+                        backgroundColor = new[] { "#4e73df", "#1cc88a", "#f6c23e", "#e74a3b" }
+                    }
+                }
             });
 
             // --- Динамика капитала ---
@@ -208,7 +213,20 @@ namespace Homie.Areas.Finances.Services
                 values.Add(totalOps);
             }
 
-            return JsonSerializer.Serialize(new { labels, values });
+            return JsonSerializer.Serialize(new
+            {
+                labels,
+                datasets = new[] {
+                    new {
+                        label = "Капитал",
+                        data = values,
+                        borderColor = "#4e73df",
+                        backgroundColor = "rgba(78, 115, 223, 0.1)",
+                        fill = true,
+                        tension = 0.3
+                    }
+                }
+            });
         }
 
         public async Task<string> GetInstrumentPriceChartJsonAsync(int instrumentId, string userId, int months = 12)
@@ -223,7 +241,19 @@ namespace Homie.Areas.Finances.Services
             var labels = priceHistory.Select(ph => ph.Date.ToString("dd.MM.yyyy")).ToList();
             var values = priceHistory.Select(ph => ph.Price).ToList();
 
-            return JsonSerializer.Serialize(new { labels, values });
+            return JsonSerializer.Serialize(new
+            {
+                labels,
+                datasets = new[] {
+                    new {
+                        label = "Цена",
+                        data = values,
+                        borderColor = "#1cc88a",
+                        fill = false,
+                        tension = 0.1
+                    }
+                }
+            });
         }
     }
 }
