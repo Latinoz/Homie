@@ -30,15 +30,21 @@
             <i class="fas fa-chart-line fa-fw fa-lg"></i>&nbsp; Дашборд
         </a>
 
-        <button class="w3-button w3-block w3-left-align w3-hover-white" onclick="myAccSavingsFunc()">
-            <i class="fas fa-piggy-bank fa-fw fa-lg"></i>&nbsp; Сбережения <i class="fa fa-caret-down"></i>
+        <button class="w3-button w3-block w3-left-align w3-hover-white" onclick="myAccAccountingFunc()">
+            <i class="fas fa-calculator fa-fw fa-lg"></i>&nbsp; Учет <i class="fa fa-caret-down"></i>
         </button>
-        <div id="savingsAcc" class="w3-hide w3-light-gray w3-card">
-            <a asp-area="Finances" asp-controller="Deposits" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
-                <i class="fas fa-money-bill-wave fa-fw"></i>&nbsp; Депозиты
+        <div id="accountingAcc" class="w3-hide w3-light-gray w3-card">
+            <a asp-area="Finances" asp-controller="Operations" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fas fa-exchange-alt fa-fw"></i>&nbsp; Операции
+            </a>
+            <a asp-area="Finances" asp-controller="OperationTypes" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fas fa-tags fa-fw"></i>&nbsp; Типы операций
             </a>
             <a asp-area="Finances" asp-controller="Accounts" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
                 <i class="fas fa-university fa-fw"></i>&nbsp; Счета
+            </a>
+            <a asp-area="Finances" asp-controller="Deposits" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fas fa-money-bill-wave fa-fw"></i>&nbsp; Депозиты
             </a>
         </div>
 
@@ -47,20 +53,18 @@
         </button>
         <div id="investAcc" class="w3-hide w3-light-gray w3-card">
             <a asp-area="Finances" asp-controller="Investments" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
-                <i class="fas fa-briefcase fa-fw"></i>&nbsp; Портфель
+                <i class="fas fa-briefcase fa-fw"></i>&nbsp; Инвестиции
             </a>
             <a asp-area="Finances" asp-controller="Instruments" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
                 <i class="fas fa-search-dollar fa-fw"></i>&nbsp; Инструменты
             </a>
+            <a asp-area="Finances" asp-controller="Crypto" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fab fa-bitcoin fa-fw"></i>&nbsp; Крипто
+            </a>
+            <a asp-area="Finances" asp-controller="PreciousMetals" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
+                <i class="fas fa-gem fa-fw"></i>&nbsp; Драгметаллы
+            </a>
         </div>
-
-        <a asp-area="Finances" asp-controller="Crypto" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
-            <i class="fab fa-bitcoin fa-fw fa-lg"></i>&nbsp; Крипто
-        </a>
-
-        <a asp-area="Finances" asp-controller="PreciousMetals" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
-            <i class="fas fa-gem fa-fw fa-lg"></i>&nbsp; Драгметаллы
-        </a>
 
         <button class="w3-button w3-block w3-left-align w3-hover-white" onclick="myAccRefFunc()">
             <i class="fas fa-cog fa-fw fa-lg"></i>&nbsp; Справочники <i class="fa fa-caret-down"></i>
@@ -74,12 +78,6 @@
             </a>
             <a asp-area="Finances" asp-controller="Inflation" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
                 <i class="fas fa-percentage fa-fw"></i>&nbsp; Инфляция
-            </a>
-            <a asp-area="Finances" asp-controller="Operations" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
-                <i class="fas fa-exchange-alt fa-fw"></i>&nbsp; Операции
-            </a>
-            <a asp-area="Finances" asp-controller="OperationTypes" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
-                <i class="fas fa-tags fa-fw"></i>&nbsp; Типы операций
             </a>
             <a asp-area="Finances" asp-controller="PriceUpdate" asp-action="Index" class="w3-bar-item w3-button w3-hover-white">
                 <i class="fas fa-sync-alt fa-fw"></i>&nbsp; Цены
@@ -111,8 +109,8 @@
         @RenderSection("Scripts", required: false)
 
         <script>
-            function myAccSavingsFunc() {
-                var x = document.getElementById("savingsAcc");
+            function myAccAccountingFunc() {
+                var x = document.getElementById("accountingAcc");
                 if (x.className.indexOf("w3-show") == -1) {
                     x.className += " w3-show";
                     x.previousElementSibling.className += " w3-white";
