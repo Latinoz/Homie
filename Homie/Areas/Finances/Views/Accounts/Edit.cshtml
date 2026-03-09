@@ -19,15 +19,45 @@
     </div>
     <div class="form-group">
         <label asp-for="AccountType" class="control-label">Тип счёта</label>
-        <select asp-for="AccountType" asp-items="Html.GetEnumSelectList<AccountType>()" class="form-control text-input-width"></select>
+        <select asp-for="AccountType" asp-items="Html.GetEnumSelectList<AccountType>()" class="form-control text-input-width" id="accountTypeSelect"></select>
     </div>
-    <div class="form-group">
-        <label asp-for="BankId" class="control-label">Банк / Брокер</label>
+    <div class="form-group" id="bankGroup">
+        <label asp-for="BankId" class="control-label">Банк</label>
         <select asp-for="BankId" class="form-control text-input-width">
             <option value="">— не выбран —</option>
             @foreach (var b in (IEnumerable<BankModel>)ViewBag.Banks)
             {
                 <option value="@b.Id" selected="@(Model.BankId == b.Id)">@b.Name</option>
+            }
+        </select>
+    </div>
+    <div class="form-group" id="brokerGroup" style="display:none;">
+        <label asp-for="BrokerId" class="control-label">Брокер</label>
+        <select asp-for="BrokerId" class="form-control text-input-width">
+            <option value="">— не выбран —</option>
+            @foreach (var b in (IEnumerable<BrokerModel>)ViewBag.Brokers)
+            {
+                <option value="@b.Id" selected="@(Model.BrokerId == b.Id)">@b.Name</option>
+            }
+        </select>
+    </div>
+    <div class="form-group" id="walletGroup" style="display:none;">
+        <label asp-for="WalletId" class="control-label">Кошелёк</label>
+        <select asp-for="WalletId" class="form-control text-input-width">
+            <option value="">— не выбран —</option>
+            @foreach (var w in (IEnumerable<WalletModel>)ViewBag.Wallets)
+            {
+                <option value="@w.Id" selected="@(Model.WalletId == w.Id)">@w.Name</option>
+            }
+        </select>
+    </div>
+    <div class="form-group" id="cryptoExchangeGroup" style="display:none;">
+        <label asp-for="CryptoExchangeId" class="control-label">Крипто биржа</label>
+        <select asp-for="CryptoExchangeId" class="form-control text-input-width">
+            <option value="">— не выбрана —</option>
+            @foreach (var c in (IEnumerable<CryptoExchangeModel>)ViewBag.CryptoExchanges)
+            {
+                <option value="@c.Id" selected="@(Model.CryptoExchangeId == c.Id)">@c.Name</option>
             }
         </select>
     </div>
@@ -48,3 +78,33 @@
         <a asp-action="Index" class="btn btn-danger">Назад</a>
     </div>
 </form>
+
+@section Scripts {
+<script>
+    function updateAccountTypeFields() {
+        var accountType = document.getElementById('accountTypeSelect').value;
+        document.getElementById('bankGroup').style.display = 'none';
+        document.getElementById('brokerGroup').style.display = 'none';
+        document.getElementById('walletGroup').style.display = 'none';
+        document.getElementById('cryptoExchangeGroup').style.display = 'none';
+        
+        switch(accountType) {
+            case '0': // Bank
+                document.getElementById('bankGroup').style.display = 'block';
+                break;
+            case '1': // Broker
+                document.getElementById('brokerGroup').style.display = 'block';
+                break;
+            case '2': // Wallet
+                document.getElementById('walletGroup').style.display = 'block';
+                break;
+            case '3': // CryptoExchange
+                document.getElementById('cryptoExchangeGroup').style.display = 'block';
+                break;
+        }
+    }
+    
+    document.getElementById('accountTypeSelect').addEventListener('change', updateAccountTypeFields);
+    updateAccountTypeFields();
+</script>
+}

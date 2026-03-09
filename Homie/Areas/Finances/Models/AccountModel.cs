@@ -14,9 +14,21 @@ namespace Homie.Areas.Finances.Models
         [Display(Name = "Название")]
         public string Name { get; set; }
 
-        [Display(Name = "Банк / Брокер")]
+        [Display(Name = "Банк")]
         public int? BankId { get; set; }
         public BankModel Bank { get; set; }
+
+        [Display(Name = "Брокер")]
+        public int? BrokerId { get; set; }
+        public BrokerModel Broker { get; set; }
+
+        [Display(Name = "Кошелёк")]
+        public int? WalletId { get; set; }
+        public WalletModel Wallet { get; set; }
+
+        [Display(Name = "Крипто биржа")]
+        public int? CryptoExchangeId { get; set; }
+        public CryptoExchangeModel CryptoExchange { get; set; }
 
         [Display(Name = "Тип счёта")]
         public AccountType AccountType { get; set; }

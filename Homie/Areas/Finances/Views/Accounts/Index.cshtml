@@ -37,7 +37,7 @@
             <tr>
                 <th><a asp-action="Index" asp-route-sortOrder="@(Model.CurrentSort == FinanceSortState.NameAsc ? FinanceSortState.NameDesc : FinanceSortState.NameAsc)" asp-route-name="@Model.NameFilter">Название</a></th>
                 <th><a asp-action="Index" asp-route-sortOrder="@(Model.CurrentSort == FinanceSortState.TypeAsc ? FinanceSortState.TypeDesc : FinanceSortState.TypeAsc)" asp-route-name="@Model.NameFilter">Тип</a></th>
-                <th>Банк/Брокер</th>
+                <th>Банк/Брокер/Кошелёк/Биржа</th>
                 <th>Валюта</th>
                 <th>Активный</th>
                 <th></th>
@@ -49,7 +49,23 @@
                 <tr>
                     <td>@a.Name</td>
                     <td>@a.AccountType</td>
-                    <td>@a.Bank?.Name</td>
+                    <td>
+                        @switch (a.AccountType)
+                        {
+                            case AccountType.Bank:
+                                @a.Bank?.Name
+                                break;
+                            case AccountType.Broker:
+                                @a.Broker?.Name
+                                break;
+                            case AccountType.Wallet:
+                                @a.Wallet?.Name
+                                break;
+                            case AccountType.CryptoExchange:
+                                @a.CryptoExchange?.Name
+                                break;
+                        }
+                    </td>
                     <td>@a.Currency?.Code</td>
                     <td>@(a.IsActive ? "✓" : "✗")</td>
                     <td>

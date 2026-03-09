@@ -33,7 +33,10 @@ namespace Homie.Areas.Finances.Controllers
             IQueryable<AccountModel> query = _db.FinanceAccounts
                 .Where(a => a.UserUid == userId)
                 .Include(a => a.Currency)
-                .Include(a => a.Bank);
+                .Include(a => a.Bank)
+                .Include(a => a.Broker)
+                .Include(a => a.Wallet)
+                .Include(a => a.CryptoExchange);
 
             if (!string.IsNullOrEmpty(name))
                 query = query.Where(a => a.Name.Contains(name));
@@ -69,6 +72,9 @@ namespace Homie.Areas.Finances.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             ViewBag.Currencies = _db.Currencies.Where(c => c.UserUid == userId).ToList();
             ViewBag.Banks = _db.Banks.Where(b => b.UserUid == userId).OrderBy(b => b.Name).ToList();
+            ViewBag.Brokers = _db.Brokers.Where(b => b.UserUid == userId).OrderBy(b => b.Name).ToList();
+            ViewBag.Wallets = _db.Wallets.Where(w => w.UserUid == userId).OrderBy(w => w.Name).ToList();
+            ViewBag.CryptoExchanges = _db.CryptoExchanges.Where(c => c.UserUid == userId).OrderBy(c => c.Name).ToList();
             return View();
         }
 
@@ -92,6 +98,9 @@ namespace Homie.Areas.Finances.Controllers
 
             ViewBag.Currencies = _db.Currencies.Where(c => c.UserUid == userId).ToList();
             ViewBag.Banks = _db.Banks.Where(b => b.UserUid == userId).OrderBy(b => b.Name).ToList();
+            ViewBag.Brokers = _db.Brokers.Where(b => b.UserUid == userId).OrderBy(b => b.Name).ToList();
+            ViewBag.Wallets = _db.Wallets.Where(w => w.UserUid == userId).OrderBy(w => w.Name).ToList();
+            ViewBag.CryptoExchanges = _db.CryptoExchanges.Where(c => c.UserUid == userId).OrderBy(c => c.Name).ToList();
             return View(account);
         }
 
@@ -113,6 +122,9 @@ namespace Homie.Areas.Finances.Controllers
             var account = await _db.FinanceAccounts
                 .Include(a => a.Currency)
                 .Include(a => a.Bank)
+                .Include(a => a.Broker)
+                .Include(a => a.Wallet)
+                .Include(a => a.CryptoExchange)
                 .FirstOrDefaultAsync(a => a.Id == id && a.UserUid == userId);
             if (account == null) return NotFound();
             return View(account);

@@ -1,0 +1,36 @@
+@model WalletListViewModel
+
+@{
+    ViewBag.Title = "Кошельки";
+}
+
+<h4><i class="fas fa-wallet"></i> Кошельки</h4>
+<hr>
+
+<div>
+    <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Добавить кошелёк</a>
+</div>
+<p></p>
+
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th>Название</th>
+            <th>Валюта</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var w in Model.Wallets)
+        {
+            <tr>
+                <td>@w.Name</td>
+                <td>@w.Currency?.Code</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@w.Id" class="fas fa-pen" style="color:green;" title="Изменить"></a>
+                    <a asp-action="Delete" asp-route-id="@w.Id" class="fas fa-trash-alt" style="color:red;" title="Удалить"></a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

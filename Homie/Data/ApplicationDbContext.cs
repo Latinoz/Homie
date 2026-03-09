@@ -33,6 +33,9 @@ namespace Homie.Data.Models {
         public DbSet<InstrumentModel> Instruments { get; set; }
         public DbSet<OperationTypeModel> OperationTypes { get; set; }
         public DbSet<BankModel> Banks { get; set; }
+        public DbSet<BrokerModel> Brokers { get; set; }
+        public DbSet<WalletModel> Wallets { get; set; }
+        public DbSet<CryptoExchangeModel> CryptoExchanges { get; set; }
         public DbSet<AccountModel> FinanceAccounts { get; set; }
         public DbSet<DepositModel> Deposits { get; set; }
         public DbSet<InvestmentPositionModel> InvestmentPositions { get; set; }
@@ -66,6 +69,15 @@ namespace Homie.Data.Models {
 
             modelBuilder.Entity<BankModel>()
                 .HasIndex(b => b.UserUid);
+
+            modelBuilder.Entity<BrokerModel>()
+                .HasIndex(b => b.UserUid);
+
+            modelBuilder.Entity<WalletModel>()
+                .HasIndex(w => w.UserUid);
+
+            modelBuilder.Entity<CryptoExchangeModel>()
+                .HasIndex(c => c.UserUid);
 
             modelBuilder.Entity<AccountModel>()
                 .HasIndex(a => a.UserUid);
@@ -102,6 +114,30 @@ namespace Homie.Data.Models {
                 .HasOne(a => a.Bank)
                 .WithMany()
                 .HasForeignKey(a => a.BankId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<AccountModel>()
+                .HasOne(a => a.Broker)
+                .WithMany()
+                .HasForeignKey(a => a.BrokerId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<AccountModel>()
+                .HasOne(a => a.Wallet)
+                .WithMany()
+                .HasForeignKey(a => a.WalletId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<AccountModel>()
+                .HasOne(a => a.CryptoExchange)
+                .WithMany()
+                .HasForeignKey(a => a.CryptoExchangeId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<WalletModel>()
+                .HasOne(w => w.Currency)
+                .WithMany()
+                .HasForeignKey(w => w.CurrencyId)
                 .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<DepositModel>()

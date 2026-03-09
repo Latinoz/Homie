@@ -92,6 +92,27 @@ namespace Homie.Areas.Finances.Models
         public PageViewModel PageViewModel { get; set; }
     }
 
+    /// <summary>ViewModel для списка брокеров</summary>
+    public class BrokerListViewModel
+    {
+        public IEnumerable<BrokerModel> Brokers { get; set; }
+        public PageViewModel PageViewModel { get; set; }
+    }
+
+    /// <summary>ViewModel для списка кошельков</summary>
+    public class WalletListViewModel
+    {
+        public IEnumerable<WalletModel> Wallets { get; set; }
+        public PageViewModel PageViewModel { get; set; }
+    }
+
+    /// <summary>ViewModel для списка крипто бирж</summary>
+    public class CryptoExchangeListViewModel
+    {
+        public IEnumerable<CryptoExchangeModel> CryptoExchanges { get; set; }
+        public PageViewModel PageViewModel { get; set; }
+    }
+
     /// <summary>ViewModel для списка инфляции</summary>
     public class InflationListViewModel
     {
