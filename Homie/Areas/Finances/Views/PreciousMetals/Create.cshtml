@@ -13,9 +13,11 @@
 <hr>
 
 <form asp-action="Create">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="form-group">
         <label asp-for="Name" class="control-label">Название (напр. «Мерный слиток 10г»)</label>
         <input asp-for="Name" class="form-control text-input-width" />
+        <span asp-validation-for="Name" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="Metal" class="control-label">Металл</label>
@@ -24,10 +26,12 @@
     <div class="form-group">
         <label asp-for="WeightGrams" class="control-label">Вес единицы, грамм</label>
         <input asp-for="WeightGrams" type="number" step="0.01" class="form-control number-input-width" />
+        <span asp-validation-for="WeightGrams" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="Quantity" class="control-label">Количество</label>
         <input asp-for="Quantity" type="number" class="form-control number-input-width" />
+        <span asp-validation-for="Quantity" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="PurchasePrice" class="control-label">Цена покупки за грамм ₽</label>

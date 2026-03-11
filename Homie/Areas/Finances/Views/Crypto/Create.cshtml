@@ -13,15 +13,18 @@
 <hr>
 
 <form asp-action="Create">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="form-group">
         <label asp-for="InstrumentId" class="control-label">Инструмент</label>
         <select asp-for="InstrumentId" asp-items="@(new SelectList(ViewBag.Instruments, "Id", "Name"))" class="form-control text-input-width">
             <option value="">-- Выберите --</option>
         </select>
+        <span asp-validation-for="InstrumentId" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="Ticker" class="control-label">Тикер (BTC, ETH и т.д.)</label>
         <input asp-for="Ticker" class="form-control text-input-width" />
+        <span asp-validation-for="Ticker" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="CoinGeckoId" class="control-label">CoinGecko ID</label>
@@ -36,6 +39,7 @@
     <div class="form-group">
         <label asp-for="CurrencyId" class="control-label">Валюта учёта</label>
         <select asp-for="CurrencyId" asp-items="@(new SelectList(ViewBag.Currencies, "Id", "Code"))" class="form-control text-input-width"></select>
+        <span asp-validation-for="CurrencyId" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="Quantity" class="control-label">Количество</label>

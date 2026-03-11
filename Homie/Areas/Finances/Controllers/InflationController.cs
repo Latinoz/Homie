@@ -58,27 +58,31 @@ namespace Homie.Areas.Finances.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(InflationModel inflation)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            inflation.UserUid = userId;
-
-            // Автоподсчёт накопленной инфляции за год
-            var prevMonth = await _db.Inflation
-                .Where(i => i.UserUid == userId && i.Year == inflation.Year && i.Month == inflation.Month - 1)
-                .FirstOrDefaultAsync();
-
-            if (prevMonth != null && prevMonth.AccumulatedYearPercent.HasValue)
+            if (ModelState.IsValid)
             {
-                inflation.AccumulatedYearPercent =
-                    (1 + prevMonth.AccumulatedYearPercent.Value / 100m) * (1 + inflation.CpiPercent / 100m) * 100m - 100m;
-            }
-            else
-            {
-                inflation.AccumulatedYearPercent = inflation.CpiPercent;
-            }
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                inflation.UserUid = userId;
 
-            _db.Inflation.Add(inflation);
-            await _db.SaveChangesAsync();
-            return RedirectToAction("Index");
+                // Автоподсчёт накопленной инфляции за год
+                var prevMonth = await _db.Inflation
+                    .Where(i => i.UserUid == userId && i.Year == inflation.Year && i.Month == inflation.Month - 1)
+                    .FirstOrDefaultAsync();
+
+                if (prevMonth != null && prevMonth.AccumulatedYearPercent.HasValue)
+                {
+                    inflation.AccumulatedYearPercent =
+                        (1 + prevMonth.AccumulatedYearPercent.Value / 100m) * (1 + inflation.CpiPercent / 100m) * 100m - 100m;
+                }
+                else
+                {
+                    inflation.AccumulatedYearPercent = inflation.CpiPercent;
+                }
+
+                _db.Inflation.Add(inflation);
+                await _db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+            return View(inflation);
         }
 
         [Breadcrumb("Редактирование", FromAction = "Index")]
@@ -94,10 +98,14 @@ namespace Homie.Areas.Finances.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(InflationModel inflation)
         {
-            inflation.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            _db.Inflation.Update(inflation);
-            await _db.SaveChangesAsync();
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                inflation.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                _db.Inflation.Update(inflation);
+                await _db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+            return View(inflation);
         }
 
         [HttpGet]

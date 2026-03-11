@@ -62,10 +62,14 @@ namespace Homie.Areas.Finances.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CurrencyModel currency)
         {
-            currency.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            _db.Currencies.Add(currency);
-            await _db.SaveChangesAsync();
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                currency.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                _db.Currencies.Add(currency);
+                await _db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+            return View(currency);
         }
 
         [Breadcrumb("Редактирование", FromAction = "Index")]
@@ -81,10 +85,14 @@ namespace Homie.Areas.Finances.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(CurrencyModel currency)
         {
-            currency.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            _db.Currencies.Update(currency);
-            await _db.SaveChangesAsync();
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                currency.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                _db.Currencies.Update(currency);
+                await _db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+            return View(currency);
         }
 
         [HttpPost]

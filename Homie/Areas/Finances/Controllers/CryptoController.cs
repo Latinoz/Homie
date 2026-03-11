@@ -81,10 +81,20 @@ namespace Homie.Areas.Finances.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CryptoAssetModel asset)
         {
-            asset.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            _db.CryptoAssets.Add(asset);
-            await _db.SaveChangesAsync();
-            return RedirectToAction("Index");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (ModelState.IsValid)
+            {
+                asset.UserUid = userId;
+                _db.CryptoAssets.Add(asset);
+                await _db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+            ViewBag.Instruments = _db.Instruments
+                .Where(i => i.UserUid == userId && i.Type == InstrumentType.Crypto).ToList();
+            ViewBag.Currencies = _db.Currencies.Where(c => c.UserUid == userId).ToList();
+            ViewBag.Accounts = _db.FinanceAccounts
+                .Where(a => a.UserUid == userId && a.AccountType == AccountType.CryptoExchange).ToList();
+            return View(asset);
         }
 
         [Breadcrumb("Редактирование", FromAction = "Index")]
@@ -108,12 +118,22 @@ namespace Homie.Areas.Finances.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(CryptoAssetModel asset, bool manualPriceOverride)
         {
-            asset.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (manualPriceOverride)
-                asset.LastManualOverrideDate = DateTime.UtcNow;
-            _db.CryptoAssets.Update(asset);
-            await _db.SaveChangesAsync();
-            return RedirectToAction("Index");
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (ModelState.IsValid)
+            {
+                asset.UserUid = userId;
+                if (manualPriceOverride)
+                    asset.LastManualOverrideDate = DateTime.UtcNow;
+                _db.CryptoAssets.Update(asset);
+                await _db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+            ViewBag.Instruments = _db.Instruments
+                .Where(i => i.UserUid == userId && i.Type == InstrumentType.Crypto).ToList();
+            ViewBag.Currencies = _db.Currencies.Where(c => c.UserUid == userId).ToList();
+            ViewBag.Accounts = _db.FinanceAccounts
+                .Where(a => a.UserUid == userId && a.AccountType == AccountType.CryptoExchange).ToList();
+            return View(asset);
         }
 
         [Breadcrumb("Детали", FromAction = "Index")]

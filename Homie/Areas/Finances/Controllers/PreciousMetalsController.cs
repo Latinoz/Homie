@@ -73,12 +73,16 @@ namespace Homie.Areas.Finances.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(PreciousMetalModel metal)
+        public async Task<IActionResult> Create(PreciousMetalModel model)
         {
-            metal.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            _db.PreciousMetals.Add(metal);
-            await _db.SaveChangesAsync();
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                model.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                _db.PreciousMetals.Add(model);
+                await _db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+            return View(model);
         }
 
         [Breadcrumb("Редактирование", FromAction = "Index")]
@@ -92,14 +96,18 @@ namespace Homie.Areas.Finances.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(PreciousMetalModel metal, bool manualPriceOverride)
+        public async Task<IActionResult> Edit(PreciousMetalModel model, bool manualPriceOverride)
         {
-            metal.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (manualPriceOverride)
-                metal.LastManualOverrideDate = DateTime.UtcNow;
-            _db.PreciousMetals.Update(metal);
-            await _db.SaveChangesAsync();
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                model.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (manualPriceOverride)
+                    model.LastManualOverrideDate = DateTime.UtcNow;
+                _db.PreciousMetals.Update(model);
+                await _db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+            return View(model);
         }
 
         [HttpGet]

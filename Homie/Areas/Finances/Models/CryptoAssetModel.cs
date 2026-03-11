@@ -9,6 +9,7 @@ namespace Homie.Areas.Finances.Models
     {
         public int Id { get; set; }
 
+        [Range(1, int.MaxValue, ErrorMessage = "Выберите инструмент")]
         [Display(Name = "Инструмент")]
         public int InstrumentId { get; set; }
         public InstrumentModel Instrument { get; set; }
@@ -26,6 +27,7 @@ namespace Homie.Areas.Finances.Models
         [Display(Name = "CoinGecko ID")]
         public string CoinGeckoId { get; set; }
 
+        [Range(1, int.MaxValue, ErrorMessage = "Выберите валюту")]
         [Display(Name = "Валюта оценки")]
         public int CurrencyId { get; set; }
         public CurrencyModel Currency { get; set; }

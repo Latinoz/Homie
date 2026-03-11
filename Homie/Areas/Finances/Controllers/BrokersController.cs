@@ -48,10 +48,14 @@ namespace Homie.Areas.Finances.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(BrokerModel broker)
         {
-            broker.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            _db.Brokers.Add(broker);
-            await _db.SaveChangesAsync();
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                broker.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                _db.Brokers.Add(broker);
+                await _db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+            return View(broker);
         }
 
         [Breadcrumb("Редактирование", FromAction = "Index")]
@@ -67,10 +71,14 @@ namespace Homie.Areas.Finances.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(BrokerModel broker)
         {
-            broker.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            _db.Brokers.Update(broker);
-            await _db.SaveChangesAsync();
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                broker.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                _db.Brokers.Update(broker);
+                await _db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+            return View(broker);
         }
 
         [HttpGet]
