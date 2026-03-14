@@ -22,7 +22,7 @@
         <option value="">Все</option>
         @foreach (InstrumentType t in Enum.GetValues(typeof(InstrumentType)))
         {
-            <option value="@t" selected="@(Model.TypeFilter == t)">@t</option>
+            <option value="@t" selected="@(Model.TypeFilter == t)">@t.GetDisplayName()</option>
         }
     </select>
     <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
@@ -52,7 +52,7 @@
                 <tr>
                     <td>@i.Name</td>
                     <td>@i.Code</td>
-                    <td>@i.Type</td>
+                    <td>@i.Type.GetDisplayName()</td>
                     <td>@i.Exchange</td>
                     <td>@i.Currency?.Code</td>
                     <td>@(i.LastPrice?.ToString("N2") ?? "—")</td>

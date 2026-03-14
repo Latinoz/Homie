@@ -22,7 +22,7 @@
         <select asp-for="Category" class="form-control text-input-width">
             @foreach (OperationCategory c in Enum.GetValues(typeof(OperationCategory)))
             {
-                <option value="@c" selected="@(Model.Category == c)">@c</option>
+                <option value="@c" selected="@(Model.Category == c)">@c.GetDisplayName()</option>
             }
         </select>
     </div>

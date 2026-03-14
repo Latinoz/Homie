@@ -20,7 +20,7 @@
         <option value="">Все</option>
         @foreach (MetalType t in Enum.GetValues(typeof(MetalType)))
         {
-            <option value="@t" selected="@(Model.MetalFilter == t)">@t</option>
+            <option value="@t" selected="@(Model.MetalFilter == t)">@t.GetDisplayName()</option>
         }
     </select>
     <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
@@ -58,7 +58,7 @@
             {
                 <tr>
                     <td>@m.Name</td>
-                    <td>@m.Metal</td>
+                    <td>@m.Metal.GetDisplayName()</td>
                     <td>@m.WeightGrams.ToString("N2")</td>
                     <td>@m.Quantity</td>
                     <td>@m.TotalWeightGrams.ToString("N2")</td>

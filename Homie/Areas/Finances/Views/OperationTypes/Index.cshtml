@@ -23,7 +23,7 @@
         <option value="">Все</option>
         @foreach (OperationCategory c in Enum.GetValues(typeof(OperationCategory)))
         {
-            <option value="@c" selected="@(ViewBag.CategoryFilter != null && (OperationCategory)ViewBag.CategoryFilter == c)">@c</option>
+            <option value="@c" selected="@(ViewBag.CategoryFilter != null && (OperationCategory)ViewBag.CategoryFilter == c)">@c.GetDisplayName()</option>
         }
     </select>
     <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
@@ -43,7 +43,7 @@
         {
             <tr>
                 <td>@t.Name</td>
-                <td>@t.Category</td>
+                <td>@t.Category.GetDisplayName()</td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@t.Id" class="fas fa-pen" style="color:green;"></a>
                     <a asp-action="Delete" asp-route-id="@t.Id" class="fas fa-trash-alt" style="color:red;"></a>

@@ -11,7 +11,7 @@
     <dt>Название:</dt>
     <dd>@Model.Name</dd>
     <dt>Тип:</dt>
-    <dd>@Model.AccountType</dd>
+    <dd>@Model.AccountType.GetDisplayName()</dd>
     <dt>Банк/Брокер:</dt>
     <dd>@Model.Bank?.Name</dd>
     <dt>Валюта:</dt>

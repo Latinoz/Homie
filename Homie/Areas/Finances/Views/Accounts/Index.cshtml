@@ -22,7 +22,7 @@
         <option value="">Все</option>
         @foreach (AccountType t in Enum.GetValues(typeof(AccountType)))
         {
-            <option value="@t" selected="@(Model.TypeFilter == t)">@t</option>
+            <option value="@t" selected="@(Model.TypeFilter == t)">@t.GetDisplayName()</option>
         }
     </select>
     <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
@@ -48,7 +48,7 @@
             {
                 <tr>
                     <td>@a.Name</td>
-                    <td>@a.AccountType</td>
+                    <td>@a.AccountType.GetDisplayName()</td>
                     <td>
                         @switch (a.AccountType)
                         {

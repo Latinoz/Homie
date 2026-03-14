@@ -1,21 +1,32 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Homie.Areas.Finances.Models
 {
     /// <summary>Тип счёта</summary>
     public enum AccountType
     {
+        [Display(Name = "Банк")]
         Bank = 0,
+        [Display(Name = "Брокер")]
         Broker = 1,
+        [Display(Name = "Кошелек")]
         Wallet = 2,
+        [Display(Name = "Криптобиржа")]
         CryptoExchange = 3
     }
 
     /// <summary>Тип инструмента</summary>
     public enum InstrumentType
     {
+        [Display(Name = "Акции")]
         Stock = 0,
+        [Display(Name = "Облигации")]
         Bond = 1,
+        [Display(Name = "ETF")]
         ETF = 2,
+        [Display(Name = "Криптовалюта")]
         Crypto = 3,
+        [Display(Name = "Драгметаллы")]
         PreciousMetalRef = 4
     }
 
@@ -43,20 +54,30 @@ namespace Homie.Areas.Finances.Models
     /// <summary>Категория типа операции</summary>
     public enum OperationCategory
     {
+        [Display(Name = "Вклад")]
         Deposit = 0,
+        [Display(Name = "Инвестиции")]
         Investment = 1,
+        [Display(Name = "Криптовалюта")]
         Crypto = 2,
+        [Display(Name = "Драгоценные металлы")]
         PreciousMetal = 3,
+        [Display(Name = "Перевод")]
         Transfer = 4,
+        [Display(Name = "Другое")]
         Other = 5
     }
 
     /// <summary>Вид драгметалла</summary>
     public enum MetalType
     {
+        [Display(Name = "Золото")]
         Gold = 0,
+        [Display(Name = "Серебро")]
         Silver = 1,
+        [Display(Name = "Платина")]
         Platinum = 2,
+        [Display(Name = "Палладий")]
         Palladium = 3
     }
 

@@ -21,7 +21,7 @@
         <select asp-for="Category" class="form-control text-input-width">
             @foreach (OperationCategory c in Enum.GetValues(typeof(OperationCategory)))
             {
-                <option value="@c">@c</option>
+                <option value="@c">@c.GetDisplayName()</option>
             }
         </select>
     </div>
