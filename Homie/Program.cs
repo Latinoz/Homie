@@ -23,6 +23,9 @@ namespace Homie
     {
         public static void Main(string[] args)
         {
+            // Регистрация кодировки windows-1251 для API ЦБ РФ
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
             var builder = WebApplication.CreateBuilder(args);
             
             // Настройка Kestrel для корректного запуска

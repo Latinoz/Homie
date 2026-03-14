@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -99,7 +100,17 @@ namespace Homie.Areas.Finances.Controllers
         public async Task<IActionResult> UpdateRatesFromCbr()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var rates = await _cbrService.FetchCurrencyRatesAsync(DateTime.Today);
+
+            Dictionary<string, decimal> rates;
+            try
+            {
+                rates = await _cbrService.FetchCurrencyRatesAsync(DateTime.Today);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Ошибка загрузки курсов ЦБ: {ex.Message}";
+                return RedirectToAction("Index");
+            }
 
             var userCurrencies = await _db.Currencies
                 .Where(c => c.UserUid == userId && !c.IsBase)

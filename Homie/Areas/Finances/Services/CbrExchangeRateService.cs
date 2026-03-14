@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
@@ -26,41 +27,42 @@ namespace Homie.Areas.Finances.Services
         {
             var result = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
 
-            try
+            // ЦБ публикует курсы только в рабочие дни — сдвигаем выходные на пятницу
+            if (date.DayOfWeek == DayOfWeek.Saturday)
+                date = date.AddDays(-1);
+            else if (date.DayOfWeek == DayOfWeek.Sunday)
+                date = date.AddDays(-2);
+
+            var dateStr = date.ToString("dd/MM/yyyy");
+            var url = $"https://www.cbr.ru/scripts/XML_daily.asp?date_req={dateStr}";
+            _logger.LogDebug("Запрос курсов ЦБ: {Url}", url);
+
+            // ЦБ возвращает XML в windows-1251
+            var bytes = await _httpClient.GetByteArrayAsync(url);
+            var xml = Encoding.GetEncoding("windows-1251").GetString(bytes);
+            var doc = XDocument.Parse(xml);
+
+            foreach (var valute in doc.Descendants("Valute"))
             {
-                var dateStr = date.ToString("dd/MM/yyyy");
-                var url = $"https://cbr.ru/scripts/XML_daily.asp?date_req={dateStr}";
-                _logger.LogDebug("Запрос курсов ЦБ: {Url}", url);
+                var charCode = valute.Element("CharCode")?.Value;
+                var nominalStr = valute.Element("Nominal")?.Value;
+                var valueStr = valute.Element("Value")?.Value;
 
-                var xml = await _httpClient.GetStringAsync(url);
-                var doc = XDocument.Parse(xml);
+                if (string.IsNullOrEmpty(charCode) || string.IsNullOrEmpty(valueStr))
+                    continue;
 
-                foreach (var valute in doc.Descendants("Valute"))
+                // ЦБ использует запятую как десятичный разделитель
+                if (decimal.TryParse(valueStr.Replace(",", "."), NumberStyles.Any,
+                        CultureInfo.InvariantCulture, out var value) &&
+                    decimal.TryParse(nominalStr?.Replace(",", ".") ?? "1", NumberStyles.Any,
+                        CultureInfo.InvariantCulture, out var nominal))
                 {
-                    var charCode = valute.Element("CharCode")?.Value;
-                    var nominalStr = valute.Element("Nominal")?.Value;
-                    var valueStr = valute.Element("Value")?.Value;
-
-                    if (string.IsNullOrEmpty(charCode) || string.IsNullOrEmpty(valueStr))
-                        continue;
-
-                    // ЦБ использует запятую как десятичный разделитель
-                    if (decimal.TryParse(valueStr.Replace(",", "."), NumberStyles.Any,
-                            CultureInfo.InvariantCulture, out var value) &&
-                        decimal.TryParse(nominalStr?.Replace(",", ".") ?? "1", NumberStyles.Any,
-                            CultureInfo.InvariantCulture, out var nominal))
-                    {
-                        // Курс за 1 единицу валюты
-                        result[charCode] = value / nominal;
-                    }
+                    // Курс за 1 единицу валюты
+                    result[charCode] = value / nominal;
                 }
+            }
 
-                _logger.LogInformation("Загружено {Count} курсов валют ЦБ на {Date}", result.Count, dateStr);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка загрузки курсов ЦБ");
-            }
+            _logger.LogInformation("Загружено {Count} курсов валют ЦБ на {Date}", result.Count, dateStr);
 
             return result;
         }
@@ -73,10 +75,12 @@ namespace Homie.Areas.Finances.Services
             {
                 var dateFrom = date.ToString("dd/MM/yyyy");
                 var dateTo = date.ToString("dd/MM/yyyy");
-                var url = $"https://cbr.ru/scripts/xml_metall.asp?date_req1={dateFrom}&date_req2={dateTo}";
+                var url = $"https://www.cbr.ru/scripts/xml_metall.asp?date_req1={dateFrom}&date_req2={dateTo}";
                 _logger.LogDebug("Запрос цен металлов ЦБ: {Url}", url);
 
-                var xml = await _httpClient.GetStringAsync(url);
+                // ЦБ возвращает XML в windows-1251
+                var bytes = await _httpClient.GetByteArrayAsync(url);
+                var xml = Encoding.GetEncoding("windows-1251").GetString(bytes);
                 var doc = XDocument.Parse(xml);
 
                 // Маппинг кодов ЦБ на наши имена
