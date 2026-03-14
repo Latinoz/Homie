@@ -32,7 +32,7 @@ public interface ICbrExchangeRateService
     /// <summary>
     /// Получить цены драгоценных металлов на указанную дату
     /// </summary>
-    Task<Dictionary<MetalType, decimal>> FetchMetalPricesAsync(DateTime date);
+    Task<Dictionary<string, decimal>> FetchMetalPricesAsync(DateTime date);
 }
 ```
 
@@ -230,10 +230,8 @@ public interface ICoinGeckoPriceService
 
 public class CryptoPriceDto
 {
-    public decimal PriceUsd { get; set; }
-    public decimal PriceRub { get; set; }
-    public decimal Change24h { get; set; }
-    public decimal MarketCap { get; set; }
+    public decimal Usd { get; set; }
+    public decimal Rub { get; set; }
 }
 ```
 
@@ -304,15 +302,38 @@ GET https://api.coingecko.com/api/v3/simple/price
 ```csharp
 public interface IPriceUpdateOrchestrator
 {
-    /// <summary>
-    /// Обновить все котировки для пользователя
-    /// </summary>
     Task<PriceUpdateResultViewModel> UpdateAllPricesAsync(string userId);
-    
-    /// <summary>
-    /// Обновить цену одного инструмента
-    /// </summary>
     Task<PriceUpdateItemResult> UpdateSinglePriceAsync(int instrumentId, string userId);
+}
+```
+
+---
+
+## IFinanceCalculationService — Расчётный сервис
+
+### Назначение
+
+Бизнес-логика расчётов: баланс вкладов, метрики инвестиций, данные для дашборда, графики.
+
+### Методы интерфейса
+
+```csharp
+public interface IFinanceCalculationService
+{
+    Task<FinanceDashboardViewModel> GetDashboardDataAsync(string userId);
+    Task<decimal> GetDepositBalanceAsync(int depositId, string userId);
+    Task<InvestmentMetrics> GetInvestmentMetricsAsync(int positionId, string userId);
+    Task<string> GetPortfolioHistoryJsonAsync(string userId, int months = 12);
+    Task<string> GetInstrumentPriceChartJsonAsync(int instrumentId, string userId, int months = 12);
+}
+
+public class InvestmentMetrics
+{
+    public decimal QuantityFromJournal { get; set; }
+    public decimal AvgPriceFromJournal { get; set; }
+    public decimal DividendsFromJournal { get; set; }
+    public decimal ReturnPercent { get; set; }
+    public decimal ValueInRub { get; set; }
 }
 ```
 
@@ -343,19 +364,21 @@ public class PriceUpdateResultViewModel
     public int SuccessCount { get; set; }
     public int ErrorCount { get; set; }
     public int SkippedCount { get; set; }  // IsAutoUpdateEnabled = false
-    public DateTime UpdateTime { get; set; }
+    public DateTime UpdatedAt { get; set; }
     public List<PriceUpdateItemResult> Items { get; set; }
 }
 
 public class PriceUpdateItemResult
 {
-    public int InstrumentId { get; set; }
-    public string InstrumentCode { get; set; }
+    public string InstrumentName { get; set; }
+    public string Ticker { get; set; }
     public decimal? OldPrice { get; set; }
     public decimal? NewPrice { get; set; }
     public PriceSource Source { get; set; }
     public bool Success { get; set; }
     public string ErrorMessage { get; set; }
+    public bool Skipped { get; set; }
+    public string SkipReason { get; set; }
 }
 ```
 
@@ -394,21 +417,11 @@ public class PriceUpdateHostedService : BackgroundService
                 continue;
             }
 
-            var now = DateTime.UtcNow;
-            
-            // Обновление курсов ЦБ в 08:30 UTC
-            if (ShouldUpdateCbr(now))
-            {
-                await UpdateCbrRatesAsync();
-            }
-            
-            // Обновление котировок в 19:00 UTC (после закрытия MOEX)
-            if (ShouldUpdatePrices(now))
-            {
-                await UpdateAllPricesAsync();
-            }
-            
-            await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+            // Вычисляет точный delay до следующего целевого времени
+            var delay = CalculateDelayUntilNextRun();
+            await Task.Delay(delay, stoppingToken);
+
+            await RunUpdateAsync(stoppingToken);
         }
     }
 }
@@ -465,11 +478,4 @@ if (position.LastManualOverrideDate.HasValue)
 
 ### Retry-политика
 
-```csharp
-// Используется Polly для повторных попыток
-var retryPolicy = Policy
-    .Handle<HttpRequestException>()
-    .Or<TaskCanceledException>()
-    .WaitAndRetryAsync(3, retryAttempt => 
-        TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
-```
+Обработка ошибок выполнена через базовый try/catch без автоматических повторных попыток. Ошибки логируются и отображаются в результатах обновления (`PriceUpdateItemResult.ErrorMessage`).

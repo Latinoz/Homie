@@ -26,9 +26,9 @@
 ```
 Areas/Finances/
 ├── Controllers/     # 16 контроллеров для управления данными
-├── Models/          # Модели данных и ViewModels
-├── Services/        # Бизнес-логика и интеграции с API
-└── Views/           # Представления для каждой сущности
+├── Models/          # 16 моделей данных, ViewModels и Enums
+├── Services/        # Бизнес-логика и интеграции с API (13 файлов)
+└── Views/           # Представления для каждой сущности (16 папок)
 ```
 
 ## Быстрый старт
@@ -51,8 +51,10 @@ Areas/Finances/
 
 - **ASP.NET Core MVC** — веб-фреймворк
 - **Entity Framework Core** — ORM для работы с базой данных
+- **IHttpClientFactory** — HTTP-клиенты для внешних API
 - **Chart.js** — визуализация графиков на дашборде
 - **Background Services** — фоновое обновление котировок
+- **SmartBreadcrumbs** — навигационные хлебные крошки
 
 ## Авторизация
 

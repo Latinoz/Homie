@@ -70,7 +70,6 @@
 | Action | HTTP | Описание |
 |--------|------|----------|
 | `Index` | GET | Список счетов с фильтрацией |
-| `Details` | GET | Детальная информация о счёте |
 | `Create` | GET/POST | Создание нового счёта |
 | `Edit` | GET/POST | Редактирование счёта |
 | `Delete` | GET/POST | Удаление счёта |
@@ -132,11 +131,11 @@
 | Action | HTTP | Описание |
 |--------|------|----------|
 | `Index` | GET | Список позиций |
-| `Details` | GET | Детали позиции с метриками |
+| `Details` | GET | Детали позиции с метриками и графиком цен |
 | `Create` | GET/POST | Добавление позиции |
-| `Edit` | GET/POST | Редактирование |
+| `Edit` | GET/POST | Редактирование (поддержка `manualPriceOverride`) |
 | `Delete` | GET/POST | Удаление позиции |
-| `UpdatePrice` | POST | Ручное обновление цены |
+| `UpdatePrice` | POST | Обновление цены через API |
 
 ### Расчёт метрик
 
@@ -164,9 +163,9 @@
 | Action | HTTP | Описание |
 |--------|------|----------|
 | `Index` | GET | Список криптоактивов |
-| `Details` | GET | Детали актива |
+| `Details` | GET | Детали актива с графиком цен |
 | `Create` | GET/POST | Добавление актива |
-| `Edit` | GET/POST | Редактирование |
+| `Edit` | GET/POST | Редактирование (поддержка `manualPriceOverride`) |
 | `Delete` | GET/POST | Удаление |
 | `UpdatePrice` | POST | Обновление цены через CoinGecko |
 
@@ -194,30 +193,28 @@
 
 | Action | HTTP | Описание |
 |--------|------|----------|
-| `Index` | GET | Список металлов с итогами |
-| `Details` | GET | Детали позиции |
+| `Index` | GET | Список металлов с итоговой стоимостью (₽) по типам |
 | `Create` | GET/POST | Добавление металла |
-| `Edit` | GET/POST | Редактирование |
+| `Edit` | GET/POST | Редактирование (поддержка `manualPriceOverride`) |
 | `Delete` | GET/POST | Удаление |
 
 ### Итоги по типам металлов
 
-На странице списка отображаются итоги:
-- Общий вес золота (г)
-- Общий вес серебра (г)
-- Общий вес платины (г)
-- Общий вес палладия (г)
-- Общая стоимость (RUB)
+На странице списка отображаются итоговые стоимости в рублях:
+- TotalGoldRub — стоимость всего золота (₽)
+- TotalSilverRub — стоимость всего серебра (₽)
+- TotalPlatinumRub — стоимость всей платины (₽)
+- TotalPalladiumRub — стоимость всего палладия (₽)
 
 ### Поля формы
 
 - Тип металла (Gold/Silver/Platinum/Palladium)
 - Название (слиток 50г, монета «Георгий Победоносец»)
-- Проба (999, 585)
+- Проба (текстовое поле: «999», «585»)
 - Вес единицы (грамм)
 - Количество единиц
 - Цена покупки за единицу
-- Дата покупки
+- Дата покупки (опционально)
 - Автообновление цены (да/нет)
 
 ---
@@ -229,7 +226,6 @@
 | Action | HTTP | Описание |
 |--------|------|----------|
 | `Index` | GET | Список операций с фильтрами |
-| `Details` | GET | Детали операции |
 | `Create` | GET/POST | Добавление операции |
 | `Edit` | GET/POST | Редактирование |
 | `Delete` | GET/POST | Удаление |
@@ -265,7 +261,6 @@
 | Action | HTTP | Описание |
 |--------|------|----------|
 | `Index` | GET | Справочник инструментов |
-| `Details` | GET | Детали с историей цен |
 | `Create` | GET/POST | Добавление инструмента |
 | `Edit` | GET/POST | Редактирование |
 | `Delete` | GET/POST | Удаление |
@@ -290,11 +285,11 @@
 | Action | HTTP | Описание |
 |--------|------|----------|
 | `Index` | GET | Список валют с текущими курсами |
-| `Details` | GET | История курсов валюты |
 | `Create` | GET/POST | Добавление валюты |
 | `Edit` | GET/POST | Редактирование |
 | `Delete` | GET/POST | Удаление |
-| `UpdateRates` | POST | Обновление курсов ЦБ РФ |
+| `UpdateRatesFromCbr` | POST | Обновление курсов ЦБ РФ |
+| `AddManualRate` | POST | Ручной ввод курса (currencyId, date, rate) |
 
 ### Предустановленные валюты
 
@@ -313,10 +308,16 @@
 | Action | HTTP | Описание |
 |--------|------|----------|
 | `Index` | GET | Статус обновлений |
-| `UpdateAll` | POST | Массовое обновление |
+| `UpdateAll` | POST | Массовое обновление всех инструментов |
 | `UpdateSingle` | POST | Обновление одного инструмента |
 | `ManualEntry` | GET/POST | Ручной ввод цены |
-| `History` | GET | История цен инструмента |
+
+### Ручной ввод цены (ManualEntry)
+
+При `UpdateCurrentPrice = true` каскадно обновляет:
+- `Instrument.LastPrice` / `LastPriceDate` / `LastPriceSource`
+- `CurrentPrice` у всех связанных InvestmentPositions и CryptoAssets
+- Устанавливает `LastManualOverrideDate` для блокировки автообновления
 
 ### Результат обновления
 
@@ -328,6 +329,7 @@ public class PriceUpdateResultViewModel
     public int ErrorCount { get; set; }
     public int SkippedCount { get; set; }
     public List<PriceUpdateItemResult> Items { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }
 ```
 
@@ -339,10 +341,14 @@ public class PriceUpdateResultViewModel
 
 | Action | HTTP | Описание |
 |--------|------|----------|
-| `Index` | GET | Данные инфляции по годам |
-| `Create` | GET/POST | Добавление месячных данных |
+| `Index` | GET | Данные инфляции по годам с фильтром |
+| `Create` | GET/POST | Добавление месячных данных (автовычисление AccumulatedYearPercent) |
 | `Edit` | GET/POST | Корректировка |
 | `Delete` | GET/POST | Удаление |
+
+### Автовычисление
+
+При создании записи контроллер автоматически рассчитывает `AccumulatedYearPercent` на основе данных предыдущих месяцев текущего года. Форма создания предзаполняется текущим годом/месяцем.
 
 ### Формула накопленной инфляции
 
@@ -368,6 +374,8 @@ public class PriceUpdateResultViewModel
 ### OperationTypesController
 
 Управление типами операций с привязкой к категориям.
+
+**Защита от удаления:** при попытке удалить тип, который используется в операциях, контроллер проверяет наличие связанных записей и отклоняет удаление с сообщением об ошибке через TempData.
 
 ---
 

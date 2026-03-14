@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "274e8c0620235e4a",
+        "id": "66c5af6ae4f1065c",
         "type": "tabs",
         "children": [
           {
-            "id": "5a55e2599c000a9f",
+            "id": "ea47642b5d13990b",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "features.md",
-                "mode": "preview",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "features"
+              "title": "Новая вкладка"
             }
           }
         ]
@@ -183,12 +179,13 @@
       "bases:Создать новую базу": false
     }
   },
-  "active": "5a55e2599c000a9f",
+  "active": "ea47642b5d13990b",
   "lastOpenFiles": [
-    "architecture.md",
+    "user-guide.md",
     "models.md",
     "features.md",
-    "user-guide.md",
+    "architecture.md",
+    "api-integrations.md",
     "README.md"
   ]
 }

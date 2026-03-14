@@ -192,15 +192,23 @@ IPriceUpdateOrchestrator
 │   ApplicationDbContext    │   │   Внешние API                 │
 │   (Entity Framework)      │   │   - ЦБ РФ                     │
 │                           │   │   - MOEX ISS                  │
-│   Таблицы:                │   │   - Yahoo Finance             │
-│   - Accounts              │   │   - CoinGecko                 │
-│   - Deposits              │   └───────────────────────────────┘
+│   DbSets (16):            │   │   - Yahoo Finance             │
+│   - Currencies            │   │   - CoinGecko                 │
+│   - ExchangeRates         │   └───────────────────────────────┘
+│   - Instruments           │
+│   - OperationTypes        │
+│   - Banks                 │
+│   - Brokers               │
+│   - Wallets               │
+│   - CryptoExchanges       │
+│   - FinanceAccounts       │
+│   - Deposits              │
 │   - InvestmentPositions   │
 │   - CryptoAssets          │
-│   - Operations            │
-│   - ExchangeRates         │
+│   - PreciousMetals        │
+│   - FinanceOperations     │
+│   - Inflation             │
 │   - PriceHistory          │
-│   - ...                   │
 └───────────────────────────┘
 ```
 
@@ -217,22 +225,26 @@ public class PriceUpdateHostedService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var now = DateTime.UtcNow;
-            
-            // Обновление курсов ЦБ РФ (08:30 UTC)
-            if (now.TimeOfDay >= _settings.CbrUpdateTimeUtc)
+            if (!_settings.EnableBackgroundPriceUpdate)
             {
-                await _cbrService.FetchCurrencyRatesAsync(DateTime.Today);
+                await Task.Delay(TimeSpan.FromHours(1), stoppingToken);
+                continue;
             }
-            
-            // Обновление котировок (19:00 UTC)
-            if (now.TimeOfDay >= _settings.PriceUpdateTimeUtc)
-            {
-                await _orchestrator.UpdateAllPricesAsync(userId);
-            }
-            
-            await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
+
+            // Вычисляет точный delay до следующего целевого времени
+            var delay = CalculateDelayUntilNextRun();
+            await Task.Delay(delay, stoppingToken);
+
+            await RunUpdateAsync(stoppingToken);
         }
+    }
+
+    private async Task RunUpdateAsync(CancellationToken ct)
+    {
+        // 1. Обновление курсов ЦБ РФ для всех пользователей
+        await _cbrService.FetchCurrencyRatesAsync(DateTime.Today);
+        // 2. Вызов оркестратора для каждого пользователя
+        await _orchestrator.UpdateAllPricesAsync(userId);
     }
 }
 ```
@@ -272,32 +284,42 @@ public class PriceUpdateHostedService : BackgroundService
 public class FinancesSettings
 {
     public string BaseCurrency { get; set; } = "RUB";
-    public TimeSpan CbrUpdateTimeUtc { get; set; }
-    public TimeSpan PriceUpdateTimeUtc { get; set; }
-    public bool EnableBackgroundPriceUpdate { get; set; }
+    public string CbrUpdateTimeUtc { get; set; } = "08:30";
+    public string PriceUpdateTimeUtc { get; set; } = "19:00";
+    public bool EnableBackgroundPriceUpdate { get; set; } = true;
     public int ManualOverrideLockHours { get; set; } = 24;
-    public List<string> DefaultCurrencies { get; set; }
-    public List<string> DefaultMetals { get; set; }
-    public CoinGeckoSettings CoinGecko { get; set; }
-    public MoexSettings MoexIss { get; set; }
-    public YahooFinanceSettings YahooFinance { get; set; }
+    public string[] DefaultCurrencies { get; set; }
+    public string[] DefaultMetals { get; set; }
+    public CoinGeckoSettings CoinGecko { get; set; } = new();
+    public MoexIssSettings MoexIss { get; set; } = new();
+    public YahooFinanceSettings YahooFinance { get; set; } = new();
 }
 ```
 
 ## Регистрация сервисов
 
 ```csharp
-// Program.cs или Startup.cs
-services.Configure<FinancesSettings>(configuration.GetSection("Finances"));
+// Program.cs
 
-services.AddScoped<IFinanceCalculationService, FinanceCalculationService>();
-services.AddScoped<ICbrExchangeRateService, CbrExchangeRateService>();
-services.AddScoped<IMoexPriceService, MoexPriceService>();
-services.AddScoped<IYahooFinancePriceService, YahooFinancePriceService>();
-services.AddScoped<ICoinGeckoPriceService, CoinGeckoPriceService>();
-services.AddScoped<IPriceUpdateOrchestrator, PriceUpdateOrchestrator>();
+// Конфигурация
+builder.Services.Configure<FinancesSettings>(builder.Configuration.GetSection("Finances"));
+builder.Services.Configure<CoinGeckoSettings>(builder.Configuration.GetSection("Finances:CoinGecko"));
+builder.Services.Configure<MoexIssSettings>(builder.Configuration.GetSection("Finances:MoexIss"));
+builder.Services.Configure<YahooFinanceSettings>(builder.Configuration.GetSection("Finances:YahooFinance"));
 
-services.AddHostedService<PriceUpdateHostedService>();
+// HTTP-клиенты (AddHttpClient, не AddScoped)
+builder.Services.AddHttpClient<ICbrExchangeRateService, CbrExchangeRateService>();
+builder.Services.AddHttpClient<IMoexPriceService, MoexPriceService>();
+builder.Services.AddHttpClient<IYahooFinancePriceService, YahooFinancePriceService>();
+builder.Services.AddHttpClient<ICoinGeckoPriceService, CoinGeckoPriceService>();
+
+// Scoped-сервисы
+builder.Services.AddScoped<IPriceUpdateOrchestrator, PriceUpdateOrchestrator>();
+builder.Services.AddScoped<IFinanceCalculationService, FinanceCalculationService>();
+
+// Фоновый сервис
+builder.Services.AddHostedService<PriceUpdateHostedService>();
+```
 ```
 
 ## Диаграмма связей между моделями

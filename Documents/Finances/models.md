@@ -2,7 +2,7 @@
 
 ## Обзор
 
-Модуль использует 17 моделей данных, организованных в логические группы:
+Модуль использует 16 моделей данных (+ конфигурационный POCO `FinancesSettings`), организованных в логические группы:
 
 1. **Счета** — AccountModel, BankModel, BrokerModel, WalletModel, CryptoExchangeModel
 2. **Инструменты** — InstrumentModel, CurrencyModel, ExchangeRateModel
@@ -37,12 +37,12 @@ public enum InstrumentType
 // Биржа
 public enum Exchange
 {
-    None,       // Не указана
-    MOEX,       // Московская биржа
-    NYSE,       // Нью-Йоркская биржа
-    NASDAQ,     // NASDAQ
-    LSE,        // Лондонская биржа
-    CryptoSpot  // Криптовалютный рынок
+    None = 0,       // Не указана
+    MOEX = 1,       // Московская биржа
+    NYSE = 2,       // Нью-Йоркская биржа
+    NASDAQ = 3,     // NASDAQ
+    LSE = 4,        // Лондонская биржа
+    CryptoSpot = 5  // Криптовалютный рынок
 }
 
 // Источник цены
@@ -97,21 +97,21 @@ public enum FinanceSortState
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `Id` | int | Первичный ключ |
-| `Name` | string | Название счёта |
+| `Name` | string | Название счёта (Required, varchar(255)) |
 | `AccountType` | AccountType | Тип счёта (Bank/Broker/Wallet/CryptoExchange) |
-| `CurrencyId` | int | Базовая валюта счёта |
-| `IsActive` | bool | Активен ли счёт |
-| `Notes` | string | Заметки |
-| `UserUid` | string | Идентификатор пользователя |
+| `CurrencyId` | int | FK на валюту (базовая валюта счёта) |
+| `IsActive` | bool | Активен ли счёт (default: true) |
+| `Notes` | string | Заметки (varchar(500)) |
+| `UserUid` | string | Идентификатор пользователя (varchar(255)) |
 | `BankId` | int? | FK на банк (nullable) |
 | `BrokerId` | int? | FK на брокера (nullable) |
 | `WalletId` | int? | FK на кошелёк (nullable) |
 | `CryptoExchangeId` | int? | FK на криптобиржу (nullable) |
 
 **Связи:**
-- `Currency` — валюта счёта
-- `Bank` / `Broker` / `Wallet` / `CryptoExchange` — связанная организация
-- `Deposits` — список вкладов (one-to-many)
+- `Currency` → CurrencyModel — валюта счёта
+- `Bank` → BankModel / `Broker` → BrokerModel / `Wallet` → WalletModel / `CryptoExchange` → CryptoExchangeModel — связанная организация (полиморфная, только одно из полей заполнено)
+- `Deposits` → ICollection\<DepositModel\> — список вкладов (one-to-many)
 
 ---
 
@@ -120,8 +120,8 @@ public enum FinanceSortState
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `Id` | int | Первичный ключ |
-| `Name` | string | Название банка |
-| `UserUid` | string | Идентификатор пользователя |
+| `Name` | string | Название банка (Required, varchar(255)) |
+| `UserUid` | string | Идентификатор пользователя (varchar(255)) |
 
 ---
 
@@ -130,8 +130,8 @@ public enum FinanceSortState
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `Id` | int | Первичный ключ |
-| `Name` | string | Название брокера |
-| `UserUid` | string | Идентификатор пользователя |
+| `Name` | string | Название брокера (Required, varchar(255)) |
+| `UserUid` | string | Идентификатор пользователя (varchar(255)) |
 
 ---
 
@@ -140,12 +140,12 @@ public enum FinanceSortState
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `Id` | int | Первичный ключ |
-| `Name` | string | Название кошелька |
-| `CurrencyId` | int | Основная валюта |
-| `UserUid` | string | Идентификатор пользователя |
+| `Name` | string | Название кошелька (Required, varchar(255)) |
+| `CurrencyId` | int? | FK на валюту (nullable) |
+| `UserUid` | string | Идентификатор пользователя (varchar(255)) |
 
 **Связи:**
-- `Currency` — валюта кошелька
+- `Currency` → CurrencyModel — валюта кошелька (опционально)
 
 ---
 
@@ -154,8 +154,8 @@ public enum FinanceSortState
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `Id` | int | Первичный ключ |
-| `Name` | string | Название биржи |
-| `UserUid` | string | Идентификатор пользователя |
+| `Name` | string | Название биржи (Required, varchar(255)) |
+| `UserUid` | string | Идентификатор пользователя (varchar(255)) |
 
 ---
 
@@ -165,11 +165,12 @@ public enum FinanceSortState
 
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `Code` | string | Код валюты (RUB, USD, EUR) — PK |
-| `Name` | string | Название валюты |
-| `CbrCode` | string | Код ЦБ РФ для API |
+| `Id` | int | Первичный ключ (автоинкремент) |
+| `Code` | string | Код валюты (RUB, USD, EUR) (Required, varchar(10)) |
+| `Name` | string | Название валюты (Required, varchar(255)) |
+| `CbrCode` | string | Код ЦБ РФ для API (varchar(20)) |
 | `IsBase` | bool | Базовая валюта (RUB = true) |
-| `UserUid` | string | Идентификатор пользователя |
+| `UserUid` | string | Идентификатор пользователя (varchar(255)) |
 
 **Связи:**
 - `ExchangeRates` — история курсов
@@ -185,24 +186,25 @@ public enum FinanceSortState
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `Id` | int | Первичный ключ |
-| `Code` | string | Тикер (SBER, AAPL, BTC) |
-| `Name` | string | Полное название |
+| `Code` | string | Тикер (SBER, AAPL, BTC) (Required, varchar(50)) |
+| `Name` | string | Полное название (Required, varchar(255)) |
 | `Type` | InstrumentType | Тип инструмента |
 | `Exchange` | Exchange | Биржа |
-| `ISIN` | string | Международный код (для акций/облигаций) |
-| `ExternalCode` | string | Внешний код для API |
-| `CurrencyId` | int | Валюта котировки |
-| `Category` | string | Категория (опционально) |
-| `LastPrice` | decimal | Последняя цена |
+| `ISIN` | string | Международный код (varchar(20)) |
+| `ExternalCode` | string | Внешний код для API (varchar(50)) |
+| `CurrencyId` | int | FK на валюту котировки |
+| `Category` | string | Категория (varchar(100), опционально) |
+| `LastPrice` | decimal? | Последняя цена (decimal(18,6), nullable) |
 | `LastPriceDate` | DateTime? | Дата последнего обновления |
-| `LastPriceSource` | PriceSource | Источник последней цены |
-| `UserUid` | string | Идентификатор пользователя |
+| `LastPriceSource` | PriceSource? | Источник последней цены (nullable) |
+| `Notes` | string | Заметки (varchar(500)) |
+| `UserUid` | string | Идентификатор пользователя (varchar(255)) |
 
 **Связи:**
-- `Currency` — валюта инструмента
-- `Operations` — операции с инструментом
-- `InvestmentPositions` — позиции по инструменту
-- `PriceHistory` — история цен
+- `Currency` → CurrencyModel — валюта инструмента
+- `Operations` → операции с инструментом
+- `InvestmentPositions` → позиции по инструменту
+- `PriceHistory` → история цен
 
 ---
 
@@ -213,11 +215,14 @@ public enum FinanceSortState
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `Id` | int | Первичный ключ |
-| `CurrencyId` | string | FK на валюту |
-| `Date` | DateTime | Дата курса |
-| `Rate` | decimal(18,6) | Курс к базовой валюте |
+| `CurrencyId` | int | FK на валюту (Required) |
+| `Date` | DateTime | Дата курса (Required) |
+| `Rate` | decimal | Курс к базовой валюте (Required, decimal(18,6)) |
 | `Source` | PriceSource | Источник курса |
-| `UserUid` | string | Идентификатор пользователя |
+| `UserUid` | string | Идентификатор пользователя (varchar(255)) |
+
+**Связи:**
+- `Currency` → CurrencyModel
 
 ---
 
@@ -230,16 +235,16 @@ public enum FinanceSortState
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `Id` | int | Первичный ключ |
-| `Name` | string | Название вклада |
+| `Name` | string | Название вклада (Required, varchar(255)) |
 | `AccountId` | int | FK на счёт |
-| `CurrencyId` | string | Валюта вклада |
-| `Amount` | decimal | Начальная сумма |
-| `InterestRate` | decimal(5,2) | Процентная ставка (%) |
+| `CurrencyId` | int | FK на валюту вклада |
+| `Amount` | decimal | Начальная сумма (decimal(18,2)) |
+| `InterestRate` | decimal | Процентная ставка, % (decimal(5,2)) |
 | `OpenDate` | DateTime | Дата открытия |
-| `EndDate` | DateTime? | Дата закрытия |
+| `EndDate` | DateTime? | Дата закрытия (nullable) |
 | `IsCapitalization` | bool | Капитализация процентов |
-| `Notes` | string | Условия вклада |
-| `UserUid` | string | Идентификатор пользователя |
+| `Notes` | string | Условия вклада (varchar(500)) |
+| `UserUid` | string | Идентификатор пользователя (varchar(255)) |
 
 **Вычисляемые поля (NotMapped):**
 | Поле | Тип | Описание |
@@ -247,6 +252,10 @@ public enum FinanceSortState
 | `BalanceFromJournal` | decimal | Баланс из журнала операций |
 | `AccruedInterest` | decimal | Начисленные проценты |
 | `ValueInRub` | decimal | Стоимость в рублях |
+
+**Связи:**
+- `Account` → AccountModel
+- `Currency` → CurrencyModel
 
 ---
 
@@ -259,12 +268,13 @@ public enum FinanceSortState
 | `Id` | int | Первичный ключ |
 | `InstrumentId` | int | FK на инструмент |
 | `AccountId` | int | FK на брокерский счёт |
-| `Quantity` | decimal | Количество |
-| `AvgPurchasePrice` | decimal | Средняя цена покупки |
-| `CurrentPrice` | decimal | Текущая цена |
-| `IsAutoUpdateEnabled` | bool | Автообновление цены |
+| `Quantity` | decimal | Количество (decimal(18,6)) |
+| `AvgPurchasePrice` | decimal | Средняя цена покупки (decimal(18,6)) |
+| `CurrentPrice` | decimal | Текущая цена (decimal(18,6)) |
+| `IsAutoUpdateEnabled` | bool | Автообновление цены (default: true) |
 | `LastManualOverrideDate` | DateTime? | Дата ручного ввода |
-| `UserUid` | string | Идентификатор пользователя |
+| `Notes` | string | Заметки (varchar(500)) |
+| `UserUid` | string | Идентификатор пользователя (varchar(255)) |
 
 **Вычисляемые поля (NotMapped):**
 | Поле | Тип | Описание |
@@ -275,6 +285,10 @@ public enum FinanceSortState
 | `ReturnPercent` | decimal | Доходность (%) |
 | `ValueInRub` | decimal | Стоимость в рублях |
 
+**Связи:**
+- `Instrument` → InstrumentModel
+- `Account` → AccountModel
+
 ---
 
 ### CryptoAssetModel
@@ -284,18 +298,19 @@ public enum FinanceSortState
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `Id` | int | Первичный ключ |
-| `InstrumentId` | int | FK на инструмент |
-| `AccountId` | int | FK на счёт (биржа/кошелёк) |
-| `Ticker` | string | Тикер (BTC, ETH) |
-| `CoinGeckoId` | string | ID для CoinGecko API |
-| `CurrencyId` | string | Валюта учёта |
-| `Quantity` | decimal(18,8) | Количество (8 знаков после запятой) |
-| `AvgPurchasePrice` | decimal | Средняя цена покупки |
-| `CurrentPrice` | decimal | Текущая цена |
-| `IsAutoUpdateEnabled` | bool | Автообновление цены |
-| `WalletAddress` | string | Адрес кошелька |
-| `Notes` | string | Заметки |
-| `UserUid` | string | Идентификатор пользователя |
+| `InstrumentId` | int | FK на инструмент (Required, Range(1, MaxValue)) |
+| `AccountId` | int? | FK на счёт, биржа/кошелёк (nullable) |
+| `Ticker` | string | Тикер (BTC, ETH) (Required, varchar(20)) |
+| `CoinGeckoId` | string | ID для CoinGecko API (varchar(50)) |
+| `CurrencyId` | int | FK на валюту учёта (Required, Range(1, MaxValue)) |
+| `Quantity` | decimal | Количество (decimal(18,8), 8 знаков после запятой) |
+| `AvgPurchasePrice` | decimal | Средняя цена покупки (decimal(18,6)) |
+| `CurrentPrice` | decimal | Текущая цена (decimal(18,6)) |
+| `IsAutoUpdateEnabled` | bool | Автообновление цены (default: true) |
+| `LastManualOverrideDate` | DateTime? | Дата ручного ввода |
+| `Notes` | string | Заметки (varchar(500)) |
+| `WalletAddress` | string | Адрес кошелька (varchar(255)) |
+| `UserUid` | string | Идентификатор пользователя (varchar(255)) |
 
 **Вычисляемые поля (NotMapped):**
 | Поле | Тип | Описание |
@@ -314,22 +329,23 @@ public enum FinanceSortState
 |------|-----|----------|
 | `Id` | int | Первичный ключ |
 | `Metal` | MetalType | Тип металла |
-| `Name` | string | Название (слиток, монета) |
-| `Purity` | decimal | Проба (999, 585) |
-| `WeightGrams` | decimal | Вес единицы (грамм) |
+| `Name` | string | Название (слиток, монета) (Required, varchar(255)) |
+| `Purity` | string | Проба (999, 585) (varchar(10)) |
+| `WeightGrams` | decimal | Вес единицы, грамм (decimal(10,3)) |
 | `Quantity` | int | Количество единиц |
-| `PurchasePrice` | decimal | Цена покупки за единицу |
-| `PurchaseDate` | DateTime | Дата покупки |
-| `CurrentPricePerGram` | decimal | Текущая цена за грамм |
-| `IsAutoUpdateEnabled` | bool | Автообновление цены |
+| `PurchasePrice` | decimal | Цена покупки за единицу (decimal(18,2)) |
+| `PurchaseDate` | DateTime? | Дата покупки (nullable) |
+| `CurrentPricePerGram` | decimal | Текущая цена за грамм (decimal(18,2)) |
+| `IsAutoUpdateEnabled` | bool | Автообновление цены (default: true) |
 | `LastManualOverrideDate` | DateTime? | Дата ручного ввода |
-| `UserUid` | string | Идентификатор пользователя |
+| `Notes` | string | Заметки (varchar(500)) |
+| `UserUid` | string | Идентификатор пользователя (varchar(255)) |
 
 **Вычисляемые поля (NotMapped):**
 | Поле | Тип | Описание |
 |------|-----|----------|
-| `TotalWeightGrams` | decimal | Общий вес |
-| `TotalValueRub` | decimal | Общая стоимость в рублях |
+| `TotalWeightGrams` | decimal | Общий вес = WeightGrams × Quantity |
+| `TotalValueRub` | decimal | Общая стоимость = TotalWeightGrams × CurrentPricePerGram |
 
 ---
 
@@ -342,25 +358,25 @@ public enum FinanceSortState
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `Id` | int | Первичный ключ |
-| `Date` | DateTime | Дата операции |
+| `Date` | DateTime | Дата операции (Required) |
 | `OperationTypeId` | int | FK на тип операции |
 | `AccountId` | int | FK на счёт |
-| `InstrumentId` | int? | FK на инструмент (опционально) |
-| `Quantity` | decimal | Количество |
-| `Price` | decimal | Цена за единицу |
-| `CurrencyId` | string | Валюта операции |
-| `ExchangeRateToRub` | decimal(18,6) | Курс к рублю на дату |
-| `AmountInRub` | decimal(18,2) | Сумма в рублях |
-| `Commission` | decimal? | Комиссия (RUB) |
-| `Tax` | decimal? | Налог (RUB) |
-| `Notes` | string(500) | Комментарий |
-| `UserUid` | string | Идентификатор пользователя |
+| `InstrumentId` | int? | FK на инструмент (nullable) |
+| `Quantity` | decimal? | Количество (decimal(18,6), nullable) |
+| `Price` | decimal? | Цена за единицу (decimal(18,6), nullable) |
+| `CurrencyId` | int | FK на валюту |
+| `ExchangeRateToRub` | decimal | Курс к рублю на дату (decimal(18,6)) |
+| `AmountInRub` | decimal | Сумма в рублях (decimal(18,2)) |
+| `Commission` | decimal? | Комиссия (decimal(18,2), nullable) |
+| `Tax` | decimal? | Налог (decimal(18,2), nullable) |
+| `Notes` | string | Комментарий (varchar(500)) |
+| `UserUid` | string | Идентификатор пользователя (varchar(255)) |
 
 **Связи:**
-- `OperationType` — тип операции
-- `Account` — счёт
-- `Instrument` — инструмент
-- `Currency` — валюта
+- `OperationType` → OperationTypeModel — тип операции
+- `Account` → AccountModel — счёт
+- `Instrument` → InstrumentModel — инструмент (опционально)
+- `Currency` → CurrencyModel — валюта
 
 ---
 
@@ -371,9 +387,9 @@ public enum FinanceSortState
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `Id` | int | Первичный ключ |
-| `Name` | string | Название типа |
+| `Name` | string | Название типа (Required, varchar(100)) |
 | `Category` | OperationCategory | Категория |
-| `UserUid` | string | Идентификатор пользователя |
+| `UserUid` | string | Идентификатор пользователя (varchar(255)) |
 
 **Предустановленные типы (15 шт.):**
 - Пополнение вклада, Снятие со вклада, Начисление процентов
@@ -383,6 +399,8 @@ public enum FinanceSortState
 - Покупка драгметалла, Продажа драгметалла
 - Перевод между счетами
 - Прочие расходы, Прочие доходы
+
+**Защита от удаления:** тип нельзя удалить, если он используется в операциях.
 
 ---
 
@@ -396,11 +414,16 @@ public enum FinanceSortState
 |------|-----|----------|
 | `Id` | int | Первичный ключ |
 | `InstrumentId` | int | FK на инструмент |
-| `Date` | DateTime | Дата |
-| `Price` | decimal | Цена в валюте инструмента |
-| `CurrencyId` | string | Валюта |
-| `PriceInRub` | decimal | Цена в рублях |
+| `Date` | DateTime | Дата (Required) |
+| `Price` | decimal | Цена в валюте инструмента (Required, decimal(18,6)) |
+| `CurrencyId` | int | FK на валюту |
+| `PriceInRub` | decimal | Цена в рублях (decimal(18,2)) |
 | `Source` | PriceSource | Источник данных |
+| `UserUid` | string | Идентификатор пользователя (varchar(255)) |
+
+**Связи:**
+- `Instrument` → InstrumentModel
+- `Currency` → CurrencyModel
 
 ---
 
@@ -411,11 +434,59 @@ public enum FinanceSortState
 | Поле | Тип | Описание |
 |------|-----|----------|
 | `Id` | int | Первичный ключ |
-| `Year` | int | Год |
-| `Month` | int | Месяц (1-12) |
-| `CpiPercent` | decimal(5,2) | ИПЦ за месяц (%) |
-| `AccumulatedYearPercent` | decimal(8,4) | Накопленная инфляция за год (%) |
-| `UserUid` | string | Идентификатор пользователя |
+| `Year` | int | Год (Required) |
+| `Month` | int | Месяц 1-12 (Required, Range(1,12)) |
+| `CpiPercent` | decimal | ИПЦ за месяц, % (decimal(5,2)) |
+| `AccumulatedYearPercent` | decimal? | Накопленная инфляция за год, % (decimal(8,4), nullable, автовычисляется) |
+| `Notes` | string | Заметки (varchar(500)) |
+| `UserUid` | string | Идентификатор пользователя (varchar(255)) |
+
+**Автовычисление:** при создании записи контроллер автоматически рассчитывает `AccumulatedYearPercent` на основе предыдущих месяцев.
+
+---
+
+## ViewModels
+
+### FinanceDashboardViewModel
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `TotalCapital` | decimal | Общий капитал в рублях |
+| `TotalDeposits` | decimal | Сумма вкладов |
+| `TotalInvestments` | decimal | Стоимость инвестиций |
+| `TotalCrypto` | decimal | Стоимость криптовалюты |
+| `TotalPreciousMetals` | decimal | Стоимость драгметаллов |
+| `TotalReturnPercent` | decimal | Общая доходность портфеля |
+| `RealValueAfterInflation` | decimal | Реальная стоимость с учётом инфляции |
+| `AccumulatedInflationPercent` | decimal | Накопленная инфляция |
+| `AssetAllocationJson` | string | JSON для круговой диаграммы |
+| `CapitalDynamicsJson` | string | JSON для графика динамики |
+| `LastPriceUpdateDate` | DateTime? | Дата последнего обновления |
+| `LatestRates` | List\<ExchangeRateModel\> | Курсы валют |
+| `RecentOperations` | List\<OperationModel\> | Последние операции |
+
+### ListViewModels (13 шт.)
+
+- **AccountListViewModel**: Accounts, PageViewModel, CurrentSort, NameFilter, TypeFilter
+- **DepositListViewModel**: Deposits, PageViewModel, CurrentSort, NameFilter, AccountFilter
+- **InvestmentListViewModel**: Positions, PageViewModel, CurrentSort, NameFilter, TypeFilter
+- **CryptoListViewModel**: Assets, PageViewModel, CurrentSort, NameFilter
+- **PreciousMetalListViewModel**: Metals, PageViewModel, CurrentSort, MetalFilter, TotalGoldRub, TotalSilverRub, TotalPlatinumRub, TotalPalladiumRub
+- **OperationListViewModel**: Operations, PageViewModel, CurrentSort, CategoryFilter, AccountFilter, DateFrom, DateTo
+- **InstrumentListViewModel**: Instruments, PageViewModel, CurrentSort, NameFilter, TypeFilter
+- **CurrencyListViewModel**: Currencies, LatestRates, PageViewModel
+- **BankListViewModel**: Banks, PageViewModel
+- **BrokerListViewModel**: Brokers, PageViewModel
+- **WalletListViewModel**: Wallets, PageViewModel
+- **CryptoExchangeListViewModel**: CryptoExchanges, PageViewModel
+- **InflationListViewModel**: Records, PageViewModel, YearFilter
+
+### PriceViewModels (4 шт.)
+
+- **PriceUpdateResultViewModel**: TotalProcessed, SuccessCount, ErrorCount, SkippedCount, Items (List\<PriceUpdateItemResult\>), UpdatedAt
+- **PriceUpdateItemResult**: InstrumentName, Ticker, OldPrice, NewPrice, Source, Success, ErrorMessage, Skipped, SkipReason
+- **ManualPriceEntryViewModel**: InstrumentId, Date (default: Today), Price, CurrencyId, UpdateCurrentPrice (default: true)
+- **PriceHistoryChartViewModel**: InstrumentId, InstrumentName, Ticker, ChartDataJson
 
 ---
 
@@ -424,7 +495,7 @@ public enum FinanceSortState
 ```
 ┌────────────────┐     ┌────────────────┐     ┌────────────────┐
 │    Currency    │────<│ ExchangeRate   │     │   Inflation    │
-│  (Code = PK)   │     │   (history)    │     │   (monthly)    │
+│  (Id = PK)     │     │   (history)    │     │   (monthly)    │
 └────────────────┘     └────────────────┘     └────────────────┘
         │
         │ 1:N
