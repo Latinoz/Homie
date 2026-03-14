@@ -69,6 +69,7 @@
     <div class="w3-half">
         <div class="w3-card w3-padding">
             <h5>Структура портфеля</h5>
+            <div id="pieLegend" style="margin-bottom: 10px;"></div>
             <div class="chart-container">
                 <canvas id="pieChart"></canvas>
             </div>
@@ -104,10 +105,46 @@
     var lineData = @Html.Raw(Model.CapitalDynamicsJson ?? "{}");
 
     if (pieData.labels) {
+        var values = pieData.datasets[0].data;
+        var colors = pieData.datasets[0].backgroundColor;
+        var total = values.reduce(function(s, v) { return s + v; }, 0);
+
+        // Build legend with amounts and percentages
+        var legendHtml = '';
+        for (var i = 0; i < pieData.labels.length; i++) {
+            var pct = total > 0 ? (values[i] / total * 100).toFixed(1) : '0.0';
+            var amount = Number(values[i]).toLocaleString('ru-RU', { maximumFractionDigits: 0 });
+            legendHtml += '<span style="display:inline-block;width:12px;height:12px;background:' + colors[i] + ';border-radius:2px;margin-right:5px;"></span>'
+                + '<b>' + pieData.labels[i] + '</b>: ' + amount + ' ₽ (' + pct + '%)<br>';
+        }
+        document.getElementById('pieLegend').innerHTML = legendHtml;
+
+        // Update chart labels to include percentage
+        pieData.labels = pieData.labels.map(function(label, i) {
+            var pct = total > 0 ? (values[i] / total * 100).toFixed(1) : '0.0';
+            return label + ' — ' + pct + '%';
+        });
+
         new Chart(document.getElementById('pieChart'), {
             type: 'doughnut',
             data: pieData,
-            options: { responsive: true, maintainAspectRatio: false }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: function() { return ''; },
+                            label: function(ctx) {
+                                var val = ctx.parsed;
+                                var pct = total > 0 ? (val / total * 100).toFixed(1) : '0.0';
+                                return pieData.labels[ctx.dataIndex].split(' — ')[0] + ' - ' + pct + '%: ' + Number(val).toLocaleString('ru-RU', { maximumFractionDigits: 0 }) + ' ₽';
+                            }
+                        }
+                    }
+                }
+            }
         });
     }
 
