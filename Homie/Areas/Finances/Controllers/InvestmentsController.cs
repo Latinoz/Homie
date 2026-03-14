@@ -150,9 +150,19 @@ namespace Homie.Areas.Finances.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _priceOrchestrator.UpdateSinglePriceAsync(instrumentId, userId);
-            TempData["PriceUpdateMsg"] = result.Success
+
+            // Диагностика: проверить позицию после обновления
+            var pos = await _db.InvestmentPositions
+                .Where(ip => ip.InstrumentId == instrumentId)
+                .Select(ip => new { ip.Id, ip.InstrumentId, ip.CurrentPrice, ip.IsAutoUpdateEnabled, ip.UserUid })
+                .FirstOrDefaultAsync();
+            var diag = pos != null
+                ? $" [DBG: posId={pos.Id}, instrId={pos.InstrumentId}, curPrice={pos.CurrentPrice}, auto={pos.IsAutoUpdateEnabled}, uid={pos.UserUid}]"
+                : $" [DBG: NO position found for instrumentId={instrumentId}]";
+
+            TempData["PriceUpdateMsg"] = (result.Success
                 ? $"{result.Ticker}: {result.OldPrice} → {result.NewPrice}"
-                : $"{result.Ticker}: ошибка - {result.ErrorMessage}";
+                : $"{result.Ticker}: ошибка - {result.ErrorMessage}") + diag;
             return RedirectToAction("Index");
         }
 

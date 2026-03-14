@@ -39,6 +39,12 @@ namespace Homie.Areas.Finances.Services
             _logger = logger;
         }
 
+        /// <summary>Возвращает ExternalCode если он задан и выглядит как валидный тикер, иначе Code</summary>
+        private static string GetTickerKey(InstrumentModel i) =>
+            !string.IsNullOrWhiteSpace(i.ExternalCode) && !i.ExternalCode.Contains(' ')
+                ? i.ExternalCode
+                : i.Code;
+
         public async Task<PriceUpdateResultViewModel> UpdateAllPricesAsync(string userId)
         {
             var result = new PriceUpdateResultViewModel { UpdatedAt = DateTime.UtcNow };
@@ -68,7 +74,7 @@ namespace Homie.Areas.Finances.Services
             // --- 1. MOEX ---
             var moexTickers = instruments
                 .Where(i => i.Exchange == Exchange.MOEX)
-                .Select(i => i.ExternalCode ?? i.Code)
+                .Select(i => GetTickerKey(i))
                 .Distinct().ToList();
 
             var moexPrices = moexTickers.Any()
@@ -79,7 +85,7 @@ namespace Homie.Areas.Finances.Services
             var yahooExchanges = new[] { Exchange.NYSE, Exchange.NASDAQ, Exchange.LSE };
             var yahooTickers = instruments
                 .Where(i => yahooExchanges.Contains(i.Exchange))
-                .Select(i => i.ExternalCode ?? i.Code)
+                .Select(i => GetTickerKey(i))
                 .Distinct().ToList();
 
             var yahooPrices = yahooTickers.Any()
@@ -113,7 +119,7 @@ namespace Homie.Areas.Finances.Services
                     OldPrice = instrument.LastPrice
                 };
 
-                var tickerKey = instrument.ExternalCode ?? instrument.Code;
+                var tickerKey = GetTickerKey(instrument);
                 decimal? newPrice = null;
                 PriceSource source = PriceSource.Manual;
 
@@ -244,7 +250,7 @@ namespace Homie.Areas.Finances.Services
                 OldPrice = instrument.LastPrice
             };
 
-            var tickerKey = instrument.ExternalCode ?? instrument.Code;
+            var tickerKey = GetTickerKey(instrument);
             decimal? newPrice = null;
             PriceSource source = PriceSource.Manual;
 
@@ -291,18 +297,41 @@ namespace Homie.Areas.Finances.Services
                     instrument.LastPriceDate = DateTime.UtcNow;
                     instrument.LastPriceSource = source;
 
-                    _db.PriceHistory.Add(new PriceHistoryModel
+                    var existing = await _db.PriceHistory
+                        .FirstOrDefaultAsync(ph => ph.InstrumentId == instrument.Id
+                                                    && ph.Date.Date == DateTime.Today
+                                                    && ph.UserUid == userId);
+                    if (existing != null)
                     {
-                        InstrumentId = instrument.Id,
-                        Date = DateTime.Today,
-                        Price = newPrice.Value,
-                        CurrencyId = instrument.CurrencyId,
-                        PriceInRub = 0,
-                        Source = source,
-                        UserUid = userId
-                    });
+                        existing.Price = newPrice.Value;
+                        existing.Source = source;
+                    }
+                    else
+                    {
+                        _db.PriceHistory.Add(new PriceHistoryModel
+                        {
+                            InstrumentId = instrument.Id,
+                            Date = DateTime.Today,
+                            Price = newPrice.Value,
+                            CurrencyId = instrument.CurrencyId,
+                            PriceInRub = 0,
+                            Source = source,
+                            UserUid = userId
+                        });
+                    }
 
                     await _db.SaveChangesAsync();
+
+                    // Обновляем текущую цену на инвест-позициях этого инструмента
+                    var positions = await _db.InvestmentPositions
+                        .Where(ip => ip.InstrumentId == instrument.Id)
+                        .ToListAsync();
+                    foreach (var pos in positions)
+                    {
+                        pos.CurrentPrice = newPrice.Value;
+                    }
+                    if (positions.Any())
+                        await _db.SaveChangesAsync();
 
                     itemResult.NewPrice = newPrice.Value;
                     itemResult.Source = source;

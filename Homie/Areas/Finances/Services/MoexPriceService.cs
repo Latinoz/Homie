@@ -44,30 +44,44 @@ namespace Homie.Areas.Finances.Services
             {
                 try
                 {
-                    var url = $"{_settings.BaseUrl}/engines/{engine}/markets/{market}/boards/{board}/securities/{ticker}.json?iss.meta=off&iss.only=marketdata&marketdata.columns=SECID,LAST,PREVPRICE";
+                    var url = $"{_settings.BaseUrl}/engines/{engine}/markets/{market}/boards/{board}/securities/{ticker}.json?iss.meta=off&iss.only=marketdata,securities&marketdata.columns=SECID,LAST,PREVPRICE&securities.columns=SECID,PREVLEGALCLOSEPRICE";
                     _logger.LogDebug("MOEX запрос: {Url}", url);
 
                     var json = await _httpClient.GetStringAsync(url);
                     using var doc = JsonDocument.Parse(json);
 
+                    decimal price = 0;
+
+                    // Приоритет: LAST > PREVPRICE (из marketdata) > PREVLEGALCLOSEPRICE (из securities)
                     var marketdata = doc.RootElement.GetProperty("marketdata");
                     var data = marketdata.GetProperty("data");
 
                     if (data.GetArrayLength() > 0)
                     {
                         var row = data[0];
-                        // LAST — последняя цена, PREVPRICE — цена закрытия предыдущего дня
-                        decimal price = 0;
                         if (row[1].ValueKind == JsonValueKind.Number)
                             price = row[1].GetDecimal();
                         else if (row[2].ValueKind == JsonValueKind.Number)
                             price = row[2].GetDecimal();
+                    }
 
-                        if (price > 0)
+                    // Fallback: когда биржа закрыта, marketdata пуст — берём цену закрытия из securities
+                    if (price <= 0)
+                    {
+                        var securities = doc.RootElement.GetProperty("securities");
+                        var secData = securities.GetProperty("data");
+                        if (secData.GetArrayLength() > 0)
                         {
-                            result[ticker] = price;
-                            _logger.LogDebug("MOEX {Ticker}: {Price}", ticker, price);
+                            var secRow = secData[0];
+                            if (secRow[1].ValueKind == JsonValueKind.Number)
+                                price = secRow[1].GetDecimal();
                         }
+                    }
+
+                    if (price > 0)
+                    {
+                        result[ticker] = price;
+                        _logger.LogDebug("MOEX {Ticker}: {Price}", ticker, price);
                     }
                 }
                 catch (Exception ex)
