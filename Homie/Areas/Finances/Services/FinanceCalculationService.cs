@@ -53,7 +53,11 @@ namespace Homie.Areas.Finances.Services
             var deposits = await _db.Deposits
                 .Where(d => d.UserUid == userId)
                 .ToListAsync();
-            vm.TotalDeposits = deposits.Sum(d => d.Amount * GetRubRate(d.CurrencyId));
+            foreach (var d in deposits)
+            {
+                d.BalanceFromJournal = await GetDepositBalanceAsync(d.Id, userId);
+            }
+            vm.TotalDeposits = deposits.Sum(d => d.BalanceFromJournal * GetRubRate(d.CurrencyId));
 
             // --- Итого инвестиции ---
             var investPositions = await _db.InvestmentPositions
@@ -126,9 +130,14 @@ namespace Homie.Areas.Finances.Services
 
         public async Task<decimal> GetDepositBalanceAsync(int depositId, string userId)
         {
+            // Найти депозит, чтобы получить его AccountId
+            var deposit = await _db.Deposits
+                .FirstOrDefaultAsync(d => d.Id == depositId && d.UserUid == userId);
+            if (deposit == null) return 0;
+
             // Сумма пополнений - снятий + начисленные проценты из журнала
             var operations = await _db.FinanceOperations
-                .Where(o => o.UserUid == userId)
+                .Where(o => o.UserUid == userId && o.AccountId == deposit.AccountId)
                 .Include(o => o.OperationType)
                 .Where(o => o.OperationType.Category == OperationCategory.Deposit)
                 .ToListAsync();
@@ -191,6 +200,64 @@ namespace Homie.Areas.Finances.Services
                 DividendsFromJournal = dividends,
                 ReturnPercent = returnPct,
                 ValueInRub = quantity * position.CurrentPrice
+            };
+        }
+
+        public async Task<CryptoMetrics> GetCryptoMetricsAsync(int assetId, string userId)
+        {
+            var asset = await _db.CryptoAssets
+                .Include(ca => ca.Currency)
+                .FirstOrDefaultAsync(ca => ca.Id == assetId && ca.UserUid == userId);
+            if (asset == null) return new CryptoMetrics();
+
+            var operations = await _db.FinanceOperations
+                .Where(o => o.UserUid == userId && o.InstrumentId == asset.InstrumentId)
+                .Include(o => o.OperationType)
+                .Where(o => o.OperationType.Category == OperationCategory.Crypto)
+                .ToListAsync();
+
+            var buyOps = operations.Where(o => o.OperationType.Name == "Покупка криптовалюты").ToList();
+            var sellOps = operations.Where(o => o.OperationType.Name == "Продажа криптовалюты").ToList();
+
+            var totalBought = buyOps.Sum(o => o.Quantity ?? 0);
+            var totalSold = sellOps.Sum(o => o.Quantity ?? 0);
+            var quantity = totalBought - totalSold;
+
+            var valueInCurrency = quantity * asset.CurrentPrice;
+
+            // Получить курс валюты актива к RUB
+            var currencies = await _db.Currencies.Where(c => c.UserUid == userId).ToListAsync();
+            var isBase = asset.Currency != null && asset.Currency.IsBase;
+            decimal rubRate = 1m;
+            if (!isBase)
+            {
+                var rate = await _db.ExchangeRates
+                    .Where(r => r.CurrencyId == asset.CurrencyId && r.UserUid == userId)
+                    .OrderByDescending(r => r.Date)
+                    .FirstOrDefaultAsync();
+                rubRate = rate?.Rate ?? 1m;
+            }
+
+            // Для ValueInUsd: найти USD курс
+            var usdCurrency = currencies.FirstOrDefault(c => c.Code == "USD");
+            decimal usdRate = 1m;
+            if (usdCurrency != null && !usdCurrency.IsBase)
+            {
+                var usdExRate = await _db.ExchangeRates
+                    .Where(r => r.CurrencyId == usdCurrency.Id && r.UserUid == userId)
+                    .OrderByDescending(r => r.Date)
+                    .FirstOrDefaultAsync();
+                usdRate = usdExRate?.Rate ?? 1m;
+            }
+
+            var valueInRub = valueInCurrency * rubRate;
+            var valueInUsd = usdRate > 0 ? valueInRub / usdRate : 0;
+
+            return new CryptoMetrics
+            {
+                QuantityFromJournal = quantity,
+                ValueInUsd = valueInUsd,
+                ValueInRub = valueInRub
             };
         }
 
