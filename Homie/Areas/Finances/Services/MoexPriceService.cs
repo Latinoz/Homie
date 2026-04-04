@@ -32,7 +32,97 @@ namespace Homie.Areas.Finances.Services
 
         public async Task<Dictionary<string, decimal>> FetchBondPricesAsync(IEnumerable<string> tickers)
         {
-            return await FetchPricesFromBoard("stock", "bonds", "TQCB", tickers);
+            // Облигации: ищем по бордам TQOB (ОФЗ) и TQCB (корп.), конвертируем % → абсолютная цена
+            var result = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
+            var remaining = tickers.ToList();
+
+            // Сначала TQOB (гос. облигации — ОФЗ)
+            var fromTqob = await FetchBondPricesFromBoard("TQOB", remaining);
+            foreach (var kv in fromTqob) result[kv.Key] = kv.Value;
+
+            remaining = remaining.Where(t => !result.ContainsKey(t)).ToList();
+
+            // Затем TQCB (корпоративные облигации)
+            if (remaining.Any())
+            {
+                var fromTqcb = await FetchBondPricesFromBoard("TQCB", remaining);
+                foreach (var kv in fromTqcb) result[kv.Key] = kv.Value;
+            }
+
+            _logger.LogInformation("MOEX Bonds: загружено {Count} цен", result.Count);
+            return result;
+        }
+
+        public async Task<Dictionary<string, decimal>> FetchEtfPricesAsync(IEnumerable<string> tickers)
+        {
+            return await FetchPricesFromBoard("stock", "shares", "TQTF", tickers);
+        }
+
+        /// <summary>Загрузка цен облигаций с конвертацией из % номинала в абсолютную цену</summary>
+        private async Task<Dictionary<string, decimal>> FetchBondPricesFromBoard(
+            string board, IEnumerable<string> tickers)
+        {
+            var result = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var ticker in tickers)
+            {
+                try
+                {
+                    var url = $"{_settings.BaseUrl}/engines/stock/markets/bonds/boards/{board}/securities/{ticker}.json" +
+                              "?iss.meta=off&iss.only=marketdata,securities" +
+                              "&marketdata.columns=SECID,LAST,PREVPRICE" +
+                              "&securities.columns=SECID,PREVLEGALCLOSEPRICE,FACEVALUE";
+                    _logger.LogDebug("MOEX bond запрос: {Url}", url);
+
+                    var json = await _httpClient.GetStringAsync(url);
+                    using var doc = JsonDocument.Parse(json);
+
+                    decimal pricePercent = 0;
+                    decimal faceValue = 1000m; // По умолчанию для большинства рос. облигаций
+
+                    // Приоритет: LAST > PREVPRICE (из marketdata) > PREVLEGALCLOSEPRICE (из securities)
+                    var marketdata = doc.RootElement.GetProperty("marketdata");
+                    var data = marketdata.GetProperty("data");
+
+                    if (data.GetArrayLength() > 0)
+                    {
+                        var row = data[0];
+                        if (row[1].ValueKind == JsonValueKind.Number)
+                            pricePercent = row[1].GetDecimal();
+                        else if (row[2].ValueKind == JsonValueKind.Number)
+                            pricePercent = row[2].GetDecimal();
+                    }
+
+                    // Извлекаем FACEVALUE и fallback-цену из securities
+                    var securities = doc.RootElement.GetProperty("securities");
+                    var secData = securities.GetProperty("data");
+                    if (secData.GetArrayLength() > 0)
+                    {
+                        var secRow = secData[0];
+                        // FACEVALUE — 3-й столбец (индекс 2)
+                        if (secRow[2].ValueKind == JsonValueKind.Number)
+                            faceValue = secRow[2].GetDecimal();
+
+                        // Fallback: PREVLEGALCLOSEPRICE — 2-й столбец (индекс 1)
+                        if (pricePercent <= 0 && secRow[1].ValueKind == JsonValueKind.Number)
+                            pricePercent = secRow[1].GetDecimal();
+                    }
+
+                    if (pricePercent > 0)
+                    {
+                        var absolutePrice = pricePercent * faceValue / 100m;
+                        result[ticker] = absolutePrice;
+                        _logger.LogDebug("MOEX Bond {Ticker}: {Percent}% × {Face} = {Absolute}",
+                            ticker, pricePercent, faceValue, absolutePrice);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Ошибка загрузки цены облигации MOEX для {Ticker}", ticker);
+                }
+            }
+
+            return result;
         }
 
         private async Task<Dictionary<string, decimal>> FetchPricesFromBoard(

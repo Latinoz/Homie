@@ -71,15 +71,41 @@ namespace Homie.Areas.Finances.Services
                 .Where(pm => pm.UserUid == userId && pm.IsAutoUpdateEnabled)
                 .ToListAsync();
 
-            // --- 1. MOEX ---
-            var moexTickers = instruments
-                .Where(i => i.Exchange == Exchange.MOEX)
+            // --- 1. MOEX (раздельно: акции, облигации, ETF) ---
+            var moexInstruments = instruments.Where(i => i.Exchange == Exchange.MOEX).ToList();
+
+            var moexStockTickers = moexInstruments
+                .Where(i => i.Type == InstrumentType.Stock)
                 .Select(i => GetTickerKey(i))
                 .Distinct().ToList();
 
-            var moexPrices = moexTickers.Any()
-                ? await _moex.FetchSharePricesAsync(moexTickers)
+            var moexBondTickers = moexInstruments
+                .Where(i => i.Type == InstrumentType.Bond)
+                .Select(i => GetTickerKey(i))
+                .Distinct().ToList();
+
+            var moexEtfTickers = moexInstruments
+                .Where(i => i.Type == InstrumentType.ETF)
+                .Select(i => GetTickerKey(i))
+                .Distinct().ToList();
+
+            var moexStockPrices = moexStockTickers.Any()
+                ? await _moex.FetchSharePricesAsync(moexStockTickers)
                 : new Dictionary<string, decimal>();
+
+            var moexBondPrices = moexBondTickers.Any()
+                ? await _moex.FetchBondPricesAsync(moexBondTickers)
+                : new Dictionary<string, decimal>();
+
+            var moexEtfPrices = moexEtfTickers.Any()
+                ? await _moex.FetchEtfPricesAsync(moexEtfTickers)
+                : new Dictionary<string, decimal>();
+
+            // Объединяем все MOEX-цены
+            var moexPrices = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
+            foreach (var kv in moexStockPrices) moexPrices[kv.Key] = kv.Value;
+            foreach (var kv in moexBondPrices) moexPrices[kv.Key] = kv.Value;
+            foreach (var kv in moexEtfPrices) moexPrices[kv.Key] = kv.Value;
 
             // --- 2. Yahoo Finance ---
             var yahooExchanges = new[] { Exchange.NYSE, Exchange.NASDAQ, Exchange.LSE };
@@ -259,7 +285,14 @@ namespace Homie.Areas.Finances.Services
                 switch (instrument.Exchange)
                 {
                     case Exchange.MOEX:
-                        var moexResult = await _moex.FetchSharePricesAsync(new[] { tickerKey });
+                        Dictionary<string, decimal> moexResult;
+                        if (instrument.Type == InstrumentType.Bond)
+                            moexResult = await _moex.FetchBondPricesAsync(new[] { tickerKey });
+                        else if (instrument.Type == InstrumentType.ETF)
+                            moexResult = await _moex.FetchEtfPricesAsync(new[] { tickerKey });
+                        else
+                            moexResult = await _moex.FetchSharePricesAsync(new[] { tickerKey });
+
                         if (moexResult.TryGetValue(tickerKey, out var mp))
                         {
                             newPrice = mp;
