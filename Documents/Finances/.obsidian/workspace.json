@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "user-guide.md",
+                "file": "features.md",
                 "mode": "preview",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "user-guide"
+              "title": "features"
             }
           }
         ]
