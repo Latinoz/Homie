@@ -53,7 +53,11 @@ namespace Homie.Areas.Finances.Services
             var deposits = await _db.Deposits
                 .Where(d => d.UserUid == userId)
                 .ToListAsync();
-            vm.TotalDeposits = deposits.Sum(d => d.Amount * GetRubRate(d.CurrencyId));
+            foreach (var d in deposits)
+            {
+                d.BalanceFromJournal = await GetDepositBalanceAsync(d.Id, userId);
+            }
+            vm.TotalDeposits = deposits.Sum(d => d.BalanceFromJournal * GetRubRate(d.CurrencyId));
 
             // --- Итого инвестиции ---
             var investPositions = await _db.InvestmentPositions
@@ -126,9 +130,14 @@ namespace Homie.Areas.Finances.Services
 
         public async Task<decimal> GetDepositBalanceAsync(int depositId, string userId)
         {
+            // Найти депозит, чтобы получить его AccountId
+            var deposit = await _db.Deposits
+                .FirstOrDefaultAsync(d => d.Id == depositId && d.UserUid == userId);
+            if (deposit == null) return 0;
+
             // Сумма пополнений - снятий + начисленные проценты из журнала
             var operations = await _db.FinanceOperations
-                .Where(o => o.UserUid == userId)
+                .Where(o => o.UserUid == userId && o.AccountId == deposit.AccountId)
                 .Include(o => o.OperationType)
                 .Where(o => o.OperationType.Category == OperationCategory.Deposit)
                 .ToListAsync();

@@ -44,7 +44,7 @@
                     <td><a asp-action="Details" asp-route-id="@d.Id">@d.Name</a></td>
                     <td>@d.Account?.Name</td>
                     <td>@d.Currency?.Code</td>
-                    <td>@d.Amount.ToString("N2")</td>
+                    <td>@d.BalanceFromJournal.ToString("N2")</td>
                     <td>@d.InterestRate.ToString("N2")</td>
                     <td>@d.OpenDate.ToString("dd.MM.yyyy")</td>
                     <td>@d.EndDate?.ToString("dd.MM.yyyy")</td>

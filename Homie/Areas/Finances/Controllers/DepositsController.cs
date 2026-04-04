@@ -56,6 +56,11 @@ namespace Homie.Areas.Finances.Controllers
             var count = await query.CountAsync();
             var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
+            foreach (var d in items)
+            {
+                d.BalanceFromJournal = await _calcService.GetDepositBalanceAsync(d.Id, userId);
+            }
+
             var vm = new DepositListViewModel
             {
                 Deposits = items,
