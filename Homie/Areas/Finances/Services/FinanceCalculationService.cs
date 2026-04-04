@@ -135,14 +135,14 @@ namespace Homie.Areas.Finances.Services
                 .FirstOrDefaultAsync(d => d.Id == depositId && d.UserUid == userId);
             if (deposit == null) return 0;
 
-            // Сумма пополнений - снятий + начисленные проценты из журнала
+            // Начальная сумма + операции из журнала (пополнения, снятия, проценты)
             var operations = await _db.FinanceOperations
                 .Where(o => o.UserUid == userId && o.AccountId == deposit.AccountId)
                 .Include(o => o.OperationType)
                 .Where(o => o.OperationType.Category == OperationCategory.Deposit)
                 .ToListAsync();
 
-            decimal balance = 0;
+            decimal balance = deposit.Amount;
             foreach (var op in operations)
             {
                 switch (op.OperationType.Name)
