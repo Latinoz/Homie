@@ -210,7 +210,9 @@ namespace Homie.Areas.Series.Controllers
                     HoldPlay = m.HoldPlay,
                     Favorite = m.Favorite,
                     UserUid = m.UserUid,
-                    ImgBT = m.ImgBT
+                    ImgBT = m.ImgBT,
+                    Comment = m.Comment,
+                    LastSeasonEpisodeUpdated = m.LastSeasonEpisodeUpdated
                 })
                 .Skip((page - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
 
@@ -247,7 +249,9 @@ namespace Homie.Areas.Series.Controllers
                     HoldPlay = m.HoldPlay,
                     Favorite = m.Favorite,
                     UserUid = m.UserUid,
-                    ImgBT = m.ImgBT
+                    ImgBT = m.ImgBT,
+                    Comment = m.Comment,
+                    LastSeasonEpisodeUpdated = m.LastSeasonEpisodeUpdated
                 })
                 .Skip((page - 1) * pageSize).Take(pageSize).AsNoTracking().ToListAsync();
 
@@ -478,6 +482,17 @@ namespace Homie.Areas.Series.Controllers
 
             movie.UserUid = userId;
 
+            // Проверяем, изменились ли Season/Episode для обновления LastSeasonEpisodeUpdated
+            var current = await db.MoviesEF.AsNoTracking().FirstOrDefaultAsync(m => m.Id == movie.Id && m.UserUid == userId);
+            if (current != null && (current.Season != movie.Season || current.Episode != movie.Episode))
+            {
+                movie.LastSeasonEpisodeUpdated = DateTime.UtcNow;
+            }
+            else if (current != null)
+            {
+                movie.LastSeasonEpisodeUpdated = current.LastSeasonEpisodeUpdated;
+            }
+
             // Проверка флага удаления изображения, пришедшего из формы
             var deleteFlag = Request.Form["DeleteImage"].FirstOrDefault();
             var isDelete = !string.IsNullOrEmpty(deleteFlag) && deleteFlag.ToLower() == "true";
@@ -568,10 +583,14 @@ namespace Homie.Areas.Series.Controllers
 
             if (pvm.tempSeason != null)
             {
+                if (movies.Season != (int)pvm.tempSeason)
+                    movies.LastSeasonEpisodeUpdated = DateTime.UtcNow;
                 movies.Season = (int)pvm.tempSeason;
             }
             if (pvm.tempEpisode != null)
             {
+                if (movies.Episode != (int)pvm.tempEpisode)
+                    movies.LastSeasonEpisodeUpdated = DateTime.UtcNow;
                 movies.Episode = (int)pvm.tempEpisode;
             }
 
@@ -717,9 +736,34 @@ namespace Homie.Areas.Series.Controllers
 
             movie.Season = request.Season;
             movie.Episode = request.Episode;
+            movie.LastSeasonEpisodeUpdated = DateTime.UtcNow;
             await db.SaveChangesAsync();
 
-            return Json(new { success = true, season = movie.Season, episode = movie.Episode });
+            return Json(new { success = true, season = movie.Season, episode = movie.Episode, lastUpdated = movie.LastSeasonEpisodeUpdated.Value.ToString("dd.MM.yyyy HH:mm") });
+        }
+
+        /// <summary>
+        /// AJAX endpoint для обновления комментария из модального окна
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> UpdateComment([FromBody] UpdateCommentRequest request)
+        {
+            if (request == null)
+                return BadRequest(new { success = false, message = "Неверный запрос" });
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == request.Id && p.UserUid == userId);
+
+            if (movie == null)
+                return NotFound(new { success = false, message = "Сериал не найден" });
+
+            if (request.Comment != null && request.Comment.Length > 255)
+                return BadRequest(new { success = false, message = "Комментарий не может превышать 255 символов" });
+
+            movie.Comment = request.Comment;
+            await db.SaveChangesAsync();
+
+            return Json(new { success = true, comment = movie.Comment });
         }
 
         /// <summary>

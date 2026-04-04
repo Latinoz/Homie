@@ -27,5 +27,11 @@ namespace Homie.Areas.Series.Models
 
         public byte[] Avatar { get; set; }
 
+        [Column(TypeName = "varchar(255)")]
+        [MaxLength(255)]
+        public string Comment { get; set; }
+
+        public DateTime? LastSeasonEpisodeUpdated { get; set; }
+
     }
 }

@@ -148,6 +148,9 @@
             <th>
                 <center>Комментарии</center>
             </th>
+            <th>
+                <center>Обновлено</center>
+            </th>
         </tr>
         @foreach (var p in Model.Series)
         {
@@ -188,7 +191,29 @@
                     </center>
                 </td>
 
-                <td>                    
+                <td>
+                    <center>
+                        <a href="#" class="btn-comment" data-id="@p.Id" data-comment="@p.Comment" title="Редактировать комментарий">
+                            @if (!string.IsNullOrEmpty(p.Comment))
+                            {
+                                @(p.Comment.Length > 50 ? p.Comment.Substring(0, 50) + "..." : p.Comment)
+                            }
+                            else
+                            {
+                                <i class="fas fa-comment" style="color: #999;"></i>
+                            }
+                        </a>
+                    </center>
+                </td>
+                <td>
+                    <center>
+                        <span class="last-updated" data-id="@p.Id">
+                        @if (p.LastSeasonEpisodeUpdated.HasValue)
+                        {
+                            @p.LastSeasonEpisodeUpdated.Value.ToString("dd.MM.yyyy HH:mm")
+                        }
+                        </span>
+                    </center>
                 </td>
             </tr>
         }
@@ -214,6 +239,31 @@
     </a>
 }
 <p></p>
+
+<!-- Модальное окно: Комментарий -->
+<div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="commentModalLabel">Комментарий</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="cm-movie-id" />
+                <div class="form-group">
+                    <textarea id="cm-comment" class="form-control" rows="4" maxlength="255" placeholder="Введите комментарий (макс. 255 символов)..."></textarea>
+                    <small class="form-text text-muted"><span id="cm-char-count">0</span> / 255</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="cm-save">Сохранить</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Отмена</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Модальное окно: Сезон / Серия -->
 <div class="modal fade" id="seasonEpisodeModal" tabindex="-1" role="dialog" aria-labelledby="seasonEpisodeModalLabel" aria-hidden="true">
@@ -317,7 +367,60 @@
                         var links = $('.btn-season-episode[data-id="' + id + '"]');
                         $(links[0]).text(resp.season);
                         $(links[1]).text(resp.episode);
+                        // Обновляем дату последнего изменения
+                        if (resp.lastUpdated) {
+                            $('.last-updated[data-id="' + id + '"]').text(resp.lastUpdated);
+                        }
                         $('#seasonEpisodeModal').modal('hide');
+                    } else {
+                        alert('Ошибка сохранения');
+                    }
+                },
+                error: function () {
+                    alert('Ошибка сохранения');
+                }
+            });
+        });
+
+        // === Комментарий ===
+        // Открытие модального окна при клике на комментарий
+        $('.btn-comment').on('click', function (e) {
+            e.preventDefault();
+            var id = $(this).data('id');
+            var comment = $(this).data('comment') || '';
+            $('#cm-movie-id').val(id);
+            $('#cm-comment').val(comment);
+            $('#cm-char-count').text(comment.length);
+            $('#commentModal').modal('show');
+        });
+
+        // Счётчик символов
+        $('#cm-comment').on('input', function () {
+            $('#cm-char-count').text($(this).val().length);
+        });
+
+        // Сохранение комментария
+        $('#cm-save').on('click', function () {
+            var id = parseInt($('#cm-movie-id').val());
+            var comment = $('#cm-comment').val();
+
+            var token = $('input[name="__RequestVerificationToken"]').val();
+            $.ajax({
+                url: '@Url.Action("UpdateComment", "Serie", new { area = "Series" })',
+                type: 'POST',
+                contentType: 'application/json',
+                headers: { 'RequestVerificationToken': token },
+                data: JSON.stringify({ id: id, comment: comment }),
+                success: function (resp) {
+                    if (resp.success) {
+                        var link = $('.btn-comment[data-id="' + id + '"]');
+                        link.data('comment', resp.comment);
+                        if (resp.comment && resp.comment.length > 0) {
+                            link.html(resp.comment.length > 50 ? resp.comment.substring(0, 50) + '...' : resp.comment);
+                        } else {
+                            link.html('<i class="fas fa-comment" style="color: #999;"></i>');
+                        }
+                        $('#commentModal').modal('hide');
                     } else {
                         alert('Ошибка сохранения');
                     }

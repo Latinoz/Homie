@@ -14,5 +14,7 @@ namespace Homie.Areas.Series.Models
         public bool Favorite { get; set; }
         public string UserUid { get; set; }
         public string ImgBT { get; set; }
+        public string Comment { get; set; }
+        public DateTime? LastSeasonEpisodeUpdated { get; set; }
     }
 }
