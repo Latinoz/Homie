@@ -172,8 +172,8 @@
                         </center>
                     </p>
                 </td>
-                <td><center>@p.Season</center></td>
-                <td><center>@p.Episode</center></td>
+                <td><center><a href="#" class="btn-season-episode" data-id="@p.Id" data-season="@p.Season" data-episode="@p.Episode" data-name="@p.Name" title="Изменить сезон/серию">@p.Season</a></center></td>
+                <td><center><a href="#" class="btn-season-episode" data-id="@p.Id" data-season="@p.Season" data-episode="@p.Episode" data-name="@p.Name" title="Изменить сезон/серию">@p.Episode</a></center></td>
                 <td><center>@p.Category</center></td>
                 <td>
                     <center>
@@ -214,4 +214,119 @@
     </a>
 }
 <p></p>
+
+<!-- Модальное окно: Сезон / Серия -->
+<div class="modal fade" id="seasonEpisodeModal" tabindex="-1" role="dialog" aria-labelledby="seasonEpisodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="seasonEpisodeModalLabel">Сезон / Серия</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="se-movie-id" />
+                <div class="row">
+                    <div class="col-6 text-center">
+                        <label><strong>Сезон</strong></label>
+                        <div>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="se-season-up"><i class="fas fa-caret-up fa-lg"></i></button>
+                        </div>
+                        <input type="number" id="se-season" class="form-control text-center" min="0" style="max-width:80px; margin:5px auto;" />
+                        <div>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="se-season-down"><i class="fas fa-caret-down fa-lg"></i></button>
+                        </div>
+                    </div>
+                    <div class="col-6 text-center">
+                        <label><strong>Серия</strong></label>
+                        <div>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="se-episode-up"><i class="fas fa-caret-up fa-lg"></i></button>
+                        </div>
+                        <input type="number" id="se-episode" class="form-control text-center" min="0" style="max-width:80px; margin:5px auto;" />
+                        <div>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="se-episode-down"><i class="fas fa-caret-down fa-lg"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="se-save">Сохранить</button>
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Отмена</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Открытие модального окна при клике на Сезон или Серию
+        $('.btn-season-episode').on('click', function (e) {
+            e.preventDefault();
+            var id = $(this).data('id');
+            var season = $(this).data('season');
+            var episode = $(this).data('episode');
+            $('#se-movie-id').val(id);
+            $('#se-season').val(season);
+            $('#se-episode').val(episode);
+            $('#seasonEpisodeModal').modal('show');
+        });
+
+        // Кнопки +/- для Сезона
+        $('#se-season-up').on('click', function () {
+            var val = parseInt($('#se-season').val()) || 0;
+            $('#se-season').val(val + 1);
+        });
+        $('#se-season-down').on('click', function () {
+            var val = parseInt($('#se-season').val()) || 0;
+            if (val > 0) $('#se-season').val(val - 1);
+        });
+
+        // Кнопки +/- для Серии
+        $('#se-episode-up').on('click', function () {
+            var val = parseInt($('#se-episode').val()) || 0;
+            $('#se-episode').val(val + 1);
+        });
+        $('#se-episode-down').on('click', function () {
+            var val = parseInt($('#se-episode').val()) || 0;
+            if (val > 0) $('#se-episode').val(val - 1);
+        });
+
+        // Сохранение
+        $('#se-save').on('click', function () {
+            var id = parseInt($('#se-movie-id').val());
+            var season = parseInt($('#se-season').val()) || 0;
+            var episode = parseInt($('#se-episode').val()) || 0;
+
+            var token = $('input[name="__RequestVerificationToken"]').val();
+            $.ajax({
+                url: '@Url.Action("UpdateSeasonEpisode", "Serie", new { area = "Series" })',
+                type: 'POST',
+                contentType: 'application/json',
+                headers: { 'RequestVerificationToken': token },
+                data: JSON.stringify({ id: id, season: season, episode: episode }),
+                success: function (resp) {
+                    if (resp.success) {
+                        // Обновляем значения в таблице без перезагрузки
+                        $('.btn-season-episode[data-id="' + id + '"]').each(function () {
+                            $(this).data('season', resp.season);
+                            $(this).data('episode', resp.episode);
+                        });
+                        // Обновляем отображаемый текст
+                        var links = $('.btn-season-episode[data-id="' + id + '"]');
+                        $(links[0]).text(resp.season);
+                        $(links[1]).text(resp.episode);
+                        $('#seasonEpisodeModal').modal('hide');
+                    } else {
+                        alert('Ошибка сохранения');
+                    }
+                },
+                error: function () {
+                    alert('Ошибка сохранения');
+                }
+            });
+        });
+    });
+</script>
 

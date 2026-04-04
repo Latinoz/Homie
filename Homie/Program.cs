@@ -108,6 +108,12 @@ namespace Homie
                 options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute());
             });
 
+            // Настройка имени заголовка для AJAX-передачи antiforgery-токена
+            builder.Services.AddAntiforgery(options =>
+            {
+                options.HeaderName = "RequestVerificationToken";
+            });
+
             // Настройка лимитов для загрузки файлов
             builder.Services.Configure<IISServerOptions>(options =>
             {

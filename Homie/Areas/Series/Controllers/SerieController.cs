@@ -698,6 +698,31 @@ namespace Homie.Areas.Series.Controllers
         }
 
         /// <summary>
+        /// AJAX endpoint для обновления Сезона и Серии из модального окна
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> UpdateSeasonEpisode([FromBody] UpdateSeasonEpisodeRequest request)
+        {
+            if (request == null)
+                return BadRequest(new { success = false, message = "Неверный запрос" });
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var movie = await db.MoviesEF.FirstOrDefaultAsync(p => p.Id == request.Id && p.UserUid == userId);
+
+            if (movie == null)
+                return NotFound(new { success = false, message = "Сериал не найден" });
+
+            if (request.Season < 0 || request.Episode < 0)
+                return BadRequest(new { success = false, message = "Значения не могут быть отрицательными" });
+
+            movie.Season = request.Season;
+            movie.Episode = request.Episode;
+            await db.SaveChangesAsync();
+
+            return Json(new { success = true, season = movie.Season, episode = movie.Episode });
+        }
+
+        /// <summary>
         /// API endpoint для автодополнения поиска сериалов
         /// </summary>
         [HttpGet]
