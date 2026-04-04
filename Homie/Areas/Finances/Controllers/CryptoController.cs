@@ -148,6 +148,11 @@ namespace Homie.Areas.Finances.Controllers
                 .FirstOrDefaultAsync(ca => ca.Id == id && ca.UserUid == userId);
             if (asset == null) return NotFound();
 
+            var metrics = await _calcService.GetCryptoMetricsAsync(id.Value, userId);
+            asset.QuantityFromJournal = metrics.QuantityFromJournal;
+            asset.ValueInUsd = metrics.ValueInUsd;
+            asset.ValueInRub = metrics.ValueInRub;
+
             ViewBag.PriceChartJson = await _calcService.GetInstrumentPriceChartJsonAsync(
                 asset.InstrumentId, userId);
             return View(asset);

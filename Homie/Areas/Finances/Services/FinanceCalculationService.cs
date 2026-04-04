@@ -203,6 +203,64 @@ namespace Homie.Areas.Finances.Services
             };
         }
 
+        public async Task<CryptoMetrics> GetCryptoMetricsAsync(int assetId, string userId)
+        {
+            var asset = await _db.CryptoAssets
+                .Include(ca => ca.Currency)
+                .FirstOrDefaultAsync(ca => ca.Id == assetId && ca.UserUid == userId);
+            if (asset == null) return new CryptoMetrics();
+
+            var operations = await _db.FinanceOperations
+                .Where(o => o.UserUid == userId && o.InstrumentId == asset.InstrumentId)
+                .Include(o => o.OperationType)
+                .Where(o => o.OperationType.Category == OperationCategory.Crypto)
+                .ToListAsync();
+
+            var buyOps = operations.Where(o => o.OperationType.Name == "Покупка криптовалюты").ToList();
+            var sellOps = operations.Where(o => o.OperationType.Name == "Продажа криптовалюты").ToList();
+
+            var totalBought = buyOps.Sum(o => o.Quantity ?? 0);
+            var totalSold = sellOps.Sum(o => o.Quantity ?? 0);
+            var quantity = totalBought - totalSold;
+
+            var valueInCurrency = quantity * asset.CurrentPrice;
+
+            // Получить курс валюты актива к RUB
+            var currencies = await _db.Currencies.Where(c => c.UserUid == userId).ToListAsync();
+            var isBase = asset.Currency != null && asset.Currency.IsBase;
+            decimal rubRate = 1m;
+            if (!isBase)
+            {
+                var rate = await _db.ExchangeRates
+                    .Where(r => r.CurrencyId == asset.CurrencyId && r.UserUid == userId)
+                    .OrderByDescending(r => r.Date)
+                    .FirstOrDefaultAsync();
+                rubRate = rate?.Rate ?? 1m;
+            }
+
+            // Для ValueInUsd: найти USD курс
+            var usdCurrency = currencies.FirstOrDefault(c => c.Code == "USD");
+            decimal usdRate = 1m;
+            if (usdCurrency != null && !usdCurrency.IsBase)
+            {
+                var usdExRate = await _db.ExchangeRates
+                    .Where(r => r.CurrencyId == usdCurrency.Id && r.UserUid == userId)
+                    .OrderByDescending(r => r.Date)
+                    .FirstOrDefaultAsync();
+                usdRate = usdExRate?.Rate ?? 1m;
+            }
+
+            var valueInRub = valueInCurrency * rubRate;
+            var valueInUsd = usdRate > 0 ? valueInRub / usdRate : 0;
+
+            return new CryptoMetrics
+            {
+                QuantityFromJournal = quantity,
+                ValueInUsd = valueInUsd,
+                ValueInRub = valueInRub
+            };
+        }
+
         public async Task<string> GetPortfolioHistoryJsonAsync(string userId, int months = 12)
         {
             var startDate = DateTime.Today.AddMonths(-months);
