@@ -14,6 +14,7 @@
 
 <form asp-action="Edit" asp-route-id="@Model.Id">
     <input type="hidden" asp-for="Id" />
+    <div asp-validation-summary="All" class="text-danger"></div>
     <div class="form-group">
         <label asp-for="Date" class="control-label">Дата</label>
         <input asp-for="Date" type="date" class="form-control number-input-width" />
@@ -65,3 +66,60 @@
         <a asp-action="Index" class="btn btn-danger">Назад</a>
     </div>
 </form>
+
+<script>
+(function () {
+    var opTypes = @Html.Raw(ViewBag.OperationTypesJson);
+    var instruments = @Html.Raw(ViewBag.InstrumentsJson);
+
+    var categoryToTypes = { 1: [0,1,2], 2: [3], 3: [4] };
+
+    var opTypeMap = {};
+    opTypes.forEach(function(ot) { opTypeMap[ot.Id] = ot.Category; });
+    var instrMap = {};
+    instruments.forEach(function(i) { instrMap[i.Id] = i.Type; });
+
+    var opTypeSelect = document.getElementById('OperationTypeId');
+    var instrSelect = document.getElementById('InstrumentId');
+    var instrGroup = instrSelect.closest('.form-group');
+
+    var allOptions = Array.from(instrSelect.options);
+    var currentValue = instrSelect.value;
+
+    function filterInstruments() {
+        var opTypeId = parseInt(opTypeSelect.value);
+        var category = opTypeMap[opTypeId];
+        var allowedTypes = categoryToTypes[category];
+
+        instrSelect.innerHTML = '';
+        var emptyOpt = document.createElement('option');
+        emptyOpt.value = '';
+        emptyOpt.textContent = '-- Не выбран --';
+        instrSelect.appendChild(emptyOpt);
+
+        if (!allowedTypes) {
+            instrGroup.style.display = 'none';
+            instrSelect.value = '';
+            return;
+        }
+
+        instrGroup.style.display = '';
+        allOptions.forEach(function(opt) {
+            if (opt.value === '') return;
+            var iType = instrMap[parseInt(opt.value)];
+            if (allowedTypes.indexOf(iType) !== -1) {
+                instrSelect.appendChild(opt.cloneNode(true));
+            }
+        });
+
+        // Восстановить текущее значение, если оно в списке
+        if (currentValue) {
+            instrSelect.value = currentValue;
+            currentValue = null;
+        }
+    }
+
+    opTypeSelect.addEventListener('change', filterInstruments);
+    filterInstruments();
+})();
+</script>

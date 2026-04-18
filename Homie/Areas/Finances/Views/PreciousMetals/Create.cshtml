@@ -46,6 +46,12 @@
         <input asp-for="PurchaseDate" type="date" class="form-control number-input-width" />
     </div>
     <div class="form-group">
+        <label asp-for="InstrumentId" class="control-label">Инструмент (связка с журналом операций)</label>
+        <select asp-for="InstrumentId" asp-items="@(new SelectList(ViewBag.Instruments, "Id", "Name"))" class="form-control text-input-width">
+            <option value="">-- Не выбран --</option>
+        </select>
+    </div>
+    <div class="form-group">
         <label asp-for="Notes" class="control-label">Комментарий</label>
         <textarea asp-for="Notes" class="form-control text-input-width" rows="2"></textarea>
     </div>

@@ -51,6 +51,10 @@ namespace Homie.Areas.Finances.Models
         [Display(Name = "Дата ручной корректировки")]
         public DateTime? LastManualOverrideDate { get; set; }
 
+        [Display(Name = "Инструмент")]
+        public int? InstrumentId { get; set; }
+        public InstrumentModel Instrument { get; set; }
+
         [Column(TypeName = "varchar(500)")]
         [Display(Name = "Заметки")]
         public string Notes { get; set; }

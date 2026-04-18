@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,11 +30,35 @@ namespace Homie.Areas.Finances.Controllers
         private static readonly string[] SecuritiesOperationNames =
             { "Покупка ценных бумаг", "Продажа ценных бумаг" };
 
+        private static readonly string[] PreciousMetalOperationNames =
+            { "Покупка драгметалла", "Продажа драгметалла" };
+
         private async Task<bool> IsSecuritiesOperationAsync(OperationModel op)
         {
             var opType = await _db.OperationTypes.FindAsync(op.OperationTypeId);
             op.OperationType = opType;
             return opType != null && SecuritiesOperationNames.Contains(opType.Name);
+        }
+
+        private async Task<bool> IsPreciousMetalOperationAsync(OperationModel op)
+        {
+            var opType = op.OperationType ?? await _db.OperationTypes.FindAsync(op.OperationTypeId);
+            op.OperationType = opType;
+            return opType != null && PreciousMetalOperationNames.Contains(opType.Name);
+        }
+
+        private void PopulateOperationViewBag(string userId)
+        {
+            var operationTypes = _db.OperationTypes.ToList();
+            var instruments = _db.Instruments.Where(i => i.UserUid == userId).ToList();
+            ViewBag.OperationTypes = operationTypes;
+            ViewBag.Accounts = _db.FinanceAccounts.Where(a => a.UserUid == userId).ToList();
+            ViewBag.Instruments = instruments;
+            ViewBag.Currencies = _db.Currencies.Where(c => c.UserUid == userId).ToList();
+            ViewBag.OperationTypesJson = JsonSerializer.Serialize(
+                operationTypes.Select(ot => new { ot.Id, Category = (int)ot.Category }));
+            ViewBag.InstrumentsJson = JsonSerializer.Serialize(
+                instruments.Select(i => new { i.Id, Type = (int)i.Type }));
         }
 
         [Breadcrumb("Журнал операций", FromAction = "Index", FromController = typeof(DashboardController), AreaName = "Finances")]
@@ -92,10 +117,7 @@ namespace Homie.Areas.Finances.Controllers
         public IActionResult Create()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            ViewBag.OperationTypes = _db.OperationTypes.ToList();
-            ViewBag.Accounts = _db.FinanceAccounts.Where(a => a.UserUid == userId).ToList();
-            ViewBag.Instruments = _db.Instruments.Where(i => i.UserUid == userId).ToList();
-            ViewBag.Currencies = _db.Currencies.Where(c => c.UserUid == userId).ToList();
+            PopulateOperationViewBag(userId);
             return View();
         }
 
@@ -103,12 +125,21 @@ namespace Homie.Areas.Finances.Controllers
         public async Task<IActionResult> Create(OperationModel operation)
         {
             operation.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (operation.AccountId == 0 || operation.OperationTypeId == 0 || operation.CurrencyId == 0)
+            {
+                ModelState.AddModelError("", "Заполните обязательные поля: Тип операции, Счёт и Валюта.");
+                PopulateOperationViewBag(operation.UserUid);
+                return View(operation);
+            }
+
             _db.FinanceOperations.Add(operation);
             await _db.SaveChangesAsync();
 
-            if (operation.InstrumentId.HasValue && await IsSecuritiesOperationAsync(operation))
+            if (operation.InstrumentId.HasValue)
             {
-                await _calcService.ApplyOperationToPositionAsync(operation, operation.UserUid);
+                if (await IsSecuritiesOperationAsync(operation))
+                    await _calcService.ApplyOperationToPositionAsync(operation, operation.UserUid);
             }
 
             return RedirectToAction("Index");
@@ -123,10 +154,7 @@ namespace Homie.Areas.Finances.Controllers
                 .FirstOrDefaultAsync(o => o.Id == id && o.UserUid == userId);
             if (operation == null) return NotFound();
 
-            ViewBag.OperationTypes = _db.OperationTypes.ToList();
-            ViewBag.Accounts = _db.FinanceAccounts.Where(a => a.UserUid == userId).ToList();
-            ViewBag.Instruments = _db.Instruments.Where(i => i.UserUid == userId).ToList();
-            ViewBag.Currencies = _db.Currencies.Where(c => c.UserUid == userId).ToList();
+            PopulateOperationViewBag(userId);
             return View(operation);
         }
 
@@ -135,25 +163,33 @@ namespace Homie.Areas.Finances.Controllers
         {
             operation.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            if (operation.AccountId == 0 || operation.OperationTypeId == 0 || operation.CurrencyId == 0)
+            {
+                ModelState.AddModelError("", "Заполните обязательные поля: Тип операции, Счёт и Валюта.");
+                PopulateOperationViewBag(operation.UserUid);
+                return View(operation);
+            }
+
             // Загрузить старую версию операции для отката
             var oldOp = await _db.FinanceOperations.AsNoTracking()
                 .Include(o => o.OperationType)
                 .FirstOrDefaultAsync(o => o.Id == operation.Id && o.UserUid == operation.UserUid);
 
             // Откатить старую операцию из позиции
-            if (oldOp != null && oldOp.InstrumentId.HasValue
-                && SecuritiesOperationNames.Contains(oldOp.OperationType?.Name))
+            if (oldOp != null && oldOp.InstrumentId.HasValue)
             {
-                await _calcService.RevertOperationFromPositionAsync(oldOp, operation.UserUid);
+                if (SecuritiesOperationNames.Contains(oldOp.OperationType?.Name))
+                    await _calcService.RevertOperationFromPositionAsync(oldOp, operation.UserUid);
             }
 
             _db.FinanceOperations.Update(operation);
             await _db.SaveChangesAsync();
 
             // Применить новую операцию к позиции
-            if (operation.InstrumentId.HasValue && await IsSecuritiesOperationAsync(operation))
+            if (operation.InstrumentId.HasValue)
             {
-                await _calcService.ApplyOperationToPositionAsync(operation, operation.UserUid);
+                if (await IsSecuritiesOperationAsync(operation))
+                    await _calcService.ApplyOperationToPositionAsync(operation, operation.UserUid);
             }
 
             return RedirectToAction("Index");
@@ -188,9 +224,7 @@ namespace Homie.Areas.Finances.Controllers
 
                 // Откатить операцию из позиции ДО удаления
                 if (isSecurities)
-                {
                     await _calcService.RevertOperationFromPositionAsync(operation, userId);
-                }
 
                 _db.FinanceOperations.Remove(operation);
                 await _db.SaveChangesAsync();

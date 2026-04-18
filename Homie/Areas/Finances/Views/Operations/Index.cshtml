@@ -1,4 +1,5 @@
 @model OperationListViewModel
+@using Homie.Helpers
 
 @addTagHelper *, Homie
 
@@ -20,7 +21,7 @@
         <option value="">Все</option>
         @foreach (OperationCategory c in Enum.GetValues(typeof(OperationCategory)))
         {
-            <option value="@c" selected="@(Model.CategoryFilter == c)">@c</option>
+            <option value="@c" selected="@(Model.CategoryFilter == c)">@c.GetDisplayName()</option>
         }
     </select>
     <label>Счёт: </label>

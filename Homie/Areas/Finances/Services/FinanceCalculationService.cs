@@ -78,7 +78,32 @@ namespace Homie.Areas.Finances.Services
             var metals = await _db.PreciousMetals
                 .Where(pm => pm.UserUid == userId)
                 .ToListAsync();
-            vm.TotalPreciousMetals = metals.Sum(pm => pm.TotalValueRub);
+
+            // Операции покупки/продажи драгметаллов из журнала
+            var pmOps = await _db.FinanceOperations
+                .Where(o => o.UserUid == userId && o.InstrumentId != null)
+                .Include(o => o.OperationType)
+                .Where(o => o.OperationType.Name == "Покупка драгметалла"
+                          || o.OperationType.Name == "Продажа драгметалла")
+                .ToListAsync();
+
+            decimal totalPM = 0;
+            foreach (var m in metals)
+            {
+                int effectiveQty = m.Quantity;
+                if (m.InstrumentId.HasValue)
+                {
+                    var bought = pmOps
+                        .Where(o => o.InstrumentId == m.InstrumentId && o.OperationType.Name == "Покупка драгметалла")
+                        .Sum(o => o.Quantity ?? 0);
+                    var sold = pmOps
+                        .Where(o => o.InstrumentId == m.InstrumentId && o.OperationType.Name == "Продажа драгметалла")
+                        .Sum(o => o.Quantity ?? 0);
+                    effectiveQty = Math.Max(m.Quantity + (int)(bought - sold), 0);
+                }
+                totalPM += effectiveQty * m.WeightGrams * m.CurrentPricePerGram;
+            }
+            vm.TotalPreciousMetals = totalPM;
 
             // --- Общий капитал ---
             vm.TotalCapital = vm.TotalDeposits + vm.TotalInvestments + vm.TotalCrypto + vm.TotalPreciousMetals;
@@ -496,6 +521,27 @@ namespace Homie.Areas.Finances.Services
 
             await _db.SaveChangesAsync();
             return updated;
+        }
+
+        public async Task ApplyPreciousMetalOperationAsync(OperationModel operation, string userId)
+        {
+            // Драгметаллы вычисляются из журнала на лету в GetDashboardDataAsync.
+            // Этот метод оставлен для совместимости интерфейса.
+            await Task.CompletedTask;
+        }
+
+        public async Task RevertPreciousMetalOperationAsync(OperationModel operation, string userId)
+        {
+            // Драгметаллы вычисляются из журнала на лету в GetDashboardDataAsync.
+            // Этот метод оставлен для совместимости интерфейса.
+            await Task.CompletedTask;
+        }
+
+        public async Task<int> SyncPreciousMetalPositionsFromJournalAsync(string userId)
+        {
+            // Драгметаллы теперь вычисляются из журнала на лету.
+            await Task.CompletedTask;
+            return 0;
         }
     }
 }

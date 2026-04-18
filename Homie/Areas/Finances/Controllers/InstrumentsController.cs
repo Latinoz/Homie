@@ -73,6 +73,8 @@ namespace Homie.Areas.Finances.Controllers
         public async Task<IActionResult> Create(InstrumentModel instrument)
         {
             instrument.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(instrument.Code))
+                instrument.Code = instrument.Name?.Trim().ToUpperInvariant().Replace(" ", "_") ?? "INSTR";
             _db.Instruments.Add(instrument);
             await _db.SaveChangesAsync();
             return RedirectToAction("Index");
@@ -94,6 +96,8 @@ namespace Homie.Areas.Finances.Controllers
         public async Task<IActionResult> Edit(InstrumentModel instrument)
         {
             instrument.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrWhiteSpace(instrument.Code))
+                instrument.Code = instrument.Name?.Trim().ToUpperInvariant().Replace(" ", "_") ?? "INSTR";
             _db.Instruments.Update(instrument);
             await _db.SaveChangesAsync();
             return RedirectToAction("Index");

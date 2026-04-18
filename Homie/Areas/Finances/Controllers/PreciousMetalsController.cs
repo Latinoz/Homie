@@ -69,6 +69,10 @@ namespace Homie.Areas.Finances.Controllers
         [Breadcrumb("Новая позиция", FromAction = "Index")]
         public IActionResult Create()
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            ViewBag.Instruments = _db.Instruments
+                .Where(i => i.UserUid == userId && i.Type == InstrumentType.PreciousMetalRef)
+                .ToList();
             return View();
         }
 
@@ -92,6 +96,9 @@ namespace Homie.Areas.Finances.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var metal = await _db.PreciousMetals.FirstOrDefaultAsync(pm => pm.Id == id && pm.UserUid == userId);
             if (metal == null) return NotFound();
+            ViewBag.Instruments = _db.Instruments
+                .Where(i => i.UserUid == userId && i.Type == InstrumentType.PreciousMetalRef)
+                .ToList();
             return View(metal);
         }
 

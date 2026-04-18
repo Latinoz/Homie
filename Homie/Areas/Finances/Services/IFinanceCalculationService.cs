@@ -21,6 +21,15 @@ namespace Homie.Areas.Finances.Services
 
         /// <summary>Полная синхронизация всех позиций из журнала операций</summary>
         Task<int> SyncAllPositionsFromJournalAsync(string userId);
+
+        /// <summary>Синхронизация позиций драгметаллов из журнала операций</summary>
+        Task<int> SyncPreciousMetalPositionsFromJournalAsync(string userId);
+
+        /// <summary>Применить операцию покупки/продажи драгметалла к позиции</summary>
+        Task ApplyPreciousMetalOperationAsync(OperationModel operation, string userId);
+
+        /// <summary>Откатить операцию покупки/продажи драгметалла из позиции</summary>
+        Task RevertPreciousMetalOperationAsync(OperationModel operation, string userId);
     }
 
     public class InvestmentMetrics
