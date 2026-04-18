@@ -24,7 +24,7 @@ namespace Homie.Areas.Finances.Controllers
         }
 
         [Breadcrumb("Инструменты", FromAction = "Index", FromController = typeof(DashboardController), AreaName = "Finances")]
-        public async Task<IActionResult> Index(string name, InstrumentType? type, int page = 1,
+        public async Task<IActionResult> Index(string name, int? type, int page = 1,
             FinanceSortState sortOrder = FinanceSortState.NameAsc)
         {
             int pageSize = 20;
@@ -32,18 +32,19 @@ namespace Homie.Areas.Finances.Controllers
 
             IQueryable<InstrumentModel> query = _db.Instruments
                 .Where(i => i.UserUid == userId)
-                .Include(i => i.Currency);
+                .Include(i => i.Currency)
+                .Include(i => i.InvestmentType);
 
             if (!string.IsNullOrEmpty(name))
                 query = query.Where(i => i.Name.Contains(name) || i.Code.Contains(name));
             if (type.HasValue)
-                query = query.Where(i => i.Type == type.Value);
+                query = query.Where(i => i.InvestmentTypeId == type.Value);
 
             query = sortOrder switch
             {
                 FinanceSortState.NameDesc => query.OrderByDescending(i => i.Name),
-                FinanceSortState.TypeAsc => query.OrderBy(i => i.Type),
-                FinanceSortState.TypeDesc => query.OrderByDescending(i => i.Type),
+                FinanceSortState.TypeAsc => query.OrderBy(i => i.InvestmentType.Name),
+                FinanceSortState.TypeDesc => query.OrderByDescending(i => i.InvestmentType.Name),
                 _ => query.OrderBy(i => i.Name)
             };
 
@@ -56,7 +57,10 @@ namespace Homie.Areas.Finances.Controllers
                 PageViewModel = new PageViewModel(count, page, pageSize),
                 CurrentSort = sortOrder,
                 NameFilter = name,
-                TypeFilter = type
+                TypeFilter = type,
+                InvestmentTypes = await _db.InvestmentTypes
+                    .Where(t => t.UserUid == null || t.UserUid == userId)
+                    .OrderBy(t => t.Id).ToListAsync()
             };
             return View(vm);
         }
@@ -66,6 +70,8 @@ namespace Homie.Areas.Finances.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             ViewBag.Currencies = _db.Currencies.Where(c => c.UserUid == userId).ToList();
+            ViewBag.InvestmentTypes = _db.InvestmentTypes
+                .Where(t => t.UserUid == null || t.UserUid == userId).OrderBy(t => t.Id).ToList();
             return View();
         }
 
@@ -89,6 +95,8 @@ namespace Homie.Areas.Finances.Controllers
             if (instrument == null) return NotFound();
 
             ViewBag.Currencies = _db.Currencies.Where(c => c.UserUid == userId).ToList();
+            ViewBag.InvestmentTypes = _db.InvestmentTypes
+                .Where(t => t.UserUid == null || t.UserUid == userId).OrderBy(t => t.Id).ToList();
             return View(instrument);
         }
 
@@ -111,6 +119,7 @@ namespace Homie.Areas.Finances.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var instrument = await _db.Instruments
                 .Include(i => i.Currency)
+                .Include(i => i.InvestmentType)
                 .FirstOrDefaultAsync(i => i.Id == id && i.UserUid == userId);
             if (instrument == null) return NotFound();
             return View(instrument);

@@ -16,7 +16,7 @@
 <div class="w3-row-padding">
     <div class="w3-half">
         <table class="table table-sm">
-            <tr><td><strong>Тип</strong></td><td>@Model.Instrument?.Type</td></tr>
+            <tr><td><strong>Тип</strong></td><td>@Model.Instrument?.InvestmentType?.Name</td></tr>
             <tr><td><strong>Биржа</strong></td><td>@Model.Instrument?.Exchange</td></tr>
             <tr><td><strong>Брок. счёт</strong></td><td>@Model.Account?.Name</td></tr>
             <tr><td><strong>Кол-во</strong></td><td>@Model.Quantity</td></tr>

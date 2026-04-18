@@ -1,0 +1,50 @@
+@model InvestmentTypeListViewModel
+
+@{
+    ViewBag.Title = "Типы инструментов";
+}
+
+<h4><i class="fas fa-layer-group"></i> Типы инструментов</h4>
+<hr>
+
+@if (TempData["Error"] != null)
+{
+    <div class="w3-panel w3-pale-red w3-border"><p>@TempData["Error"]</p></div>
+}
+
+<div>
+    <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Добавить тип</a>
+</div>
+<p></p>
+
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th>Название</th>
+            <th>Системный код</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var t in Model.InvestmentTypes)
+        {
+            <tr>
+                <td>
+                    @t.Name
+                    @if (t.SystemCode != null)
+                    {
+                        <span class="badge badge-secondary">системный</span>
+                    }
+                </td>
+                <td>@t.SystemCode</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@t.Id" class="fas fa-pen" style="color:green;" title="Изменить"></a>
+                    @if (t.SystemCode == null)
+                    {
+                        <a asp-action="Delete" asp-route-id="@t.Id" class="fas fa-trash-alt" style="color:red;" title="Удалить"></a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

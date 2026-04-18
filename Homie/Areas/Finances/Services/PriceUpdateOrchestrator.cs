@@ -54,6 +54,7 @@ namespace Homie.Areas.Finances.Services
             // Загружаем все инструменты пользователя
             var instruments = await _db.Instruments
                 .Where(i => i.UserUid == userId)
+                .Include(i => i.InvestmentType)
                 .ToListAsync();
 
             // Загружаем позиции для проверки auto-update флагов
@@ -75,17 +76,17 @@ namespace Homie.Areas.Finances.Services
             var moexInstruments = instruments.Where(i => i.Exchange == Exchange.MOEX).ToList();
 
             var moexStockTickers = moexInstruments
-                .Where(i => i.Type == InstrumentType.Stock)
+                .Where(i => i.InvestmentType?.SystemCode == "Stock")
                 .Select(i => GetTickerKey(i))
                 .Distinct().ToList();
 
             var moexBondTickers = moexInstruments
-                .Where(i => i.Type == InstrumentType.Bond)
+                .Where(i => i.InvestmentType?.SystemCode == "Bond")
                 .Select(i => GetTickerKey(i))
                 .Distinct().ToList();
 
             var moexEtfTickers = moexInstruments
-                .Where(i => i.Type == InstrumentType.ETF)
+                .Where(i => i.InvestmentType?.SystemCode == "ETF")
                 .Select(i => GetTickerKey(i))
                 .Distinct().ToList();
 
@@ -264,6 +265,7 @@ namespace Homie.Areas.Finances.Services
         public async Task<PriceUpdateItemResult> UpdateSinglePriceAsync(int instrumentId, string userId)
         {
             var instrument = await _db.Instruments
+                .Include(i => i.InvestmentType)
                 .FirstOrDefaultAsync(i => i.Id == instrumentId && i.UserUid == userId);
 
             if (instrument == null)
@@ -286,9 +288,9 @@ namespace Homie.Areas.Finances.Services
                 {
                     case Exchange.MOEX:
                         Dictionary<string, decimal> moexResult;
-                        if (instrument.Type == InstrumentType.Bond)
+                        if (instrument.InvestmentType?.SystemCode == "Bond")
                             moexResult = await _moex.FetchBondPricesAsync(new[] { tickerKey });
-                        else if (instrument.Type == InstrumentType.ETF)
+                        else if (instrument.InvestmentType?.SystemCode == "ETF")
                             moexResult = await _moex.FetchEtfPricesAsync(new[] { tickerKey });
                         else
                             moexResult = await _moex.FetchSharePricesAsync(new[] { tickerKey });

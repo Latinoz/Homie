@@ -58,7 +58,7 @@ namespace Homie.Areas.Finances.Controllers
             ViewBag.OperationTypesJson = JsonSerializer.Serialize(
                 operationTypes.Select(ot => new { ot.Id, Category = (int)ot.Category }));
             ViewBag.InstrumentsJson = JsonSerializer.Serialize(
-                instruments.Select(i => new { i.Id, Type = (int)i.Type }));
+                instruments.Select(i => new { i.Id, Type = i.InvestmentTypeId }));
         }
 
         [Breadcrumb("Журнал операций", FromAction = "Index", FromController = typeof(DashboardController), AreaName = "Finances")]

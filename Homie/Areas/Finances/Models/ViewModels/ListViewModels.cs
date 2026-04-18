@@ -30,7 +30,8 @@ namespace Homie.Areas.Finances.Models
         public PageViewModel PageViewModel { get; set; }
         public FinanceSortState CurrentSort { get; set; }
         public string NameFilter { get; set; }
-        public InstrumentType? TypeFilter { get; set; }
+        public int? TypeFilter { get; set; }
+        public IEnumerable<InvestmentTypeModel> InvestmentTypes { get; set; }
     }
 
     /// <summary>ViewModel для списка криптоактивов</summary>
@@ -74,7 +75,8 @@ namespace Homie.Areas.Finances.Models
         public PageViewModel PageViewModel { get; set; }
         public FinanceSortState CurrentSort { get; set; }
         public string NameFilter { get; set; }
-        public InstrumentType? TypeFilter { get; set; }
+        public int? TypeFilter { get; set; }
+        public IEnumerable<InvestmentTypeModel> InvestmentTypes { get; set; }
     }
 
     /// <summary>ViewModel для списка курсов валют</summary>
@@ -119,5 +121,12 @@ namespace Homie.Areas.Finances.Models
         public IEnumerable<InflationModel> Records { get; set; }
         public PageViewModel PageViewModel { get; set; }
         public int? YearFilter { get; set; }
+    }
+
+    /// <summary>ViewModel для списка типов инструментов</summary>
+    public class InvestmentTypeListViewModel
+    {
+        public IEnumerable<InvestmentTypeModel> InvestmentTypes { get; set; }
+        public PageViewModel PageViewModel { get; set; }
     }
 }

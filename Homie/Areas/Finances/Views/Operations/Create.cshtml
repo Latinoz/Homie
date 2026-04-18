@@ -75,11 +75,11 @@
     var opTypes = @Html.Raw(ViewBag.OperationTypesJson);
     var instruments = @Html.Raw(ViewBag.InstrumentsJson);
 
-    // Category(enum) → допустимые InstrumentType(enum)
-    // Investment(1) → Stock(0), Bond(1), ETF(2)
-    // Crypto(2) → Crypto(3)
-    // PreciousMetal(3) → PreciousMetalRef(4)
-    var categoryToTypes = { 1: [0,1,2], 2: [3], 3: [4] };
+    // Category(enum) → допустимые InvestmentTypeId (из таблицы InvestmentTypes)
+    // Investment(1) → Stock(1), Bond(2), ETF(3), Currency(6)
+    // Crypto(2) → Crypto(4)
+    // PreciousMetal(3) → PreciousMetal(5)
+    var categoryToTypes = { 1: [1,2,3,6], 2: [4], 3: [5] };
 
     var opTypeMap = {};
     opTypes.forEach(function(ot) { opTypeMap[ot.Id] = ot.Category; });

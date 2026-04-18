@@ -71,7 +71,7 @@ namespace Homie.Areas.Finances.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             ViewBag.Instruments = _db.Instruments
-                .Where(i => i.UserUid == userId && i.Type == InstrumentType.PreciousMetalRef)
+                .Where(i => i.UserUid == userId && i.InvestmentType.SystemCode == "PreciousMetal")
                 .ToList();
             return View();
         }
@@ -97,7 +97,7 @@ namespace Homie.Areas.Finances.Controllers
             var metal = await _db.PreciousMetals.FirstOrDefaultAsync(pm => pm.Id == id && pm.UserUid == userId);
             if (metal == null) return NotFound();
             ViewBag.Instruments = _db.Instruments
-                .Where(i => i.UserUid == userId && i.Type == InstrumentType.PreciousMetalRef)
+                .Where(i => i.UserUid == userId && i.InvestmentType.SystemCode == "PreciousMetal")
                 .ToList();
             return View(metal);
         }

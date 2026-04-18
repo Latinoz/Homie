@@ -20,6 +20,7 @@ namespace Homie.Areas.Finances.Controllers
         private readonly ApplicationDbContext _db;
         private readonly IFinanceCalculationService _calcService;
         private readonly IPriceUpdateOrchestrator _priceOrchestrator;
+        private static readonly string[] InvestmentSystemCodes = new[] { "Stock", "Bond", "ETF", "Currency" };
 
         public InvestmentsController(ApplicationDbContext db, IFinanceCalculationService calcService,
             IPriceUpdateOrchestrator priceOrchestrator)
@@ -30,7 +31,7 @@ namespace Homie.Areas.Finances.Controllers
         }
 
         [Breadcrumb("Инвестиции", FromAction = "Index", FromController = typeof(DashboardController), AreaName = "Finances")]
-        public async Task<IActionResult> Index(string name, InstrumentType? type, int page = 1,
+        public async Task<IActionResult> Index(string name, int? type, int page = 1,
             FinanceSortState sortOrder = FinanceSortState.NameAsc)
         {
             int pageSize = 20;
@@ -39,12 +40,13 @@ namespace Homie.Areas.Finances.Controllers
             IQueryable<InvestmentPositionModel> query = _db.InvestmentPositions
                 .Where(ip => ip.UserUid == userId)
                 .Include(ip => ip.Instrument).ThenInclude(i => i.Currency)
+                .Include(ip => ip.Instrument).ThenInclude(i => i.InvestmentType)
                 .Include(ip => ip.Account);
 
             if (!string.IsNullOrEmpty(name))
                 query = query.Where(ip => ip.Instrument.Name.Contains(name) || ip.Instrument.Code.Contains(name));
             if (type.HasValue)
-                query = query.Where(ip => ip.Instrument.Type == type.Value);
+                query = query.Where(ip => ip.Instrument.InvestmentTypeId == type.Value);
 
             query = sortOrder switch
             {
@@ -63,7 +65,11 @@ namespace Homie.Areas.Finances.Controllers
                 PageViewModel = new PageViewModel(count, page, pageSize),
                 CurrentSort = sortOrder,
                 NameFilter = name,
-                TypeFilter = type
+                TypeFilter = type,
+                InvestmentTypes = await _db.InvestmentTypes
+                    .Where(t => t.UserUid == null || t.UserUid == userId)
+                    .Where(t => t.SystemCode == "Stock" || t.SystemCode == "Bond" || t.SystemCode == "ETF" || t.SystemCode == "Currency" || t.SystemCode == null)
+                    .OrderBy(t => t.Id).ToListAsync()
             };
             return View(vm);
         }
@@ -73,7 +79,7 @@ namespace Homie.Areas.Finances.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             ViewBag.Instruments = _db.Instruments
-                .Where(i => i.UserUid == userId && (i.Type == InstrumentType.Stock || i.Type == InstrumentType.Bond || i.Type == InstrumentType.ETF))
+                .Where(i => i.UserUid == userId && InvestmentSystemCodes.Contains(i.InvestmentType.SystemCode))
                 .ToList();
             ViewBag.Accounts = _db.FinanceAccounts
                 .Where(a => a.UserUid == userId && a.AccountType == AccountType.Broker)
@@ -101,7 +107,7 @@ namespace Homie.Areas.Finances.Controllers
             if (position == null) return NotFound();
 
             ViewBag.Instruments = _db.Instruments
-                .Where(i => i.UserUid == userId && (i.Type == InstrumentType.Stock || i.Type == InstrumentType.Bond || i.Type == InstrumentType.ETF))
+                .Where(i => i.UserUid == userId && InvestmentSystemCodes.Contains(i.InvestmentType.SystemCode))
                 .ToList();
             ViewBag.Accounts = _db.FinanceAccounts
                 .Where(a => a.UserUid == userId && a.AccountType == AccountType.Broker).ToList();
@@ -128,6 +134,7 @@ namespace Homie.Areas.Finances.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var position = await _db.InvestmentPositions
                 .Include(ip => ip.Instrument).ThenInclude(i => i.Currency)
+                .Include(ip => ip.Instrument).ThenInclude(i => i.InvestmentType)
                 .Include(ip => ip.Account)
                 .FirstOrDefaultAsync(ip => ip.Id == id && ip.UserUid == userId);
             if (position == null) return NotFound();

@@ -72,7 +72,7 @@
     var opTypes = @Html.Raw(ViewBag.OperationTypesJson);
     var instruments = @Html.Raw(ViewBag.InstrumentsJson);
 
-    var categoryToTypes = { 1: [0,1,2], 2: [3], 3: [4] };
+    var categoryToTypes = { 1: [1,2,3,6], 2: [4], 3: [5] };
 
     var opTypeMap = {};
     opTypes.forEach(function(ot) { opTypeMap[ot.Id] = ot.Category; });

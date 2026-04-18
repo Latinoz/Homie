@@ -15,21 +15,6 @@ namespace Homie.Areas.Finances.Models
         CryptoExchange = 3
     }
 
-    /// <summary>Тип инструмента</summary>
-    public enum InstrumentType
-    {
-        [Display(Name = "Акции")]
-        Stock = 0,
-        [Display(Name = "Облигации")]
-        Bond = 1,
-        [Display(Name = "ETF")]
-        ETF = 2,
-        [Display(Name = "Криптовалюта")]
-        Crypto = 3,
-        [Display(Name = "Драгметаллы")]
-        PreciousMetalRef = 4
-    }
-
     /// <summary>Биржа / источник цен</summary>
     public enum Exchange
     {

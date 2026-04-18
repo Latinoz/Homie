@@ -71,7 +71,7 @@ namespace Homie.Areas.Finances.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             ViewBag.Instruments = _db.Instruments
-                .Where(i => i.UserUid == userId && i.Type == InstrumentType.Crypto).ToList();
+                .Where(i => i.UserUid == userId && i.InvestmentType.SystemCode == "Crypto").ToList();
             ViewBag.Currencies = _db.Currencies.Where(c => c.UserUid == userId).ToList();
             ViewBag.Accounts = _db.FinanceAccounts
                 .Where(a => a.UserUid == userId && a.AccountType == AccountType.CryptoExchange).ToList();
@@ -90,7 +90,7 @@ namespace Homie.Areas.Finances.Controllers
                 return RedirectToAction("Index");
             }
             ViewBag.Instruments = _db.Instruments
-                .Where(i => i.UserUid == userId && i.Type == InstrumentType.Crypto).ToList();
+                .Where(i => i.UserUid == userId && i.InvestmentType.SystemCode == "Crypto").ToList();
             ViewBag.Currencies = _db.Currencies.Where(c => c.UserUid == userId).ToList();
             ViewBag.Accounts = _db.FinanceAccounts
                 .Where(a => a.UserUid == userId && a.AccountType == AccountType.CryptoExchange).ToList();
@@ -108,7 +108,7 @@ namespace Homie.Areas.Finances.Controllers
             if (asset == null) return NotFound();
 
             ViewBag.Instruments = _db.Instruments
-                .Where(i => i.UserUid == userId && i.Type == InstrumentType.Crypto).ToList();
+                .Where(i => i.UserUid == userId && i.InvestmentType.SystemCode == "Crypto").ToList();
             ViewBag.Currencies = _db.Currencies.Where(c => c.UserUid == userId).ToList();
             ViewBag.Accounts = _db.FinanceAccounts
                 .Where(a => a.UserUid == userId && a.AccountType == AccountType.CryptoExchange).ToList();
@@ -129,7 +129,7 @@ namespace Homie.Areas.Finances.Controllers
                 return RedirectToAction("Index");
             }
             ViewBag.Instruments = _db.Instruments
-                .Where(i => i.UserUid == userId && i.Type == InstrumentType.Crypto).ToList();
+                .Where(i => i.UserUid == userId && i.InvestmentType.SystemCode == "Crypto").ToList();
             ViewBag.Currencies = _db.Currencies.Where(c => c.UserUid == userId).ToList();
             ViewBag.Accounts = _db.FinanceAccounts
                 .Where(a => a.UserUid == userId && a.AccountType == AccountType.CryptoExchange).ToList();

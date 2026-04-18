@@ -31,6 +31,7 @@ namespace Homie.Data.Models {
         public DbSet<CurrencyModel> Currencies { get; set; }
         public DbSet<ExchangeRateModel> ExchangeRates { get; set; }
         public DbSet<InstrumentModel> Instruments { get; set; }
+        public DbSet<InvestmentTypeModel> InvestmentTypes { get; set; }
         public DbSet<OperationTypeModel> OperationTypes { get; set; }
         public DbSet<BankModel> Banks { get; set; }
         public DbSet<BrokerModel> Brokers { get; set; }
@@ -63,6 +64,9 @@ namespace Homie.Data.Models {
                 .HasIndex(i => i.UserUid);
             modelBuilder.Entity<InstrumentModel>()
                 .HasIndex(i => new { i.Code, i.UserUid });
+
+            modelBuilder.Entity<InvestmentTypeModel>()
+                .HasIndex(it => it.UserUid);
 
             modelBuilder.Entity<OperationTypeModel>()
                 .HasIndex(o => o.UserUid);
@@ -110,6 +114,12 @@ namespace Homie.Data.Models {
                 .HasIndex(ph => new { ph.InstrumentId, ph.Date });
 
             // --- Связи ---
+            modelBuilder.Entity<InstrumentModel>()
+                .HasOne(i => i.InvestmentType)
+                .WithMany()
+                .HasForeignKey(i => i.InvestmentTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<AccountModel>()
                 .HasOne(a => a.Bank)
                 .WithMany()
@@ -181,6 +191,16 @@ namespace Homie.Data.Models {
                 .WithMany()
                 .HasForeignKey(ph => ph.InstrumentId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // --- Seed: Типы инструментов ---
+            modelBuilder.Entity<InvestmentTypeModel>().HasData(
+                new InvestmentTypeModel { Id = 1, Name = "Акции", SystemCode = "Stock" },
+                new InvestmentTypeModel { Id = 2, Name = "Облигации", SystemCode = "Bond" },
+                new InvestmentTypeModel { Id = 3, Name = "ETF", SystemCode = "ETF" },
+                new InvestmentTypeModel { Id = 4, Name = "Криптовалюта", SystemCode = "Crypto" },
+                new InvestmentTypeModel { Id = 5, Name = "Драгметаллы", SystemCode = "PreciousMetal" },
+                new InvestmentTypeModel { Id = 6, Name = "Валюта", SystemCode = "Currency" }
+            );
 
             // --- Seed: Типы операций ---
             modelBuilder.Entity<OperationTypeModel>().HasData(

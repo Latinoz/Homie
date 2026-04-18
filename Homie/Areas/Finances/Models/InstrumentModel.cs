@@ -20,7 +20,8 @@ namespace Homie.Areas.Finances.Models
         public string Name { get; set; }
 
         [Display(Name = "Тип")]
-        public InstrumentType Type { get; set; }
+        public int InvestmentTypeId { get; set; }
+        public InvestmentTypeModel InvestmentType { get; set; }
 
         [Display(Name = "Биржа")]
         public Exchange Exchange { get; set; }

@@ -30,9 +30,10 @@
     <label>Тип: </label>
     <select name="type" class="form-control ml-1 mr-2">
         <option value="">Все</option>
-        <option value="Stock" selected="@(Model.TypeFilter == InstrumentType.Stock)">Акции</option>
-        <option value="Bond" selected="@(Model.TypeFilter == InstrumentType.Bond)">Облигации</option>
-        <option value="ETF" selected="@(Model.TypeFilter == InstrumentType.ETF)">ETF</option>
+        @foreach (var t in Model.InvestmentTypes)
+        {
+            <option value="@t.Id" selected="@(Model.TypeFilter == t.Id)">@t.Name</option>
+        }
     </select>
     <input type="submit" value="Фильтр" class="btn btn-outline-dark" />
 </form>
