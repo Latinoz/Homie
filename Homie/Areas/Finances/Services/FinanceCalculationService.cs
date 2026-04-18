@@ -322,5 +322,180 @@ namespace Homie.Areas.Finances.Services
                 }
             });
         }
+
+        public async Task ApplyOperationToPositionAsync(OperationModel operation, string userId)
+        {
+            if (operation.InstrumentId == null) return;
+
+            var opType = operation.OperationType
+                ?? await _db.OperationTypes.FindAsync(operation.OperationTypeId);
+            if (opType == null) return;
+
+            bool isBuy = opType.Name == "Покупка ценных бумаг";
+            bool isSell = opType.Name == "Продажа ценных бумаг";
+            if (!isBuy && !isSell) return;
+
+            decimal opQty = operation.Quantity ?? 0;
+            if (opQty == 0) return;
+
+            // Если Price не заполнена, вычислить из AmountInRub / Quantity
+            decimal opPrice = operation.Price
+                ?? (opQty > 0 ? operation.AmountInRub / opQty : 0);
+
+            var position = await _db.InvestmentPositions
+                .FirstOrDefaultAsync(ip => ip.InstrumentId == operation.InstrumentId
+                                        && ip.AccountId == operation.AccountId
+                                        && ip.UserUid == userId);
+
+            if (position == null)
+            {
+                if (isSell) return;
+                position = new InvestmentPositionModel
+                {
+                    InstrumentId = operation.InstrumentId.Value,
+                    AccountId = operation.AccountId,
+                    UserUid = userId,
+                    Quantity = opQty,
+                    AvgPurchasePrice = opPrice,
+                    CurrentPrice = opPrice,
+                    IsAutoUpdateEnabled = true
+                };
+                _db.InvestmentPositions.Add(position);
+            }
+            else
+            {
+                if (isBuy)
+                {
+                    var totalQty = position.Quantity + opQty;
+                    if (totalQty > 0)
+                        position.AvgPurchasePrice =
+                            (position.AvgPurchasePrice * position.Quantity + opPrice * opQty) / totalQty;
+                    position.Quantity = totalQty;
+                    // Обновить CurrentPrice ценой покупки (до автообновления с биржи)
+                    position.CurrentPrice = opPrice;
+                }
+                else // isSell
+                {
+                    position.Quantity -= opQty;
+                }
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task RevertOperationFromPositionAsync(OperationModel operation, string userId)
+        {
+            if (operation.InstrumentId == null) return;
+
+            var opType = operation.OperationType
+                ?? await _db.OperationTypes.FindAsync(operation.OperationTypeId);
+            if (opType == null) return;
+
+            bool isBuy = opType.Name == "Покупка ценных бумаг";
+            bool isSell = opType.Name == "Продажа ценных бумаг";
+            if (!isBuy && !isSell) return;
+
+            decimal opQty = operation.Quantity ?? 0;
+            if (opQty == 0) return;
+
+            decimal opPrice = operation.Price
+                ?? (opQty > 0 ? operation.AmountInRub / opQty : 0);
+
+            var position = await _db.InvestmentPositions
+                .FirstOrDefaultAsync(ip => ip.InstrumentId == operation.InstrumentId
+                                        && ip.AccountId == operation.AccountId
+                                        && ip.UserUid == userId);
+
+            if (position == null) return;
+
+            if (isBuy)
+            {
+                var newQty = position.Quantity - opQty;
+                if (newQty > 0 && position.Quantity > 0)
+                {
+                    position.AvgPurchasePrice =
+                        (position.AvgPurchasePrice * position.Quantity - opPrice * opQty) / newQty;
+                    if (position.AvgPurchasePrice < 0)
+                        position.AvgPurchasePrice = 0;
+                }
+                position.Quantity = Math.Max(newQty, 0);
+            }
+            else // isSell — откатить продажу = вернуть количество
+            {
+                position.Quantity += opQty;
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task<int> SyncAllPositionsFromJournalAsync(string userId)
+        {
+            // Все операции покупки/продажи ценных бумаг
+            var operations = await _db.FinanceOperations
+                .Where(o => o.UserUid == userId)
+                .Include(o => o.OperationType)
+                .Where(o => o.OperationType.Name == "Покупка ценных бумаг"
+                          || o.OperationType.Name == "Продажа ценных бумаг")
+                .ToListAsync();
+
+            // Группируем по (InstrumentId, AccountId)
+            var groups = operations
+                .Where(o => o.InstrumentId.HasValue)
+                .GroupBy(o => new { o.InstrumentId, o.AccountId });
+
+            int updated = 0;
+
+            foreach (var group in groups)
+            {
+                var buyOps = group.Where(o => o.OperationType.Name == "Покупка ценных бумаг").ToList();
+                var sellOps = group.Where(o => o.OperationType.Name == "Продажа ценных бумаг").ToList();
+
+                var totalBought = buyOps.Sum(o => o.Quantity ?? 0);
+                var totalSold = sellOps.Sum(o => o.Quantity ?? 0);
+                var quantity = totalBought - totalSold;
+
+                // Средневзвешенная цена покупки (если Price пустая — берём AmountInRub / Quantity)
+                var totalBoughtCost = buyOps.Sum(o =>
+                {
+                    var qty = o.Quantity ?? 0;
+                    var price = o.Price ?? (qty > 0 ? o.AmountInRub / qty : 0);
+                    return qty * price;
+                });
+                var avgPrice = totalBought > 0 ? totalBoughtCost / totalBought : 0;
+
+                var position = await _db.InvestmentPositions
+                    .FirstOrDefaultAsync(ip => ip.InstrumentId == group.Key.InstrumentId
+                                            && ip.AccountId == group.Key.AccountId
+                                            && ip.UserUid == userId);
+
+                if (position == null)
+                {
+                    if (quantity <= 0) continue;
+                    position = new InvestmentPositionModel
+                    {
+                        InstrumentId = group.Key.InstrumentId.Value,
+                        AccountId = group.Key.AccountId,
+                        UserUid = userId,
+                        Quantity = quantity,
+                        AvgPurchasePrice = avgPrice,
+                        CurrentPrice = avgPrice,
+                        IsAutoUpdateEnabled = true
+                    };
+                    _db.InvestmentPositions.Add(position);
+                }
+                else
+                {
+                    position.Quantity = quantity;
+                    position.AvgPurchasePrice = avgPrice;
+                    if (position.CurrentPrice == 0)
+                        position.CurrentPrice = avgPrice;
+                }
+
+                updated++;
+            }
+
+            await _db.SaveChangesAsync();
+            return updated;
+        }
     }
 }

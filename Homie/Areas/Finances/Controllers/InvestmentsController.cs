@@ -192,5 +192,14 @@ namespace Homie.Areas.Finances.Controllers
             }
             return RedirectToAction("Index");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> SyncPositions()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var count = await _calcService.SyncAllPositionsFromJournalAsync(userId);
+            TempData["PriceUpdateMsg"] = $"Синхронизация завершена: обновлено {count} позиций из журнала операций.";
+            return RedirectToAction("Index");
+        }
     }
 }

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using Homie.Areas.Finances.Models;
+using Homie.Areas.Finances.Services;
 using Homie.Data.Models;
 using Homie.Models;
 using SmartBreadcrumbs.Attributes;
@@ -17,10 +18,22 @@ namespace Homie.Areas.Finances.Controllers
     public class OperationsController : Controller
     {
         private readonly ApplicationDbContext _db;
+        private readonly IFinanceCalculationService _calcService;
 
-        public OperationsController(ApplicationDbContext db)
+        public OperationsController(ApplicationDbContext db, IFinanceCalculationService calcService)
         {
             _db = db;
+            _calcService = calcService;
+        }
+
+        private static readonly string[] SecuritiesOperationNames =
+            { "Покупка ценных бумаг", "Продажа ценных бумаг" };
+
+        private async Task<bool> IsSecuritiesOperationAsync(OperationModel op)
+        {
+            var opType = await _db.OperationTypes.FindAsync(op.OperationTypeId);
+            op.OperationType = opType;
+            return opType != null && SecuritiesOperationNames.Contains(opType.Name);
         }
 
         [Breadcrumb("Журнал операций", FromAction = "Index", FromController = typeof(DashboardController), AreaName = "Finances")]
@@ -92,6 +105,12 @@ namespace Homie.Areas.Finances.Controllers
             operation.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
             _db.FinanceOperations.Add(operation);
             await _db.SaveChangesAsync();
+
+            if (operation.InstrumentId.HasValue && await IsSecuritiesOperationAsync(operation))
+            {
+                await _calcService.ApplyOperationToPositionAsync(operation, operation.UserUid);
+            }
+
             return RedirectToAction("Index");
         }
 
@@ -115,8 +134,28 @@ namespace Homie.Areas.Finances.Controllers
         public async Task<IActionResult> Edit(OperationModel operation)
         {
             operation.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // Загрузить старую версию операции для отката
+            var oldOp = await _db.FinanceOperations.AsNoTracking()
+                .Include(o => o.OperationType)
+                .FirstOrDefaultAsync(o => o.Id == operation.Id && o.UserUid == operation.UserUid);
+
+            // Откатить старую операцию из позиции
+            if (oldOp != null && oldOp.InstrumentId.HasValue
+                && SecuritiesOperationNames.Contains(oldOp.OperationType?.Name))
+            {
+                await _calcService.RevertOperationFromPositionAsync(oldOp, operation.UserUid);
+            }
+
             _db.FinanceOperations.Update(operation);
             await _db.SaveChangesAsync();
+
+            // Применить новую операцию к позиции
+            if (operation.InstrumentId.HasValue && await IsSecuritiesOperationAsync(operation))
+            {
+                await _calcService.ApplyOperationToPositionAsync(operation, operation.UserUid);
+            }
+
             return RedirectToAction("Index");
         }
 
@@ -138,9 +177,21 @@ namespace Homie.Areas.Finances.Controllers
         {
             if (Id == null) return NotFound();
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var operation = await _db.FinanceOperations.FirstOrDefaultAsync(o => o.Id == Id && o.UserUid == userId);
+            var operation = await _db.FinanceOperations
+                .Include(o => o.OperationType)
+                .FirstOrDefaultAsync(o => o.Id == Id && o.UserUid == userId);
             if (operation != null)
             {
+                bool isSecurities = operation.InstrumentId.HasValue
+                    && operation.OperationType != null
+                    && SecuritiesOperationNames.Contains(operation.OperationType.Name);
+
+                // Откатить операцию из позиции ДО удаления
+                if (isSecurities)
+                {
+                    await _calcService.RevertOperationFromPositionAsync(operation, userId);
+                }
+
                 _db.FinanceOperations.Remove(operation);
                 await _db.SaveChangesAsync();
             }

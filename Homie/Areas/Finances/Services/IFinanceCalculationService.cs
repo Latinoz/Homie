@@ -12,6 +12,15 @@ namespace Homie.Areas.Finances.Services
         Task<CryptoMetrics> GetCryptoMetricsAsync(int assetId, string userId);
         Task<string> GetPortfolioHistoryJsonAsync(string userId, int months = 12);
         Task<string> GetInstrumentPriceChartJsonAsync(int instrumentId, string userId, int months = 12);
+
+        /// <summary>Применить операцию покупки/продажи к позиции (инкрементально)</summary>
+        Task ApplyOperationToPositionAsync(OperationModel operation, string userId);
+
+        /// <summary>Откатить операцию покупки/продажи из позиции (инкрементально)</summary>
+        Task RevertOperationFromPositionAsync(OperationModel operation, string userId);
+
+        /// <summary>Полная синхронизация всех позиций из журнала операций</summary>
+        Task<int> SyncAllPositionsFromJournalAsync(string userId);
     }
 
     public class InvestmentMetrics
