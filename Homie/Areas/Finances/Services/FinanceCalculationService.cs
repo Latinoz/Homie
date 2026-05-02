@@ -64,8 +64,36 @@ namespace Homie.Areas.Finances.Services
                 .Where(ip => ip.UserUid == userId)
                 .Include(ip => ip.Instrument)
                 .ToListAsync();
-            vm.TotalInvestments = investPositions.Sum(ip =>
-                ip.Quantity * ip.CurrentPrice * GetRubRate(ip.Instrument?.CurrencyId ?? 0));
+            vm.TotalInvestments = investPositions
+                .Where(ip => ip.Quantity > 0)
+                .Sum(ip => ip.Quantity * ip.CurrentPrice * GetRubRate(ip.Instrument?.CurrencyId ?? 0));
+
+            // --- Кэш-баланс брокерских счётов (дивиденды, купоны, комиссии, налоги) ---
+            // Покупка/продажа ценных бумаг уже отражены в позициях — их сюда не включаем.
+            var brokerCashOps = await _db.FinanceOperations
+                .Where(o => o.UserUid == userId)
+                .Include(o => o.OperationType)
+                .Include(o => o.Account)
+                .Where(o => o.Account.AccountType == AccountType.Broker
+                         && o.OperationType.Category == OperationCategory.Investment
+                         && o.OperationType.Name != "Покупка ценных бумаг"
+                         && o.OperationType.Name != "Продажа ценных бумаг")
+                .ToListAsync();
+
+            foreach (var op in brokerCashOps)
+            {
+                switch (op.OperationType.Name)
+                {
+                    case "Дивиденд":
+                    case "Купон":
+                        vm.TotalInvestments += op.AmountInRub;
+                        break;
+                    case "Комиссия":
+                    case "Налог":
+                        vm.TotalInvestments -= op.AmountInRub;
+                        break;
+                }
+            }
 
             // --- Итого крипто ---
             var cryptoAssets = await _db.CryptoAssets
@@ -510,7 +538,7 @@ namespace Homie.Areas.Finances.Services
                 }
                 else
                 {
-                    position.Quantity = quantity;
+                    position.Quantity = Math.Max(quantity, 0);
                     position.AvgPurchasePrice = avgPrice;
                     if (position.CurrentPrice == 0)
                         position.CurrentPrice = avgPrice;
