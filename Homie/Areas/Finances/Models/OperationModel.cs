@@ -26,11 +26,11 @@ namespace Homie.Areas.Finances.Models
         public int? InstrumentId { get; set; }
         public InstrumentModel Instrument { get; set; }
 
-        [Column(TypeName = "decimal(18,6)")]
+        [Column(TypeName = "decimal(28,12)")]
         [Display(Name = "Количество")]
         public decimal? Quantity { get; set; }
 
-        [Column(TypeName = "decimal(18,6)")]
+        [Column(TypeName = "decimal(28,12)")]
         [Display(Name = "Цена")]
         public decimal? Price { get; set; }
 

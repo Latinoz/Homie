@@ -22,9 +22,9 @@
         }
         <table class="table table-sm">
             <tr><td><strong>CoinGecko ID</strong></td><td>@Model.CoinGeckoId</td></tr>
-            <tr><td><strong>Биржа</strong></td><td>@Model.Account?.Name</td></tr>
+            <tr><td><strong>Кошелёк / Биржа</strong></td><td>@(Model.Account?.Wallet?.Name ?? Model.Account?.CryptoExchange?.Name ?? Model.Account?.Name)</td></tr>
             <tr><td><strong>Валюта</strong></td><td>@Model.Currency?.Code</td></tr>
-            <tr><td><strong>Количество</strong></td><td>@Model.Quantity.ToString("N8")</td></tr>
+            <tr><td><strong>Количество</strong></td><td>@Model.Quantity.ToString("0.############")</td></tr>
             <tr><td><strong>Ср. цена покупки</strong></td><td>@Model.AvgPurchasePrice.ToString("N2")</td></tr>
             <tr><td><strong>Текущая цена</strong></td><td>@Model.CurrentPrice.ToString("N2")</td></tr>
             <tr><td><strong>Стоимость</strong></td><td>@total.ToString("N2") @Model.Currency?.Code</td></tr>

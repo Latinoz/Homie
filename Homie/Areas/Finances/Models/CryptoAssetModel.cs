@@ -9,9 +9,9 @@ namespace Homie.Areas.Finances.Models
     {
         public int Id { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = "Выберите инструмент")]
+        [Required(ErrorMessage = "Выберите инструмент")]
         [Display(Name = "Инструмент")]
-        public int InstrumentId { get; set; }
+        public int? InstrumentId { get; set; }
         public InstrumentModel Instrument { get; set; }
 
         [Display(Name = "Счёт / Биржа")]
@@ -27,22 +27,22 @@ namespace Homie.Areas.Finances.Models
         [Display(Name = "CoinGecko ID")]
         public string CoinGeckoId { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = "Выберите валюту")]
+        [Required(ErrorMessage = "Выберите валюту")]
         [Display(Name = "Валюта оценки")]
-        public int CurrencyId { get; set; }
+        public int? CurrencyId { get; set; }
         public CurrencyModel Currency { get; set; }
 
         /// <summary>Количество (ручной ввод)</summary>
-        [Column(TypeName = "decimal(18,8)")]
+        [Column(TypeName = "decimal(28,12)")]
         [Display(Name = "Количество")]
         public decimal Quantity { get; set; }
 
-        [Column(TypeName = "decimal(18,6)")]
+        [Column(TypeName = "decimal(28,12)")]
         [Display(Name = "Средняя цена покупки")]
         public decimal AvgPurchasePrice { get; set; }
 
         /// <summary>Текущая цена (авто CoinGecko или ручной ввод)</summary>
-        [Column(TypeName = "decimal(18,6)")]
+        [Column(TypeName = "decimal(28,12)")]
         [Display(Name = "Текущая цена")]
         public decimal CurrentPrice { get; set; }
 
@@ -59,6 +59,12 @@ namespace Homie.Areas.Finances.Models
         [Column(TypeName = "varchar(255)")]
         [Display(Name = "Адрес кошелька")]
         public string WalletAddress { get; set; }
+
+        /// <summary>Дата покупки (для формы добавления, используется при создании операции покупки)</summary>
+        [NotMapped]
+        [DataType(DataType.Date)]
+        [Display(Name = "Дата покупки")]
+        public DateTime? PurchaseDate { get; set; } = DateTime.Today;
 
         [Column(TypeName = "varchar(255)")]
         public string UserUid { get; set; }

@@ -13,6 +13,9 @@ namespace Homie.Areas.Finances.Models
         [Display(Name = "Название")]
         public string Name { get; set; }
 
+        [Display(Name = "Тип кошелька")]
+        public WalletType Type { get; set; } = WalletType.Fiat;
+
         [Display(Name = "Валюта")]
         public int? CurrencyId { get; set; }
         public CurrencyModel Currency { get; set; }

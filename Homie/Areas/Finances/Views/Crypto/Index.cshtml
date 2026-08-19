@@ -17,6 +17,11 @@
     <div class="w3-panel w3-pale-green w3-border"><p>@TempData["PriceUpdateMsg"]</p></div>
 }
 
+@if (TempData["CryptoErrorMsg"] != null)
+{
+    <div class="w3-panel w3-pale-red w3-border"><p>@TempData["CryptoErrorMsg"]</p></div>
+}
+
 <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus"></i> Новый криптоактив</a>
 <p></p>
 
@@ -53,12 +58,12 @@
                 <tr>
                     <td><a asp-action="Details" asp-route-id="@a.Id">@a.Ticker</a></td>
                     <td>@a.Instrument?.Name</td>
-                    <td>@a.Quantity.ToString("N6")</td>
+                    <td>@a.Quantity.ToString("0.############")</td>
                     <td>@a.AvgPurchasePrice.ToString("N2")</td>
                     <td>@a.CurrentPrice.ToString("N2")</td>
                     <td>@total.ToString("N2") @a.Currency?.Code</td>
                     <td class="@(pl >= 0 ? "positive" : "negative")">@pl.ToString("N1")%</td>
-                    <td>@a.WalletAddress?.Substring(0, Math.Min(a.WalletAddress?.Length ?? 0, 12))...</td>
+                    <td>@(a.Account?.Wallet?.Name ?? a.Account?.CryptoExchange?.Name ?? a.Account?.Name)</td>
                     <td>
                         <form asp-action="UpdatePrice" method="post" style="display:inline;">
                             <input type="hidden" name="instrumentId" value="@a.InstrumentId" />

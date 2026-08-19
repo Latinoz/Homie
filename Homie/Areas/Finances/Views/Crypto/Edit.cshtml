@@ -2,6 +2,9 @@
 
 @{
     ViewBag.Title = "Редактирование криптоактива";
+    var accounts = (IEnumerable<AccountModel>)ViewBag.Accounts;
+    var walletAccounts = accounts.Where(a => a.AccountType == AccountType.Wallet).ToList();
+    var exchangeAccounts = accounts.Where(a => a.AccountType == AccountType.CryptoExchange).ToList();
 }
 
 <style>
@@ -15,6 +18,9 @@
 <form asp-action="Edit" asp-route-id="@Model.Id">
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="InstrumentId" />
+    <input type="hidden" asp-for="Quantity" />
+    <input type="hidden" asp-for="AvgPurchasePrice" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="form-group">
         <label class="control-label">Инструмент</label>
         <input type="text" class="form-control text-input-width" value="@Model.Instrument?.Name" readonly />
@@ -28,20 +34,42 @@
         <input asp-for="CoinGeckoId" class="form-control text-input-width" />
     </div>
     <div class="form-group">
-        <label asp-for="AccountId" class="control-label">Биржа / Кошелёк</label>
-        <select asp-for="AccountId" asp-items="@(new SelectList(ViewBag.Accounts, "Id", "Name"))" class="form-control text-input-width"></select>
+        <label asp-for="AccountId" class="control-label">Кошелёк / Биржа</label>
+        <select asp-for="AccountId" class="form-control text-input-width">
+            <option value="">-- Не выбрано --</option>
+            @if (walletAccounts.Any())
+            {
+                <optgroup label="Кошельки">
+                    @foreach (var a in walletAccounts)
+                    {
+                        <option value="@a.Id" selected="@(Model.AccountId == a.Id)">@(a.Wallet?.Name ?? a.Name)</option>
+                    }
+                </optgroup>
+            }
+            @if (exchangeAccounts.Any())
+            {
+                <optgroup label="Биржи">
+                    @foreach (var a in exchangeAccounts)
+                    {
+                        <option value="@a.Id" selected="@(Model.AccountId == a.Id)">@(a.CryptoExchange?.Name ?? a.Name)</option>
+                    }
+                </optgroup>
+            }
+        </select>
+        <span asp-validation-for="AccountId" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="CurrencyId" class="control-label">Валюта учёта</label>
         <select asp-for="CurrencyId" asp-items="@(new SelectList(ViewBag.Currencies, "Id", "Code"))" class="form-control text-input-width"></select>
     </div>
     <div class="form-group">
-        <label asp-for="Quantity" class="control-label">Количество</label>
-        <input asp-for="Quantity" type="number" step="0.00000001" class="form-control number-input-width" />
+        <label class="control-label">Количество</label>
+        <input type="text" class="form-control number-input-width" value="@Model.Quantity.ToString("0.############")" readonly />
+        <small class="form-text text-muted">Количество меняется через Журнал операций (покупка/продажа криптовалюты).</small>
     </div>
     <div class="form-group">
-        <label asp-for="AvgPurchasePrice" class="control-label">Средняя цена покупки</label>
-        <input asp-for="AvgPurchasePrice" type="number" step="0.01" class="form-control number-input-width" />
+        <label class="control-label">Средняя цена покупки</label>
+        <input type="text" class="form-control number-input-width" value="@Model.AvgPurchasePrice.ToString("N2")" readonly />
     </div>
     <div class="form-group">
         <label asp-for="CurrentPrice" class="control-label">Текущая цена</label>

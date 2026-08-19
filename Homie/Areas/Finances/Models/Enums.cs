@@ -9,10 +9,19 @@ namespace Homie.Areas.Finances.Models
         Bank = 0,
         [Display(Name = "Брокер")]
         Broker = 1,
-        [Display(Name = "Кошелек")]
+        [Display(Name = "Криптокошелёк")]
         Wallet = 2,
         [Display(Name = "Криптобиржа")]
         CryptoExchange = 3
+    }
+
+    /// <summary>Тип кошелька в справочнике</summary>
+    public enum WalletType
+    {
+        [Display(Name = "Обычный")]
+        Fiat = 0,
+        [Display(Name = "Криптокошелёк")]
+        Crypto = 1
     }
 
     /// <summary>Биржа / источник цен</summary>

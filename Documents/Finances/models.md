@@ -24,6 +24,13 @@ public enum AccountType
     CryptoExchange = 3  // Криптобиржа
 }
 
+// Тип кошелька в справочнике
+public enum WalletType
+{
+    Fiat = 0,           // Обычный (фиатный) кошелёк
+    Crypto = 1          // Криптокошелёк
+}
+
 // Тип инструмента
 public enum InstrumentType
 {
@@ -141,11 +148,14 @@ public enum FinanceSortState
 |------|-----|----------|
 | `Id` | int | Первичный ключ |
 | `Name` | string | Название кошелька (Required, varchar(255)) |
+| `Type` | WalletType | Тип кошелька: Fiat (обычный) / Crypto (криптокошелёк) |
 | `CurrencyId` | int? | FK на валюту (nullable) |
 | `UserUid` | string | Идентификатор пользователя (varchar(255)) |
 
 **Связи:**
 - `Currency` → CurrencyModel — валюта кошелька (опционально)
+
+**Особенность:** для кошелька с типом `Crypto` автоматически создаётся связанный финансовый счёт (`AccountModel`, `AccountType.Wallet`, `WalletId`), через который криптоактивы и операции журнала привязываются к кошельку.
 
 ---
 

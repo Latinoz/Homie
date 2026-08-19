@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Homie.Areas.Finances.Models;
 
@@ -13,6 +14,12 @@ namespace Homie.Areas.Finances.Services
         Task<string> GetPortfolioHistoryJsonAsync(string userId, int months = 12);
         Task<string> GetInstrumentPriceChartJsonAsync(int instrumentId, string userId, int months = 12);
 
+        /// <summary>Создать финансовые счета для криптокошельков, у которых их ещё нет</summary>
+        Task<int> EnsureCryptoWalletAccountsAsync(string userId);
+
+        /// <summary>Остатки криптовалюты по криптокошелькам</summary>
+        Task<List<WalletCryptoHolding>> GetWalletCryptoHoldingsAsync(string userId);
+
         /// <summary>Применить операцию покупки/продажи к позиции (инкрементально)</summary>
         Task ApplyOperationToPositionAsync(OperationModel operation, string userId);
 
@@ -21,6 +28,15 @@ namespace Homie.Areas.Finances.Services
 
         /// <summary>Полная синхронизация всех позиций из журнала операций</summary>
         Task<int> SyncAllPositionsFromJournalAsync(string userId);
+
+        /// <summary>Применить операцию покупки/продажи криптовалюты к криптоактиву</summary>
+        Task ApplyCryptoOperationAsync(OperationModel operation, string userId);
+
+        /// <summary>Откатить операцию покупки/продажи криптовалюты из криптоактива</summary>
+        Task RevertCryptoOperationAsync(OperationModel operation, string userId);
+
+        /// <summary>Полная синхронизация криптоактивов из журнала операций</summary>
+        Task<int> SyncCryptoAssetsFromJournalAsync(string userId);
 
         /// <summary>Синхронизация позиций драгметаллов из журнала операций</summary>
         Task<int> SyncPreciousMetalPositionsFromJournalAsync(string userId);
@@ -45,6 +61,16 @@ namespace Homie.Areas.Finances.Services
     {
         public decimal QuantityFromJournal { get; set; }
         public decimal ValueInUsd { get; set; }
+        public decimal ValueInRub { get; set; }
+    }
+
+    /// <summary>Остаток криптовалюты в криптокошельке</summary>
+    public class WalletCryptoHolding
+    {
+        public int WalletId { get; set; }
+        public string Ticker { get; set; }
+        public string InstrumentName { get; set; }
+        public decimal Quantity { get; set; }
         public decimal ValueInRub { get; set; }
     }
 }

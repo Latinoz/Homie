@@ -10,9 +10,11 @@
 <dl class="dl-horizontal">
     <dt>Тикер:</dt><dd>@Model.Ticker</dd>
     <dt>Название:</dt><dd>@Model.Instrument?.Name</dd>
-    <dt>Кол-во:</dt><dd>@Model.Quantity.ToString("N8")</dd>
+    <dt>Кол-во:</dt><dd>@Model.Quantity.ToString("0.############")</dd>
     <dt>Стоимость:</dt><dd>@((Model.Quantity * Model.CurrentPrice).ToString("N2"))</dd>
 </dl>
+
+<p class="text-muted">Актив с операциями в журнале удалить нельзя — сначала удалите операции покупки/продажи в Журнале операций.</p>
 
 <form asp-action="Delete" asp-route-id="@Model.Id" method="post">
     <input type="submit" class="btn btn-danger" value="Удалить" />

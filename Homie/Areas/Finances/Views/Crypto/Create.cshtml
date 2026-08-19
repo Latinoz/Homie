@@ -2,6 +2,9 @@
 
 @{
     ViewBag.Title = "Новый криптоактив";
+    var accounts = (IEnumerable<AccountModel>)ViewBag.Accounts;
+    var walletAccounts = accounts.Where(a => a.AccountType == AccountType.Wallet).ToList();
+    var exchangeAccounts = accounts.Where(a => a.AccountType == AccountType.CryptoExchange).ToList();
 }
 
 <style>
@@ -11,6 +14,34 @@
 
 <h4>Добавить криптоактив</h4>
 <hr>
+
+@if (!(bool)ViewBag.HasCryptoWallets)
+{
+    <div class="alert alert-warning">
+        В справочнике нет кошельков с типом «Криптокошелёк».
+        <a asp-controller="Wallets" asp-action="Create" asp-route-returnUrl="@Url.Action("Create", "Crypto")" class="btn btn-sm btn-primary">Создать кошелёк</a>
+        или укажите тип у существующего:
+        <a asp-controller="Wallets" asp-action="Index" class="btn btn-sm btn-outline-secondary">Справочник кошельков</a>
+    </div>
+}
+
+@if (ViewBag.UnlinkedCryptoWallets != null && ((List<string>)ViewBag.UnlinkedCryptoWallets).Any())
+{
+    <div class="alert alert-danger">
+        Для криптокошельков не удалось создать финансовый счёт (не указана валюта):
+        <b>@string.Join(", ", (List<string>)ViewBag.UnlinkedCryptoWallets)</b>.
+        Укажите валюту у кошелька или базовую валюту в
+        <a asp-controller="Currencies" asp-action="Index">Finances → Currencies</a>.
+    </div>
+}
+
+@if (!(bool)ViewBag.HasCryptoInstruments)
+{
+    <div class="alert alert-warning">
+        Нет инструментов типа «Криптовалюта». Добавьте инструмент (например, BTC, ETH):
+        <a asp-controller="Instruments" asp-action="Create" class="btn btn-sm btn-primary">Создать инструмент</a>
+    </div>
+}
 
 <form asp-action="Create">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -31,10 +62,29 @@
         <input asp-for="CoinGeckoId" class="form-control text-input-width" placeholder="bitcoin, ethereum, solana..." />
     </div>
     <div class="form-group">
-        <label asp-for="AccountId" class="control-label">Биржа / Кошелёк</label>
-        <select asp-for="AccountId" asp-items="@(new SelectList(ViewBag.Accounts, "Id", "Name"))" class="form-control text-input-width">
+        <label asp-for="AccountId" class="control-label">Кошелёк / Биржа</label>
+        <select asp-for="AccountId" class="form-control text-input-width">
             <option value="">-- Выберите --</option>
+            @if (walletAccounts.Any())
+            {
+                <optgroup label="Кошельки">
+                    @foreach (var a in walletAccounts)
+                    {
+                        <option value="@a.Id" selected="@(Model.AccountId == a.Id)">@(a.Wallet?.Name ?? a.Name)</option>
+                    }
+                </optgroup>
+            }
+            @if (exchangeAccounts.Any())
+            {
+                <optgroup label="Биржи">
+                    @foreach (var a in exchangeAccounts)
+                    {
+                        <option value="@a.Id" selected="@(Model.AccountId == a.Id)">@(a.CryptoExchange?.Name ?? a.Name)</option>
+                    }
+                </optgroup>
+            }
         </select>
+        <span asp-validation-for="AccountId" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="CurrencyId" class="control-label">Валюта учёта</label>
@@ -42,16 +92,23 @@
         <span asp-validation-for="CurrencyId" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Quantity" class="control-label">Количество</label>
-        <input asp-for="Quantity" type="number" step="0.00000001" class="form-control number-input-width" />
+        <label asp-for="PurchaseDate" class="control-label">Дата покупки</label>
+        <input asp-for="PurchaseDate" type="date" class="form-control number-input-width" />
     </div>
     <div class="form-group">
-        <label asp-for="AvgPurchasePrice" class="control-label">Средняя цена покупки</label>
-        <input asp-for="AvgPurchasePrice" type="number" step="0.01" class="form-control number-input-width" />
+        <label asp-for="Quantity" class="control-label">Количество</label>
+        <input asp-for="Quantity" type="number" step="any" min="0" class="form-control number-input-width" placeholder="0.000000011" />
+        <small class="form-text text-muted">Вводите значение вручную (например, 0.000000011). При количестве больше нуля автоматически создаётся операция «Покупка криптовалюты» в журнале.</small>
+    </div>
+    <div class="form-group">
+        <label asp-for="AvgPurchasePrice" class="control-label">Средняя цена покупки (за 1 монету)</label>
+        <input asp-for="AvgPurchasePrice" type="number" step="any" min="0" class="form-control number-input-width" />
+        <span asp-validation-for="AvgPurchasePrice" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label asp-for="CurrentPrice" class="control-label">Текущая цена</label>
-        <input asp-for="CurrentPrice" type="number" step="0.01" class="form-control number-input-width" />
+        <input asp-for="CurrentPrice" type="number" step="any" min="0" class="form-control number-input-width" />
+        <small class="form-text text-muted">Не обязательно, если включено автообновление (CoinGecko).</small>
     </div>
     <div class="form-group">
         <label asp-for="WalletAddress" class="control-label">Адрес кошелька</label>

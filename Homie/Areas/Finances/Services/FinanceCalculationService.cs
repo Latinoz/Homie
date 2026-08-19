@@ -98,9 +98,27 @@ namespace Homie.Areas.Finances.Services
             // --- Итого крипто ---
             var cryptoAssets = await _db.CryptoAssets
                 .Where(ca => ca.UserUid == userId)
+                .Include(ca => ca.Currency)
                 .ToListAsync();
+
+            var cryptoOps = await _db.FinanceOperations
+                .Where(o => o.UserUid == userId)
+                .Include(o => o.OperationType)
+                .Where(o => o.OperationType.Category == OperationCategory.Crypto
+                         && (o.OperationType.Name == "Покупка криптовалюты"
+                          || o.OperationType.Name == "Продажа криптовалюты"))
+                .ToListAsync();
+
             vm.TotalCrypto = cryptoAssets.Sum(ca =>
-                ca.Quantity * ca.CurrentPrice * GetRubRate(ca.CurrencyId));
+            {
+                var journalQty = cryptoOps
+                    .Where(o => o.InstrumentId == ca.InstrumentId && o.AccountId == ca.AccountId)
+                    .Sum(o => o.OperationType.Name == "Покупка криптовалюты"
+                        ? (o.Quantity ?? 0)
+                        : -(o.Quantity ?? 0));
+                var effectiveQty = journalQty > 0 ? journalQty : ca.Quantity;
+                return Math.Max(effectiveQty, 0) * ca.CurrentPrice * GetRubRate(ca.CurrencyId ?? 0);
+            });
 
             // --- Итого драгметаллы ---
             var metals = await _db.PreciousMetals
@@ -264,7 +282,9 @@ namespace Homie.Areas.Finances.Services
             if (asset == null) return new CryptoMetrics();
 
             var operations = await _db.FinanceOperations
-                .Where(o => o.UserUid == userId && o.InstrumentId == asset.InstrumentId)
+                .Where(o => o.UserUid == userId
+                         && o.InstrumentId == asset.InstrumentId
+                         && o.AccountId == asset.AccountId)
                 .Include(o => o.OperationType)
                 .Where(o => o.OperationType.Category == OperationCategory.Crypto)
                 .ToListAsync();
@@ -312,6 +332,296 @@ namespace Homie.Areas.Finances.Services
                 ValueInUsd = valueInUsd,
                 ValueInRub = valueInRub
             };
+        }
+
+        public async Task<int> EnsureCryptoWalletAccountsAsync(string userId)
+        {
+            var cryptoWallets = await _db.Wallets
+                .Where(w => w.UserUid == userId && w.Type == WalletType.Crypto)
+                .ToListAsync();
+
+            var linkedWalletIds = await _db.FinanceAccounts
+                .Where(a => a.UserUid == userId && a.AccountType == AccountType.Wallet && a.WalletId != null)
+                .Select(a => a.WalletId.Value)
+                .ToListAsync();
+
+            var currencies = await _db.Currencies
+                .Where(c => c.UserUid == userId)
+                .OrderBy(c => c.Id)
+                .ToListAsync();
+
+            // Базовая валюта → RUB → любая валюта пользователя
+            var fallbackCurrency = currencies.FirstOrDefault(c => c.IsBase)
+                ?? currencies.FirstOrDefault(c => c.Code == "RUB")
+                ?? currencies.FirstOrDefault();
+
+            int created = 0;
+            foreach (var wallet in cryptoWallets)
+            {
+                if (linkedWalletIds.Contains(wallet.Id)) continue;
+
+                int? currencyId = wallet.CurrencyId ?? fallbackCurrency?.Id;
+                if (currencyId == null) continue; // валют нет вообще — счёт создать нельзя (FK NOT NULL)
+
+                _db.FinanceAccounts.Add(new AccountModel
+                {
+                    Name = wallet.Name,
+                    AccountType = AccountType.Wallet,
+                    WalletId = wallet.Id,
+                    CurrencyId = currencyId.Value,
+                    UserUid = userId,
+                    IsActive = true
+                });
+                created++;
+            }
+
+            if (created > 0)
+                await _db.SaveChangesAsync();
+
+            return created;
+        }
+
+        public async Task<List<WalletCryptoHolding>> GetWalletCryptoHoldingsAsync(string userId)
+        {
+            var result = new List<WalletCryptoHolding>();
+
+            var walletIds = await _db.Wallets
+                .Where(w => w.UserUid == userId && w.Type == WalletType.Crypto)
+                .Select(w => w.Id)
+                .ToListAsync();
+            if (!walletIds.Any()) return result;
+
+            var accounts = await _db.FinanceAccounts
+                .Where(a => a.UserUid == userId && a.AccountType == AccountType.Wallet
+                         && a.WalletId != null && walletIds.Contains(a.WalletId.Value))
+                .ToListAsync();
+            var accountIds = accounts.Select(a => a.Id).ToList();
+            if (!accountIds.Any()) return result;
+
+            var assets = await _db.CryptoAssets
+                .Where(ca => ca.UserUid == userId && ca.AccountId.HasValue && accountIds.Contains(ca.AccountId.Value))
+                .Include(ca => ca.Instrument)
+                .ToListAsync();
+
+            var cryptoOps = await _db.FinanceOperations
+                .Where(o => o.UserUid == userId)
+                .Include(o => o.OperationType)
+                .Where(o => o.OperationType.Name == "Покупка криптовалюты"
+                         || o.OperationType.Name == "Продажа криптовалюты")
+                .ToListAsync();
+
+            var currencies = await _db.Currencies.Where(c => c.UserUid == userId).ToListAsync();
+            var latestRates = await _db.ExchangeRates
+                .Where(r => r.UserUid == userId)
+                .ToListAsync();
+            var rateDict = latestRates
+                .GroupBy(r => r.CurrencyId)
+                .ToDictionary(g => g.Key, g => g.OrderByDescending(r => r.Date).First().Rate);
+
+            decimal GetRubRate(int currencyId)
+            {
+                var cur = currencies.FirstOrDefault(c => c.Id == currencyId);
+                if (cur != null && cur.IsBase) return 1m;
+                return rateDict.TryGetValue(currencyId, out var r) ? r : 1m;
+            }
+
+            foreach (var asset in assets)
+            {
+                var journalQty = cryptoOps
+                    .Where(o => o.InstrumentId == asset.InstrumentId && o.AccountId == asset.AccountId)
+                    .Sum(o => o.OperationType.Name == "Покупка криптовалюты"
+                        ? (o.Quantity ?? 0)
+                        : -(o.Quantity ?? 0));
+                var effectiveQty = journalQty > 0 ? journalQty : asset.Quantity;
+                if (effectiveQty <= 0) continue;
+
+                var account = accounts.FirstOrDefault(a => a.Id == asset.AccountId.Value);
+                result.Add(new WalletCryptoHolding
+                {
+                    WalletId = account?.WalletId ?? 0,
+                    Ticker = asset.Ticker,
+                    InstrumentName = asset.Instrument?.Name,
+                    Quantity = effectiveQty,
+                    ValueInRub = effectiveQty * asset.CurrentPrice * GetRubRate(asset.CurrencyId ?? 0)
+                });
+            }
+
+            return result;
+        }
+
+        public async Task ApplyCryptoOperationAsync(OperationModel operation, string userId)
+        {
+            if (operation.InstrumentId == null) return;
+
+            var opType = operation.OperationType
+                ?? await _db.OperationTypes.FindAsync(operation.OperationTypeId);
+            if (opType == null) return;
+
+            bool isBuy = opType.Name == "Покупка криптовалюты";
+            bool isSell = opType.Name == "Продажа криптовалюты";
+            if (!isBuy && !isSell) return;
+
+            decimal opQty = operation.Quantity ?? 0;
+            if (opQty == 0) return;
+
+            decimal opPrice = operation.Price
+                ?? (opQty > 0 ? operation.AmountInRub / opQty : 0);
+
+            var asset = await _db.CryptoAssets
+                .FirstOrDefaultAsync(ca => ca.InstrumentId == operation.InstrumentId
+                                        && ca.AccountId == operation.AccountId
+                                        && ca.UserUid == userId);
+
+            if (asset == null)
+            {
+                if (isSell) return;
+
+                var instrument = await _db.Instruments.FindAsync(operation.InstrumentId.Value);
+                asset = new CryptoAssetModel
+                {
+                    InstrumentId = operation.InstrumentId.Value,
+                    AccountId = operation.AccountId,
+                    UserUid = userId,
+                    Ticker = instrument?.Code ?? "",
+                    CurrencyId = operation.CurrencyId,
+                    Quantity = opQty,
+                    AvgPurchasePrice = opPrice,
+                    CurrentPrice = opPrice,
+                    IsAutoUpdateEnabled = true
+                };
+                _db.CryptoAssets.Add(asset);
+            }
+            else
+            {
+                if (isBuy)
+                {
+                    var totalQty = asset.Quantity + opQty;
+                    if (totalQty > 0)
+                        asset.AvgPurchasePrice =
+                            (asset.AvgPurchasePrice * asset.Quantity + opPrice * opQty) / totalQty;
+                    asset.Quantity = totalQty;
+                }
+                else
+                {
+                    asset.Quantity = Math.Max(asset.Quantity - opQty, 0);
+                }
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task RevertCryptoOperationAsync(OperationModel operation, string userId)
+        {
+            if (operation.InstrumentId == null) return;
+
+            var opType = operation.OperationType
+                ?? await _db.OperationTypes.FindAsync(operation.OperationTypeId);
+            if (opType == null) return;
+
+            bool isBuy = opType.Name == "Покупка криптовалюты";
+            bool isSell = opType.Name == "Продажа криптовалюты";
+            if (!isBuy && !isSell) return;
+
+            decimal opQty = operation.Quantity ?? 0;
+            if (opQty == 0) return;
+
+            decimal opPrice = operation.Price
+                ?? (opQty > 0 ? operation.AmountInRub / opQty : 0);
+
+            var asset = await _db.CryptoAssets
+                .FirstOrDefaultAsync(ca => ca.InstrumentId == operation.InstrumentId
+                                        && ca.AccountId == operation.AccountId
+                                        && ca.UserUid == userId);
+            if (asset == null) return;
+
+            if (isBuy)
+            {
+                var newQty = asset.Quantity - opQty;
+                if (newQty > 0 && asset.Quantity > 0)
+                {
+                    asset.AvgPurchasePrice =
+                        (asset.AvgPurchasePrice * asset.Quantity - opPrice * opQty) / newQty;
+                    if (asset.AvgPurchasePrice < 0)
+                        asset.AvgPurchasePrice = 0;
+                }
+                asset.Quantity = Math.Max(newQty, 0);
+            }
+            else
+            {
+                asset.Quantity += opQty;
+            }
+
+            await _db.SaveChangesAsync();
+        }
+
+        public async Task<int> SyncCryptoAssetsFromJournalAsync(string userId)
+        {
+            var operations = await _db.FinanceOperations
+                .Where(o => o.UserUid == userId)
+                .Include(o => o.OperationType)
+                .Where(o => o.OperationType.Name == "Покупка криптовалюты"
+                         || o.OperationType.Name == "Продажа криптовалюты")
+                .ToListAsync();
+
+            var groups = operations
+                .Where(o => o.InstrumentId.HasValue)
+                .GroupBy(o => new { o.InstrumentId, o.AccountId });
+
+            int updated = 0;
+
+            foreach (var group in groups)
+            {
+                var buyOps = group.Where(o => o.OperationType.Name == "Покупка криптовалюты").ToList();
+                var sellOps = group.Where(o => o.OperationType.Name == "Продажа криптовалюты").ToList();
+
+                var totalBought = buyOps.Sum(o => o.Quantity ?? 0);
+                var totalSold = sellOps.Sum(o => o.Quantity ?? 0);
+                var quantity = totalBought - totalSold;
+
+                var totalBoughtCost = buyOps.Sum(o =>
+                {
+                    var qty = o.Quantity ?? 0;
+                    var price = o.Price ?? (qty > 0 ? o.AmountInRub / qty : 0);
+                    return qty * price;
+                });
+                var avgPrice = totalBought > 0 ? totalBoughtCost / totalBought : 0;
+
+                var asset = await _db.CryptoAssets
+                    .FirstOrDefaultAsync(ca => ca.InstrumentId == group.Key.InstrumentId
+                                            && ca.AccountId == group.Key.AccountId
+                                            && ca.UserUid == userId);
+
+                if (asset == null)
+                {
+                    if (quantity <= 0) continue;
+                    var instrument = await _db.Instruments.FindAsync(group.Key.InstrumentId.Value);
+                    asset = new CryptoAssetModel
+                    {
+                        InstrumentId = group.Key.InstrumentId.Value,
+                        AccountId = group.Key.AccountId,
+                        UserUid = userId,
+                        Ticker = instrument?.Code ?? "",
+                        CurrencyId = buyOps.First().CurrencyId,
+                        Quantity = quantity,
+                        AvgPurchasePrice = avgPrice,
+                        CurrentPrice = avgPrice,
+                        IsAutoUpdateEnabled = true
+                    };
+                    _db.CryptoAssets.Add(asset);
+                }
+                else
+                {
+                    asset.Quantity = Math.Max(quantity, 0);
+                    asset.AvgPurchasePrice = avgPrice;
+                    if (asset.CurrentPrice == 0)
+                        asset.CurrentPrice = avgPrice;
+                }
+
+                updated++;
+            }
+
+            await _db.SaveChangesAsync();
+            return updated;
         }
 
         public async Task<string> GetPortfolioHistoryJsonAsync(string userId, int months = 12)

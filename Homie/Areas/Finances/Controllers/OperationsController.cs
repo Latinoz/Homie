@@ -30,6 +30,9 @@ namespace Homie.Areas.Finances.Controllers
         private static readonly string[] SecuritiesOperationNames =
             { "Покупка ценных бумаг", "Продажа ценных бумаг" };
 
+        private static readonly string[] CryptoOperationNames =
+            { "Покупка криптовалюты", "Продажа криптовалюты" };
+
         private static readonly string[] PreciousMetalOperationNames =
             { "Покупка драгметалла", "Продажа драгметалла" };
 
@@ -38,6 +41,13 @@ namespace Homie.Areas.Finances.Controllers
             var opType = await _db.OperationTypes.FindAsync(op.OperationTypeId);
             op.OperationType = opType;
             return opType != null && SecuritiesOperationNames.Contains(opType.Name);
+        }
+
+        private async Task<bool> IsCryptoOperationAsync(OperationModel op)
+        {
+            var opType = op.OperationType ?? await _db.OperationTypes.FindAsync(op.OperationTypeId);
+            op.OperationType = opType;
+            return opType != null && CryptoOperationNames.Contains(opType.Name);
         }
 
         private async Task<bool> IsPreciousMetalOperationAsync(OperationModel op)
@@ -140,6 +150,8 @@ namespace Homie.Areas.Finances.Controllers
             {
                 if (await IsSecuritiesOperationAsync(operation))
                     await _calcService.ApplyOperationToPositionAsync(operation, operation.UserUid);
+                else if (await IsCryptoOperationAsync(operation))
+                    await _calcService.ApplyCryptoOperationAsync(operation, operation.UserUid);
             }
 
             return RedirectToAction("Index");
@@ -180,6 +192,8 @@ namespace Homie.Areas.Finances.Controllers
             {
                 if (SecuritiesOperationNames.Contains(oldOp.OperationType?.Name))
                     await _calcService.RevertOperationFromPositionAsync(oldOp, operation.UserUid);
+                else if (CryptoOperationNames.Contains(oldOp.OperationType?.Name))
+                    await _calcService.RevertCryptoOperationAsync(oldOp, operation.UserUid);
             }
 
             _db.FinanceOperations.Update(operation);
@@ -190,6 +204,8 @@ namespace Homie.Areas.Finances.Controllers
             {
                 if (await IsSecuritiesOperationAsync(operation))
                     await _calcService.ApplyOperationToPositionAsync(operation, operation.UserUid);
+                else if (await IsCryptoOperationAsync(operation))
+                    await _calcService.ApplyCryptoOperationAsync(operation, operation.UserUid);
             }
 
             return RedirectToAction("Index");
@@ -221,10 +237,15 @@ namespace Homie.Areas.Finances.Controllers
                 bool isSecurities = operation.InstrumentId.HasValue
                     && operation.OperationType != null
                     && SecuritiesOperationNames.Contains(operation.OperationType.Name);
+                bool isCrypto = operation.InstrumentId.HasValue
+                    && operation.OperationType != null
+                    && CryptoOperationNames.Contains(operation.OperationType.Name);
 
                 // Откатить операцию из позиции ДО удаления
                 if (isSecurities)
                     await _calcService.RevertOperationFromPositionAsync(operation, userId);
+                else if (isCrypto)
+                    await _calcService.RevertCryptoOperationAsync(operation, userId);
 
                 _db.FinanceOperations.Remove(operation);
                 await _db.SaveChangesAsync();

@@ -18,6 +18,11 @@
         <input asp-for="Name" class="form-control text-input-width" />
     </div>
     <div class="form-group">
+        <label asp-for="Type" class="control-label">Тип кошелька</label>
+        <select asp-for="Type" asp-items="Html.GetEnumSelectList<WalletType>()" class="form-control text-input-width"></select>
+        <small class="form-text text-muted">Для криптокошелька автоматически создаётся связанный финансовый счёт.</small>
+    </div>
+    <div class="form-group">
         <label asp-for="CurrencyId" class="control-label">Валюта</label>
         <select asp-for="CurrencyId" class="form-control text-input-width">
             <option value="">— не выбрана —</option>

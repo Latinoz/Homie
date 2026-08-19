@@ -16,16 +16,55 @@
     <thead>
         <tr>
             <th>Название</th>
+            <th>Тип</th>
             <th>Валюта</th>
+            <th>Криптоактивы</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
         @foreach (var w in Model.Wallets)
         {
+            var holdings = Model.CryptoHoldings.Where(h => h.WalletId == w.Id).ToList();
+            var totalRub = holdings.Sum(h => h.ValueInRub);
             <tr>
                 <td>@w.Name</td>
+                <td>
+                    @if (w.Type == WalletType.Crypto)
+                    {
+                        <span class="badge badge-info">Криптокошелёк</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-secondary">Обычный</span>
+                    }
+                </td>
                 <td>@w.Currency?.Code</td>
+                <td>
+                    @if (w.Type == WalletType.Crypto)
+                    {
+                        if (Model.CryptoWalletsWithoutAccount.Contains(w.Id))
+                        {
+                            <span class="text-danger">Счёт не создан — укажите валюту кошелька или базовую валюту (Finances → Currencies).</span>
+                        }
+                        else if (holdings.Any())
+                        {
+                            foreach (var h in holdings)
+                            {
+                                <div>@h.Ticker — @h.Quantity.ToString("0.############") <small class="text-muted">(@h.ValueInRub.ToString("N0") ₽)</small></div>
+                            }
+                            <div class="font-weight-bold">Итого: @totalRub.ToString("N0") ₽</div>
+                        }
+                        else
+                        {
+                            <small class="text-muted">нет активов</small>
+                        }
+                    }
+                    else
+                    {
+                        <small class="text-muted">—</small>
+                    }
+                </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@w.Id" class="fas fa-pen" style="color:green;" title="Изменить"></a>
                     <a asp-action="Delete" asp-route-id="@w.Id" class="fas fa-trash-alt" style="color:red;" title="Удалить"></a>

@@ -4,6 +4,7 @@ using Homie.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Homie.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260819152508_AddCryptoQuantityPrecision")]
+    partial class AddCryptoQuantityPrecision
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -320,20 +323,18 @@ namespace Homie.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("AvgPurchasePrice")
-                        .HasColumnType("decimal(28,12)");
+                        .HasColumnType("decimal(18,12)");
 
                     b.Property<string>("CoinGeckoId")
                         .HasColumnType("varchar(50)");
 
-                    b.Property<int?>("CurrencyId")
-                        .IsRequired()
+                    b.Property<int>("CurrencyId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("CurrentPrice")
-                        .HasColumnType("decimal(28,12)");
+                        .HasColumnType("decimal(18,12)");
 
-                    b.Property<int?>("InstrumentId")
-                        .IsRequired()
+                    b.Property<int>("InstrumentId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsAutoUpdateEnabled")
@@ -346,7 +347,7 @@ namespace Homie.Migrations
                         .HasColumnType("varchar(500)");
 
                     b.Property<decimal>("Quantity")
-                        .HasColumnType("decimal(28,12)");
+                        .HasColumnType("decimal(18,12)");
 
                     b.Property<string>("Ticker")
                         .IsRequired()
@@ -749,10 +750,10 @@ namespace Homie.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal?>("Price")
-                        .HasColumnType("decimal(28,12)");
+                        .HasColumnType("decimal(18,12)");
 
                     b.Property<decimal?>("Quantity")
-                        .HasColumnType("decimal(28,12)");
+                        .HasColumnType("decimal(18,12)");
 
                     b.Property<decimal?>("Tax")
                         .HasColumnType("decimal(18,2)");

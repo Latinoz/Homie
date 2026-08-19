@@ -106,6 +106,12 @@ namespace Homie.Areas.Finances.Models
     {
         public IEnumerable<WalletModel> Wallets { get; set; }
         public PageViewModel PageViewModel { get; set; }
+
+        /// <summary>Остатки криптовалюты по криптокошелькам</summary>
+        public List<Homie.Areas.Finances.Services.WalletCryptoHolding> CryptoHoldings { get; set; } = new();
+
+        /// <summary>ID криптокошельков, для которых не удалось создать связанный счёт (нет валют)</summary>
+        public List<int> CryptoWalletsWithoutAccount { get; set; } = new();
     }
 
     /// <summary>ViewModel для списка крипто бирж</summary>
