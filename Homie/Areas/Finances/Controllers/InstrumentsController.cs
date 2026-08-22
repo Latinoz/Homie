@@ -81,9 +81,21 @@ namespace Homie.Areas.Finances.Controllers
             instrument.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(instrument.Code))
                 instrument.Code = instrument.Name?.Trim().ToUpperInvariant().Replace(" ", "_") ?? "INSTR";
+            await ApplyCryptoDefaultsAsync(instrument);
             _db.Instruments.Add(instrument);
             await _db.SaveChangesAsync();
             return RedirectToAction("Index");
+        }
+
+        /// <summary>Для крипто-инструментов принудительно ставим CryptoSpot и нормализуем CoinGecko id</summary>
+        private async Task ApplyCryptoDefaultsAsync(InstrumentModel instrument)
+        {
+            var type = await _db.InvestmentTypes.FindAsync(instrument.InvestmentTypeId);
+            if (type?.SystemCode != "Crypto") return;
+
+            instrument.Exchange = Exchange.CryptoSpot;
+            if (!string.IsNullOrWhiteSpace(instrument.ExternalCode))
+                instrument.ExternalCode = instrument.ExternalCode.Trim().ToLowerInvariant();
         }
 
         [Breadcrumb("Редактирование", FromAction = "Index")]
@@ -106,6 +118,7 @@ namespace Homie.Areas.Finances.Controllers
             instrument.UserUid = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(instrument.Code))
                 instrument.Code = instrument.Name?.Trim().ToUpperInvariant().Replace(" ", "_") ?? "INSTR";
+            await ApplyCryptoDefaultsAsync(instrument);
             _db.Instruments.Update(instrument);
             await _db.SaveChangesAsync();
             return RedirectToAction("Index");

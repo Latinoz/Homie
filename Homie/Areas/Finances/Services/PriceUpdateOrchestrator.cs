@@ -45,6 +45,70 @@ namespace Homie.Areas.Finances.Services
                 ? i.ExternalCode
                 : i.Code;
 
+        /// <summary>CoinGecko id для актива: ExternalCode инструмента, иначе CoinGeckoId актива</summary>
+        private static string GetCryptoCoinId(CryptoAssetModel ca) =>
+            !string.IsNullOrWhiteSpace(ca.Instrument?.ExternalCode)
+                ? ca.Instrument.ExternalCode
+                : ca.CoinGeckoId;
+
+        /// <summary>
+        /// Конвертирует цену из CoinGecko (USD/RUB) в валюту учёта актива:
+        /// RUB/базовая — рублёвая цена CoinGecko; USD — как есть; прочие — кросс-курс через ExchangeRates.
+        /// Если курса нет — цена записывается в USD с предупреждением в лог.
+        /// </summary>
+        private decimal ConvertCryptoPriceToAccountingCurrency(
+            CryptoPriceDto price,
+            CryptoAssetModel ca,
+            List<CurrencyModel> currencies,
+            List<ExchangeRateModel> rates)
+        {
+            var currency = ca.CurrencyId.HasValue
+                ? currencies.FirstOrDefault(c => c.Id == ca.CurrencyId.Value)
+                : null;
+
+            // Базовая валюта (RUB) или не задана — берём рублёвую цену
+            if (currency == null || currency.IsBase)
+            {
+                if (price.Rub > 0)
+                    return price.Rub;
+
+                var usdRubRate = GetUsdRubRate(currencies, rates);
+                if (usdRubRate > 0)
+                    return price.Usd * usdRubRate;
+
+                _logger.LogWarning("Нет цены в RUB для {CoinId} ({Ticker}): записана цена в USD",
+                    ca.CoinGeckoId ?? ca.Instrument?.Code, ca.Ticker);
+                return price.Usd;
+            }
+
+            // Валюта учёта — USD
+            if (currency.Code == "USD")
+                return price.Usd;
+
+            // Прочие валюты — кросс-курс через курс ЦБ
+            var usdRub = GetUsdRubRate(currencies, rates);
+            var currencyRate = rates
+                .Where(r => r.CurrencyId == currency.Id)
+                .Select(r => r.Rate)
+                .FirstOrDefault();
+
+            if (usdRub > 0 && currencyRate > 0)
+                return price.Usd * usdRub / currencyRate;
+
+            _logger.LogWarning("Нет курса ЦБ для {Code}: цена {Ticker} записана в USD",
+                currency.Code, ca.Ticker);
+            return price.Usd;
+        }
+
+        /// <summary>Курс USD к рублю: 1 для базовой валюты, иначе последний курс из ExchangeRates</summary>
+        private static decimal GetUsdRubRate(List<CurrencyModel> currencies, List<ExchangeRateModel> rates)
+        {
+            var usd = currencies.FirstOrDefault(c => c.Code == "USD");
+            if (usd == null) return 0m;
+            if (usd.IsBase) return 1m;
+            return rates.FirstOrDefault(r => r.CurrencyId == usd.Id)?.Rate ?? 0m;
+        }
+
         public async Task<PriceUpdateResultViewModel> UpdateAllPricesAsync(string userId)
         {
             var result = new PriceUpdateResultViewModel { UpdatedAt = DateTime.UtcNow };
@@ -120,9 +184,13 @@ namespace Homie.Areas.Finances.Services
                 : new Dictionary<string, decimal>();
 
             // --- 3. CoinGecko ---
+            // Берём ExternalCode инструментов + CoinGeckoId активов (fallback для инструментов без ExternalCode)
             var cryptoIds = instruments
                 .Where(i => i.Exchange == Exchange.CryptoSpot && !string.IsNullOrEmpty(i.ExternalCode))
                 .Select(i => i.ExternalCode)
+                .Concat(cryptoAssets
+                    .Where(ca => !string.IsNullOrEmpty(ca.CoinGeckoId))
+                    .Select(ca => ca.CoinGeckoId))
                 .Distinct().ToList();
 
             var cryptoPrices = cryptoIds.Any()
@@ -228,17 +296,25 @@ namespace Homie.Areas.Finances.Services
             }
 
             // Обновляем текущие цены на криптоактивах
+            // Цена хранится в валюте учёта актива (см. ConvertCryptoPriceToAccountingCurrency)
+            var cryptoCurrencies = await _db.Currencies.Where(c => c.UserUid == userId).ToListAsync();
+            var cryptoRates = await _db.ExchangeRates
+                .Where(r => r.UserUid == userId)
+                .OrderByDescending(r => r.Date)
+                .ToListAsync();
+
             foreach (var ca in cryptoAssets)
             {
                 if (ca.LastManualOverrideDate.HasValue &&
                     (now - ca.LastManualOverrideDate.Value).TotalHours < lockHours)
                     continue;
 
-                if (ca.Instrument?.ExternalCode != null &&
-                    cryptoPrices.TryGetValue(ca.Instrument.ExternalCode, out var cpDto))
-                {
-                    ca.CurrentPrice = cpDto.Usd;
-                }
+                var coinId = GetCryptoCoinId(ca);
+                if (string.IsNullOrEmpty(coinId) ||
+                    !cryptoPrices.TryGetValue(coinId, out var cpDto))
+                    continue;
+
+                ca.CurrentPrice = ConvertCryptoPriceToAccountingCurrency(cpDto, ca, cryptoCurrencies, cryptoRates);
             }
 
             // Обновляем цены металлов
@@ -281,6 +357,8 @@ namespace Homie.Areas.Finances.Services
             var tickerKey = GetTickerKey(instrument);
             decimal? newPrice = null;
             PriceSource source = PriceSource.Manual;
+            CryptoPriceDto cryptoPrice = null;
+            List<CryptoAssetModel> linkedCryptoAssets = null;
 
             try
             {
@@ -314,12 +392,24 @@ namespace Homie.Areas.Finances.Services
                         break;
 
                     case Exchange.CryptoSpot:
-                        if (!string.IsNullOrEmpty(instrument.ExternalCode))
+                        linkedCryptoAssets = await _db.CryptoAssets
+                            .Where(ca => ca.InstrumentId == instrument.Id && ca.UserUid == userId)
+                            .ToListAsync();
+
+                        // Fallback на CoinGeckoId актива, если у инструмента нет ExternalCode
+                        var coinId = !string.IsNullOrWhiteSpace(instrument.ExternalCode)
+                            ? instrument.ExternalCode
+                            : linkedCryptoAssets
+                                .Select(a => a.CoinGeckoId)
+                                .FirstOrDefault(id => !string.IsNullOrWhiteSpace(id));
+
+                        if (!string.IsNullOrEmpty(coinId))
                         {
-                            var cgResult = await _coinGecko.FetchPricesAsync(new[] { instrument.ExternalCode });
-                            if (cgResult.TryGetValue(instrument.ExternalCode, out var cp))
+                            var cgResult = await _coinGecko.FetchPricesAsync(new[] { coinId });
+                            if (cgResult.TryGetValue(coinId, out var cp))
                             {
                                 newPrice = cp.Usd;
+                                cryptoPrice = cp;
                                 source = PriceSource.CoinGeckoAuto;
                             }
                         }
@@ -367,6 +457,23 @@ namespace Homie.Areas.Finances.Services
                     }
                     if (positions.Any())
                         await _db.SaveChangesAsync();
+
+                    // Обновляем текущую цену криптоактивов этого инструмента (в валюте учёта)
+                    if (cryptoPrice != null && linkedCryptoAssets != null && linkedCryptoAssets.Any())
+                    {
+                        var currencies = await _db.Currencies.Where(c => c.UserUid == userId).ToListAsync();
+                        var rates = await _db.ExchangeRates
+                            .Where(r => r.UserUid == userId)
+                            .OrderByDescending(r => r.Date)
+                            .ToListAsync();
+
+                        foreach (var asset in linkedCryptoAssets)
+                        {
+                            asset.CurrentPrice = ConvertCryptoPriceToAccountingCurrency(
+                                cryptoPrice, asset, currencies, rates);
+                        }
+                        await _db.SaveChangesAsync();
+                    }
 
                     itemResult.NewPrice = newPrice.Value;
                     itemResult.Source = source;

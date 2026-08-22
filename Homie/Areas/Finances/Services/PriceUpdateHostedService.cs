@@ -91,7 +91,7 @@ namespace Homie.Areas.Finances.Services
                 foreach (var userId in users.Where(u => u != null))
                 {
                     var userCurrencies = await db.Currencies
-                        .Where(c => c.UserUid == userId && !c.IsBase && c.CbrCode != null)
+                        .Where(c => c.UserUid == userId && !c.IsBase)
                         .ToListAsync(stoppingToken);
 
                     foreach (var cur in userCurrencies)
