@@ -58,6 +58,15 @@ namespace Homie.Areas.Finances.Services
             return await FetchPricesFromBoard("stock", "shares", "TQTF", tickers);
         }
 
+        /// <summary>Безопасное чтение числового элемента строки данных MOEX (столбец может отсутствовать, напр. в выходные)</summary>
+        private static bool TryGetNumber(JsonElement row, int index, out decimal value)
+        {
+            value = 0m;
+            return row.GetArrayLength() > index
+                && row[index].ValueKind == JsonValueKind.Number
+                && row[index].TryGetDecimal(out value);
+        }
+
         /// <summary>Загрузка цен облигаций с конвертацией из % номинала в абсолютную цену</summary>
         private async Task<Dictionary<string, decimal>> FetchBondPricesFromBoard(
             string board, IEnumerable<string> tickers)
@@ -87,10 +96,10 @@ namespace Homie.Areas.Finances.Services
                     if (data.GetArrayLength() > 0)
                     {
                         var row = data[0];
-                        if (row[1].ValueKind == JsonValueKind.Number)
-                            pricePercent = row[1].GetDecimal();
-                        else if (row[2].ValueKind == JsonValueKind.Number)
-                            pricePercent = row[2].GetDecimal();
+                        if (TryGetNumber(row, 1, out var last))
+                            pricePercent = last;
+                        else if (TryGetNumber(row, 2, out var prev))
+                            pricePercent = prev;
                     }
 
                     // Извлекаем FACEVALUE и fallback-цену из securities
@@ -100,12 +109,12 @@ namespace Homie.Areas.Finances.Services
                     {
                         var secRow = secData[0];
                         // FACEVALUE — 3-й столбец (индекс 2)
-                        if (secRow[2].ValueKind == JsonValueKind.Number)
-                            faceValue = secRow[2].GetDecimal();
+                        if (TryGetNumber(secRow, 2, out var face))
+                            faceValue = face;
 
                         // Fallback: PREVLEGALCLOSEPRICE — 2-й столбец (индекс 1)
-                        if (pricePercent <= 0 && secRow[1].ValueKind == JsonValueKind.Number)
-                            pricePercent = secRow[1].GetDecimal();
+                        if (pricePercent <= 0 && TryGetNumber(secRow, 1, out var prevLegal))
+                            pricePercent = prevLegal;
                     }
 
                     if (pricePercent > 0)
@@ -149,10 +158,10 @@ namespace Homie.Areas.Finances.Services
                     if (data.GetArrayLength() > 0)
                     {
                         var row = data[0];
-                        if (row[1].ValueKind == JsonValueKind.Number)
-                            price = row[1].GetDecimal();
-                        else if (row[2].ValueKind == JsonValueKind.Number)
-                            price = row[2].GetDecimal();
+                        if (TryGetNumber(row, 1, out var last))
+                            price = last;
+                        else if (TryGetNumber(row, 2, out var prev))
+                            price = prev;
                     }
 
                     // Fallback: когда биржа закрыта, marketdata пуст — берём цену закрытия из securities
@@ -163,8 +172,8 @@ namespace Homie.Areas.Finances.Services
                         if (secData.GetArrayLength() > 0)
                         {
                             var secRow = secData[0];
-                            if (secRow[1].ValueKind == JsonValueKind.Number)
-                                price = secRow[1].GetDecimal();
+                            if (TryGetNumber(secRow, 1, out var prevLegal))
+                                price = prevLegal;
                         }
                     }
 

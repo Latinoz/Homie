@@ -41,6 +41,7 @@ namespace Homie.Areas.Finances.Services
 
                 var request = new HttpRequestMessage(HttpMethod.Get, url);
                 request.Headers.Add("Accept", "application/json");
+                request.Headers.Add("User-Agent", "Mozilla/5.0 (compatible; HomieApp/1.0)");
 
                 var response = await _httpClient.SendAsync(request);
                 response.EnsureSuccessStatusCode();
